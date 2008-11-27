@@ -53,9 +53,9 @@ mkdir "$MIGRATION_PROBE_PATH" && \
 mkdir -p "$POLICY_PATH" && \
 mkdir "${POLICY_PATH}/local_load/freq_limit_filter" && \
 echo $MIGRATION_INTERVAL > "${POLICY_PATH}/local_load/freq_limit_filter/min_interval" && \
-mkdir "${POLICY_PATH}/local_load/freq_limit_filter/threshold_filter" && \
+mkdir "${POLICY_PATH}/local_load/freq_limit_filter/high_threshold_filter" && \
 v=`< "${MOSIX_PROBE_PATH}/norm_single_process_load/value"` && \
-echo $((v*3/2)) > "${POLICY_PATH}/local_load/freq_limit_filter/threshold_filter/threshold" && \
+echo $((v*3/2)) > "${POLICY_PATH}/local_load/freq_limit_filter/high_threshold_filter/threshold" && \
 mkdir "${POLICY_PATH}/remote_load/remote_cache_filter" && \
 echo $POLL_INTERVAL > "${POLICY_PATH}/remote_load/remote_cache_filter/polling_period" && \
 mkdir "${POLICY_PATH}/single_process_load/remote_cache_filter" && \
@@ -63,5 +63,5 @@ ln -s "${MIGRATION_PROBE_PATH}/last_migration" "${POLICY_PATH}/local_load/freq_l
 ln -s "${MOSIX_PROBE_PATH}/process_load" "${POLICY_PATH}/process_load/mosix" && \
 ln -s "${MOSIX_PROBE_PATH}/norm_upper_load" "${POLICY_PATH}/remote_load/remote_cache_filter/mosix_upper" && \
 ln -s "${MOSIX_PROBE_PATH}/norm_single_process_load" "${POLICY_PATH}/single_process_load/remote_cache_filter/mosix" && \
-ln -s "${MOSIX_PROBE_PATH}/norm_mean_load" "${POLICY_PATH}/local_load/freq_limit_filter/threshold_filter/mosix_mean" && \
+ln -s "${MOSIX_PROBE_PATH}/norm_mean_load" "${POLICY_PATH}/local_load/freq_limit_filter/high_threshold_filter/mosix_mean" && \
 echo 1 > "${SCHEDULER_PATH}/process_set/handle_all"
