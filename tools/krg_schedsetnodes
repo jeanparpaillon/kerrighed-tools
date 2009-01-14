@@ -1,0 +1,206 @@
+#!/bin/bash
+
+function is_number() {
+	[ "${1/[^0-9]}" == "$1" ]
+}
+
+function parse_nodelist() {
+	local list="$1"
+	local array=
+	local next=0
+	local next_range=
+	local low
+	local high
+	local n
+
+	until [ "$next_range" == "$list" ]; do
+		next_range="${list%%,*}"
+		list="${list#*,}"
+
+		case "$next_range" in
+		[0-9]*-[0-9]*)
+			low="${next_range%%-*}"
+			high="${next_range##*-}"
+			if [ "${next_range}" != "$low-$high" ]; then
+				return
+			fi
+			;;
+		[0-9]*)
+			low="$next_range"
+			high="$low"
+			;;
+		*)
+			return
+			;;
+		esac
+		if ! (is_number "$low" && is_number "$high"); then
+			return
+		fi
+
+		if [ $high -lt $low ]; then
+			return
+		fi
+
+		# we got a valid range expression
+		if [ $next -lt $low ]; then
+			for n in `seq $next $(( low - 1 ))`; do
+				array[n]=0
+			done
+		fi
+		for n in `seq $low $high`; do
+			array[n]=1
+		done
+		next=$(( high + 1 ))
+	done
+
+	echo ${array[*]}
+}
+
+function make_nodelist() {
+	local nodes=( $1 )
+	local first=1
+	local n
+
+	for n in ${!nodes[*]}; do
+		if [ ${nodes[n]} == 1 ]; then
+			if [ -z "$first" ]; then
+				echo -n ','
+			fi
+			first=
+			echo -n $n
+		fi
+	done
+
+	echo
+}
+
+function nodes_binop() {
+	local a=( $1 )
+	local b=( $2 )
+	local op=$3
+	local c
+	local len
+	local n
+	local an
+	local bn
+
+	len=${#a[*]}
+	if [ ${#b[*]} -gt $len ]; then
+		len=${#b[*]}
+	fi
+
+	for n in `seq 0 $(( len - 1 ))`; do
+		an=${a[n]:-0}
+		bn=${b[n]:-0}
+		c[n]=$(( an $op bn ))
+	done
+
+	echo ${c[*]}
+}
+
+function nodes_nand() {
+	nodes_binop "$1" "$2" '& !'
+}
+
+function nodes_or() {
+	nodes_binop "$1" "$2" '|'
+}
+
+function print_usage() {
+	cat <<EOF
+Usage:
+$0 -s schedname -r nodelist | -a nodelist | -l nodelist ...
+EOF
+}
+
+function check_sched() {
+	if [ -z "$SCHED" ]; then
+		echo "$0: Missing scheduler name. Aborting."
+		print_usage
+		exit 2
+	fi
+}
+
+function check_parse_nodelist() {
+	local nodes
+
+	nodes=`parse_nodelist "$OPTARG"`
+	if [ -z "$nodes" ]; then
+		echo "$0: Invalid nodelist expression. Aborting."
+		print_usage
+		exit 2
+	fi
+
+	echo $nodes
+}
+
+function commit_node_set() {
+	local list=`make_nodelist "$nodelist"`
+
+	if [ -n "$SCHED" ]; then
+		echo $list > "$SCHED/node_set" || exit 3
+	fi
+	case "$exclusive" in
+	yes)
+		echo 1 > "$SCHED/node_set_exclusive" || exit 3
+		;;
+	no)
+		echo 0 > "$SCHED/node_set_exclusive" || exit 3
+		;;
+	esac
+}
+
+if [ `/usr/bin/stat -f -c %t /config` != 62656570 ]; then
+	echo "$0: configfs is not mounted on /config. Aborting."
+	exit 1
+fi
+
+SCHED=
+while getopts 's:r:a:l:xX' name; do
+	case $name in
+	s)
+		commit_node_set
+
+		SCHED="/config/krg_scheduler/schedulers/$OPTARG"
+		if ! [ -d "$SCHED" ]; then
+			echo "$0: $SCHED does not exist. Aborting."
+			exit 2
+		fi
+		if ! [ -f "$SCHED/node_set" ]; then
+			echo "$0: $SCHED does not have a node set. Aborting."
+			exit 2
+		fi
+
+		nodelist=$(parse_nodelist `<$SCHED/node_set`)
+		exclusive=
+		;;
+	r)
+		check_sched
+		nodes=`check_parse_nodelist "$OPTARG"`
+		nodelist=`nodes_nand "$nodelist" "$nodes"`
+		;;
+	a)
+		check_sched
+		nodes=`check_parse_nodelist "$OPTARG"`
+		nodelist=`nodes_or "$nodelist" "$nodes"`
+		;;
+	l)
+		check_sched
+		nodelist=`check_parse_nodelist "$OPTARG"`
+		;;
+	x)
+		check_sched
+		exclusive=yes
+		;;
+	X)
+		check_sched
+		exclusive=no
+		;;
+	'?')
+		print_usage
+		exit 1
+		;;
+	esac
+done
+
+commit_node_set

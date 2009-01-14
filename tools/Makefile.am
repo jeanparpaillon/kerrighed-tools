@@ -6,7 +6,8 @@
 ### Author:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
-dist_bin_SCRIPTS = krg_legacy_scheduler krgboot_helper krginit_helper
+dist_bin_SCRIPTS = krg_legacy_scheduler krgboot_helper krginit_helper \
+	krg_schedsetnodes
 
 bin_PROGRAMS = migrate checkpoint restart krgadm krgcapset krgcr-run krgboot krginit ipccheckpoint ipcrestart
 
