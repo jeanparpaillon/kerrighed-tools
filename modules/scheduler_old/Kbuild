@@ -1,0 +1,10 @@
+obj-m += krgbuiltin.o
+
+krgbuiltin-objs := probe.o \
+		   analyzer.o \
+		   sched_policy.o \
+		   krg_scheduler.o scheduler.o
+
+krgbuiltin-$(CONFIG_KRG_SCHED_MOSIX_PROBE) += mosix_probe.o mosix_load_balancer.o
+
+EXTRA_CFLAGS += -I$(M) -Wall -Werror

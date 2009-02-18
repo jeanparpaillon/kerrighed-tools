@@ -1,0 +1,116 @@
+# Makefile.in for kerrighed module
+### 
+### Copyright 2006-2007 INRIA-IRISA
+###        Jean Parpaillon <jean.parpaillon@irisa.fr>
+### Copyright 2007-2008 Jean Parpaillon, Louis Rilling - Kerlabs
+###
+
+SHELL = /bin/sh
+INSTALL = @INSTALL@
+mkdir_p = mkdir -p
+VERSION = @PACKAGE_VERSION@
+
+MAINTAINER_FILES = \
+	Makefile
+
+EXTRA_DIST = \
+	CodingStyle \
+	COPYRIGHT \
+	Kbuild \
+	arch \
+	build \
+	capability \
+	ctnr \
+	epm \
+	fs \
+	ghost \
+	hotplug \
+	ipc \
+	mm \
+	proc \
+	procfs \
+	rpc \
+	scheduler \
+	scheduler_old \
+	tools
+
+DISTFILES = $(EXTRA_DIST)
+
+EXTERN_MODULES = \
+	scheduler/policies \
+	scheduler/probes \
+	scheduler/filters
+
+SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
+						 -e s/arm.*/arm/ -e s/sa110/arm/ \
+						 -e s/s390x/s390/ -e s/parisc64/parisc/ )
+
+top_srcdir = $(shell cd @top_srcdir@ && pwd)
+top_builddir = $(shell cd @top_builddir@ && pwd)
+
+LINUX_SRC = @kernelsrc@
+LINUX_BUILD ?= @kernelbuild@
+MODULE_SRC = @top_srcdir@/modules
+
+ARCH ?= $(SUBARCH)
+
+SUFFIXES = .c .o .s
+
+-include $(LINUX_BUILD)/.config
+-include $(MODULE_SRC)/Kbuild
+
+all: all-@ENABLE_KERRIGHED_MODULE@
+install: install-@ENABLE_KERRIGHED_MODULE@
+uninstall: uninstall-@ENABLE_KERRIGHED_MODULE@
+
+all-n:
+install-n:
+uninstall-n:
+
+all-y: .modules_prepare
+	rm -f "$(MODULE_SRC)/asm"
+	[ "$(top_builddir)" == "$(top_srcdir)" ] || lndir -silent "$(MODULE_SRC)"
+	ln -fs "arch/$(ARCH)" "$(CURDIR)/asm"
+	$(MAKE) -C "$(LINUX_BUILD)" M="$(CURDIR)" ARCH=$(ARCH) krgmodules1
+	rm -f build/*.o
+	$(foreach dir,$(corepart),cp "$(dir)/krgbuiltin.o" build/`basename "$(dir)"`.o;)
+	$(MAKE) -C build ARCH=$(ARCH) LINUX_BUILD_PATH="$(LINUX_BUILD)"
+	@$(foreach mod,$(EXTERN_MODULES),cp build/Module.symvers $(mod);)
+	@$(foreach mod,$(EXTERN_MODULES),$(MAKE) -C "$(LINUX_BUILD)" M=$(CURDIR)/$(mod) ARCH=$(ARCH);)
+
+.modules_prepare:
+	$(MAKE) -C "$(LINUX_BUILD)" modules_prepare
+	touch $@
+
+install-y: all
+	$(MAKE) -C build install
+	@$(foreach mod,$(EXTERN_MODULES),$(MAKE) -C "$(LINUX_BUILD)" INSTALL_MOD_PATH="$(DESTDIR)" M="$(CURDIR)/$(mod)" modules_install;)
+
+uninstall-y:
+
+clean:
+	rm -f build/*.ko build/*.c
+	find . \
+	  -name '*.o' -o \
+	  -name '.*o.cmd' -o \
+	  -name '.*o.d' -o \
+	  -name '*~' -o \
+	  -name '.tmp_versions' -o \
+	  -name 'asm' -o \
+	  -name '*.ko' -o \
+	  -path 'build/*.c' | xargs rm -rf
+
+distclean: clean
+	rm -f Makefile build/Makefile
+	rm -f config.h config.log config.status config.cache
+	rm -f .modules_prepare
+
+maintainer-clean: distclean
+
+distdir: $(DISTFILES) clean
+	cp -rp $(DISTFILES) "$(distdir)"
+	cp -rp $(MAINTAINER_FILES) "$(distdir)"
+	rm -rf `find "$(distdir)" -name '.svn'`
+	rm -f `find "$(distdir)" -name '*~'`
+
+.PHONY: all all-y all-n install install-y install-n uninstall uninstall-y uninstall-n clean distclean maintainer-clean distdir

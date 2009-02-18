@@ -1,0 +1,10 @@
+obj-m += krgbuiltin.o
+
+krgbuiltin-objs := ipc.o ipc_handler.o ipcmap_io_linker.o \
+		   shm_handler.o shm_memory_linker.o shmid_io_linker.o \
+		   msg_handler.o msg_io_linker.o \
+		   sem_handler.o semarray_io_linker.o semundolst_io_linker.o
+
+krgbuiltin-$(CONFIG_KRG_EPM) += mobility.o
+
+EXTRA_CFLAGS += -I$(M) -Wall -Werror

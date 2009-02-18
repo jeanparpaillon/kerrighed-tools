@@ -1,0 +1,6 @@
+obj-m += krgbuiltin.o
+
+krgbuiltin-objs := application.o application_cr_api.o \
+		app_checkpoint.o app_frontier.o app_restart.o app_shared.o
+
+EXTRA_CFLAGS += -I$(M) -Wall -Werror

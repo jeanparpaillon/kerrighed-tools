@@ -1,0 +1,10 @@
+obj-m += krgbuiltin.o
+
+krgbuiltin-objs := faf.o faf_server.o faf_hooks.o faf_tools.o \
+		   faf_file_mgr.o
+krgbuiltin-objs += ruaccess.o
+
+krgbuiltin-objs += $(krgbuiltin-y)
+
+EXTRA_CFLAGS += -I$(M) -Wall -Werror
+

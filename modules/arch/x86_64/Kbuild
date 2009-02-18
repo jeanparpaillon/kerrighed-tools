@@ -1,0 +1,6 @@
+obj-m += krgbuiltin.o
+
+krgbuiltin-objs := krg_x86_64.o
+krgbuiltin-$(CONFIG_KRG_EPM) := ghost.o
+
+EXTRA_CFLAGS += -I$(M)

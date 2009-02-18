@@ -1,0 +1,19 @@
+obj-m += krgbuiltin.o
+
+krgbuiltin-y := core.o
+krgbuiltin-y += krg_sched_info.o
+krgbuiltin-y += global_lock.o
+krgbuiltin-y += string_list.o
+krgbuiltin-y += hashed_string_list.o
+krgbuiltin-y += global_config.o
+krgbuiltin-y += policy.o
+krgbuiltin-y += scheduler.o
+krgbuiltin-y += pipe.o
+krgbuiltin-y += remote_pipe.o
+krgbuiltin-y += probe.o
+krgbuiltin-y += port.o
+krgbuiltin-y += filter.o
+krgbuiltin-y += process_set.o
+krgbuiltin-y += placement.o
+
+EXTRA_CFLAGS += -I$(M) -Wall -Werror

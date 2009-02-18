@@ -1,0 +1,6 @@
+make[3]: entrant dans le répertoire « /home/jean/Projets/kerrighed/git/kerrighed/kernel »
+  Building modules, stage 2.
+  MODPOST 1 modules
+  CC      /home/jean/Projets/kerrighed/git/kerrighed/modules/build/kerrighed.mod.o
+  LD [M]  /home/jean/Projets/kerrighed/git/kerrighed/modules/build/kerrighed.ko
+make[3]: quittant le répertoire « /home/jean/Projets/kerrighed/git/kerrighed/kernel »

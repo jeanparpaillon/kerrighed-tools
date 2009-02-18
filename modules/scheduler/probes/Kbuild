@@ -1,0 +1,9 @@
+obj-m += $(mods-y)
+
+mods-$(CONFIG_KRG_SCHED_CONFIG_CPU_PROBE) += cpu_probe.o
+mods-$(CONFIG_KRG_SCHED_CONFIG_MEM_PROBE) += mem_probe.o
+
+mods-$(CONFIG_KRG_SCHED_CONFIG_MIGRATION_PROBE) += migration_probe.o
+mods-$(CONFIG_KRG_SCHED_CONFIG_MOSIX_PROBE) += mosix_probe.o
+
+EXTRA_CFLAGS += -I$(M)/../.. -Werror -Wall

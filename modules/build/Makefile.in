@@ -1,0 +1,27 @@
+LINUX_SRC_PATH = @kernelsrc@
+LINUX_BUILD_PATH ?= @kernelbuild@
+BUILD_LOG = undefined-symbol-check
+
+filename = $(wildcard *.o)
+
+all:: modifie
+
+std:
+	$(MAKE) -C "$(LINUX_BUILD_PATH)" M="$(CURDIR)" modules ARCH=$(ARCH)
+
+modifie: $(filename)
+	ld -r -o kerrighed.o $^
+	@rm -rf .tmp_versions
+	@mkdir .tmp_versions
+	@echo "$(CURDIR)/kerrighed.ko" > .tmp_versions/kerrighed.mod
+	$(MAKE) -C "$(LINUX_BUILD_PATH)" krgmodules2 M="$(CURDIR)" ARCH=$(ARCH) 2>&1 | tee $(BUILD_LOG)
+	@if grep -qs 'undefined!' $(BUILD_LOG); then echo 'Undefined symbols! [See above.]'; exit 1; fi
+
+
+install:
+	$(MAKE) -C "$(LINUX_BUILD_PATH)" INSTALL_MOD_PATH="$(DESTDIR)" M="$(CURDIR)" modules_install
+	rm -rf .tmp_versions
+
+clean:
+	$(MAKE) -C "$(LINUX_BUILD_PATH)" M="$(CURDIR)" clean
+	rm -f $(BUILD_LOG)

@@ -1,0 +1,93 @@
+ 
+                 Kerrighed coding style
+		 ---------------------- 
+
+This is a short document describing the preferred coding style for
+Kerrighed.
+
+-------------------------------------------------------------------------------
+ 
+                 Chapter 1: General rules
+
+General coding style rules (identation, braces, naming, etc) are the
+same as the Linux kernel ones.
+
+
+-------------------------------------------------------------------------------
+
+                 Chapter 2: Kernel hooks naming
+
+When you have to call a Kerrighed function from the kernel, you have
+to define : (1) a function pointer in the kernel and (2) a call-back
+function in Kerrighed. When Kerrighed is initialized, the callback is
+affected to the kernel function pointer.
+
+The naming should be the following :
+
+The kernel function pointer must be prefixed by "kh_" (Kerrighed Hook).
+Example:
+
+  void (* kh_<function name>) (..)
+
+
+The Kerrighed callback function must be prefixed by "kcb_" (Kerrighed
+CallBack).
+Example:
+
+  void kcb_<function name> (...)
+
+
+If your callback need to activate a service on a remote node, the
+handling function on the remote node should be prefixed by "handle_".
+Example:
+
+  void handle_<function name> (...)
+
+
+--------------------------------------------------------------------------------
+
+                 Chapter 3: Kerrighed system call naming
+
+When you add a new system call for Kerrighed, this system call should
+be registered using the "register_proc_service". The function is
+activated from user space through an ioctl on the /proc/kerrighed/services
+file. This function must be prefixed with "proc_".
+
+To register the syscall, the name of the syscall must be capitalized
+and prefixed by "KSYS_".
+Example:
+
+  register_proc_service (KSYS_MIGRATE, proc_migrate);
+
+  int proc_migrate(void *arg)
+  {
+    int dest_node ;
+
+     if (copy_from_user((void *) &dest_node, arg, sizeof(int)))
+       return -EFAULT;
+
+    return sys_migrate(int dest_node);
+  }
+
+
+The "proc" function extracts data from user space and converts them into
+arguments which are passed to a "sys" function. The "sys" function is
+the function which should be called if we decide to add this one in the
+syscall table. It takes arguments just like a regular syscall
+interface function. This function must be prefixed with "sys_".
+Example:
+
+  int sys_migrate(int node)
+  {
+    return krg_migrate(node);
+  }
+
+
+Finally, the "sys" function calls the function which do the real work.
+This function must be prefixed with "krg_".
+Example:
+
+  int krg_migrate(int node)
+  {
+    do the real work.
+  }

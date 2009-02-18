@@ -1,0 +1,8 @@
+obj-m += krgbuiltin.o
+
+krgbuiltin-objs := memory_int_linker.o mm.o \
+		   memory_io_linker.o mm_struct.o mm_struct_io_linker.o
+
+krgbuiltin-$(CONFIG_KRG_EPM) := mobility.o
+
+EXTRA_CFLAGS += -I$(M) -Wall -Werror
