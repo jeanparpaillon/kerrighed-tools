@@ -1,7 +1,10 @@
 dnl configure.in for Kerrighed project.
-dnl Copyright 2006 Jean Parpaillon <jean.parpaillon@irisa.fr>
-dnl Copyright 2007-2009 Jean Parpaillon <jean.parpaillon@kerlabs.com>,
-dnl                     Louis Rilling <louis.rilling@kerlabs.com>
+dnl Copyright 2006 IRISA, All rights reserved
+dnl Copyright 2007-2009 Kerlabs, All rights reserved
+dnl
+dnl AUTHORS:
+dnl  Jean Parpaillon <jean.parpaillon@kerlabs.com>,
+dnl  Louis Rilling <louis.rilling@kerlabs.com>
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
@@ -14,7 +17,7 @@ dnl autoconf version
 AC_PREREQ(2.59)
 
 dnl mandatory stuff
-AC_INIT([Kerrighed], [2.4.0], [kerrighed.users@irisa.fr])
+AC_INIT([kerrighed-tools], [2.4.0], [kerrighed.users@irisa.fr])
 
 dnl Linux versions compatible with Kerrighed
 COMP_LINUX_VERSION=2.6.20
@@ -64,19 +67,6 @@ if test -z "$LSDIFF" -a "$srcdir" != "$builddir"; then
 fi
 
 ###
-### BEGIN origin check
-if test -d "$srcdir/kernel/include/linux"; then
-   # Kernel tree in the srcdir
-   default_linux_source="$srcdir/kernel"
-else
-   # Build from release
-   default_linux_source=/usr/src/linux-${COMP_LINUX_VERSION}
-fi
-###
-### END origin check
-###
-
-###
 ### BEGIN LINUX SOURCE PATH CHECK
 ###
 AC_ARG_ENABLE([linux-check],
@@ -88,9 +78,14 @@ AC_SUBST([enable_linux_check])
 
 AC_ARG_WITH([kernel],
 	    [AS_HELP_STRING([--with-kernel=PATH],
-	      		    [Path to kernel source @<:@default=${default_linux_source}@:>@])],
+	      		    [Path to kernel source !!!MANDATORY])],
             [kernelsrc="$withval"],
-	    [kernelsrc="$default_linux_source"])
+	    [])
+if test -z "$kernelsrc"; then
+   AC_MSG_ERROR([
+   *** Please specify the location of the kernel source tree with
+   *** the '--with-kernel=SRCDIR' option])
+fi
 kernelsrc=$(cd $kernelsrc; pwd)
 AC_SUBST([kernelsrc])
 
@@ -122,9 +117,9 @@ if test -d "$kernelsrc/include/linux"; then
    # Get Linux version
    LINUX_VERSION=`"$srcdir/linux_version.sh" $linux_makefile V.P.S`
    LINUX_EXTRAVERSION=`"$srcdir/linux_version.sh" $linux_makefile E`
-   
-   if echo "$LINUX_EXTRAVERSION" | grep "\-krg" > /dev/null; then
-      # Sources have been already patched
+
+   if test -d "$kernelsrc/include/kerrighed"; then
+      # Sources have already been patched
       kernel_patched="yes"
       patched=" (already patched)"
    else
@@ -172,36 +167,15 @@ AC_SUBST([kernelconfig])
 ###
 
 ###
-### BEGIN KERRIGHED MODULE CHECK
-###
-AC_ARG_ENABLE([module],
-	      [AS_HELP_STRING([--disable-module],
-			      [Patch the kernel with Kerrighed and build the module @<:@default=enable@:>@])],
-	      [],
-	      [enable_module=yes])
-AC_SUBST([enable_module])
-###
-### END KERRIGHED MODULE CHECK
-###
-
-###
 ### BEGIN LIBRARIES CHECK
 ###
 AC_ARG_ENABLE([libkerrighed],
 	      [AS_HELP_STRING([--disable-libkerrighed],
-			      [Disable libkerrighed @<:@default=enable@:>@])],
+			      [Disable libkerrighed (disable also tools compilation) @<:@default=enable@:>@])],
 	      [],
 	      [enable_libkerrighed=yes])
-
-dnl AC_ARG_ENABLE([libkrgthread],
-dnl 	      [AS_HELP_STRING([--enable-libkrgthread],
-dnl 			      [Enable libkrgthread @<:@default=disable@:>@])],
-dnl 	      [],
-dnl 	      [enable_libkrgthread=no])
 ###
 ### END LIBRARIES CHECK
-###
-
 
 ###
 ### BEGIN TOOLS CHECK
@@ -211,21 +185,11 @@ AC_ARG_ENABLE([tools],
 			      [Disable tools @<:@default=enable@:>@])],
 	      [],
 	      [enable_tools=yes])
-if test "x$enable_tools" = "xyes"; then
-   pkg-config --exists kerrighed && libkerrighed_avail="yes"
-   if test "x$enable_libkerrighed" = "xyes" -o "x$libkerrighed_avail" = "xyes"; then
-      true
-   else
-      AC_MSG_ERROR([
-***
-*** To enable tools compilation, you must either have libkerrighed
-*** installed, or enable its compilation
-***])
-   fi
+if test "x$enable_libkerrighed" != "xyes"; then
+   enable_tools=no
+   AC_MSG_WARN([Disabling libkerrighed also disable tools compilation])
 fi
 
-dnl Just to get this option passed to tools/configure and displayed
-dnl when ./configure --help
 AC_ARG_ENABLE([service],
 	      [AS_HELP_STRING([--disable-service],
 			      [Do not install kerrighed service @<:@default: enable@:>@])])
@@ -262,51 +226,16 @@ AC_ARG_ENABLE([man],
 			      [Disable manpages @<:@default=enable@:>@])],
 	      [],
 	      [enable_man=yes])
-#AC_CHECK_PROG(DB2MAN, xmlto, xmlto, )
-#if test -n "$DB2MAN"; then
-#   enable_mandoc="yes"
-#else
-#   enable_mandoc="no"
-#fi
+if test "x$enable_man" = "xyes"; then
+   AC_CHECK_PROG(DB2MAN, xmlto, xmlto, )
+fi
 ###
 ### END CHECK FOR DOCBOOK TOOLS
 ###
 
-kernel_patches=""
-if test "x$enable_kdb_patch" = "xyes"; then
-   kernel_patches="\$(KDB_PATCH)"
-fi
-kernel_patches=$kernel_patches" \$(KRG_PATCH)"
-AC_SUBST([kernel_patches])
-
-if test "x$enable_module" = "xyes" -o "x$enable_kdb_patch" = "xyes"; then
-   build_modules="modules"
-   ENABLE_KERRIGHED_MODULE=y
-else
-   ENABLE_KERRIGHED_MODULE=n
-fi
-AC_SUBST([ENABLE_KERRIGHED_MODULE])
-#if test "x$enable_libkerrighed" = "xyes" -o "x$enable_libkrgthread" = "xyes"; then
-if test "x$enable_libkerrighed" = "xyes"; then
-   build_modules="$build_modules libs"
-   AC_CONFIG_SUBDIRS(libs)
-fi
-if test "x$enable_tools" = "xyes"; then
-   build_modules="$build_modules tools"
-   AC_CONFIG_SUBDIRS(tools)
-fi
-if test "x$enable_tests" = "xyes"; then
-   build_modules="$build_modules tests"
-   AC_CONFIG_SUBDIRS(tests)
-fi
-build_modules="$build_modules patches"
-AC_SUBST([build_modules])
-
 dnl files to generate with automake
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([modules/Makefile])
 AC_CONFIG_FILES([patches/Makefile])
-AC_CONFIG_FILES([modules/build/Makefile])
 
 dnl write all stuff
 AC_OUTPUT
@@ -339,17 +268,13 @@ echo -n "    - Kernel configuration   : "
 if test -n "$kernelconfig"; then
   echo "$kernelconfig"
 else
-  if test "$enable_kernel_defconfig" = "yes"; then
-    echo "use default config"
-  else
-    echo "none. Run manually 'make *config' in kernel source tree"
-  fi
+  echo "none. Run 'make *config' in kernel source tree"
 fi
 
-echo "    - Kerrighed module       : $enable_module"
 echo "    - libkerrighed           : $enable_libkerrighed"
 echo "    - Kerrighed tools        : $enable_tools"
 echo "    - Kerrighed tests        : $enable_tests"
+echo "    - Kerrighed manpages     : $enable_man"
 
 echo ""
 echo "********************************************************************"
@@ -364,7 +289,7 @@ echo " - run 'make defconfig' to create a default configuration for the kernel"
 echo " - configure the kernel for your needs by running one of 'make *config' in the kernel source tree"
 echo " - run 'make kernel' to build your kernel"
 echo ""
-echo " - run 'make' to build module, tools, libs and so on"
+echo " - run 'make' to build tools, libs, tests and so on"
 echo ""
 echo " - as root, run 'make kernel-install'"
 echo " - as root, run 'make install'"
