@@ -1,20 +1,17 @@
 ### Makefile.am for kerrighed tools
-### 
-### Copyright 2006-2007 INRIA-IRISA
-###        Jean Parpaillon <jean.parpaillon@irisa.fr>
 ###
-if ENABLE_MAN
-MANDIR = man
-else
-MANDIR = 
-endif
+### Copyright 2006-2007 INRIA, All rights reserved
+### Copyright 2009 Kerlabs, All rights reserved
+###
+### Author:
+###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
+###
+bin_PROGRAMS = migrate checkpoint restart krgcapset krgadm
+INCLUDES = -I@top_srcdir@/libs/include
+LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la
 
-if ENABLE_SERVICE
-SCRIPTSDIR = scripts
-else
-SCRIPTSDIR = 
-endif
-
-SUBDIRS = src $(MANDIR) $(SCRIPTSDIR)
-
-bin_SCRIPTS = krg_legacy_scheduler
+migrate_SOURCES = migrate.c
+checkpoint_SOURCES = checkpoint.c
+restart_SOURCES = restart.c
+krgcapset_SOURCES = krgcapset.c
+krgadm_SOURCES = krgadm.c

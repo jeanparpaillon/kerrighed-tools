@@ -38,9 +38,11 @@ srcdir=`cd $srcdir && pwd`
 builddir=`pwd`
 
 AC_PROG_CC
+AC_PROG_LIBTOOL
 AC_PROG_MAKE_SET
 AC_PROG_LN_S
 AC_PROG_INSTALL
+AC_HEADER_STDC
 
 AC_CHECK_PROG(BZIP2, bzip2, bzip2, )
 if test -z "$BZIP2"; then
@@ -181,10 +183,6 @@ AC_ARG_ENABLE([libkerrighed],
 			      [Disable libkerrighed (disable also tools compilation) @<:@default=enable@:>@])],
 	      [],
 	      [enable_libkerrighed=yes])
-if test "x$enable_libkerrighed" = "xyes"; then
-   AC_PROG_LIBTOOL
-   AC_HEADER_STDC
-fi
 AM_CONDITIONAL([BUILD_LIBKERRIGHED], [test "$enable_libkerrighed" = "yes"])
 ###
 ### END LIBRARIES CHECK
@@ -203,8 +201,40 @@ if test "x$enable_libkerrighed" != "xyes"; then
 fi
 
 AC_ARG_ENABLE([service],
-	      [AS_HELP_STRING([--disable-service],
-			      [Do not install kerrighed service @<:@default: enable@:>@])])
+              [AS_HELP_STRING([--disable-service],
+                              [Do not install kerrighed service @<:@default: enable if lsb found@:>@])],
+              [],
+              [enable_service="yes"])
+if test "$enable_service" = "yes"; then
+   AC_CHECK_PROG([lsb], [lsb_release], [yes], [no])
+   if test "$lsb" = "no"; then
+   AC_MSG_ERROR([
+        *** You need lsb tool (or --disable-service)])
+   fi
+else
+   lsb="no"
+fi
+if test "$lsb" = "yes"; then
+   AC_MSG_CHECKING([distribution])
+   DIST_ID=`lsb_release -s -i`
+   DIST_RELEASE=`lsb_release -s -r`
+   AC_MSG_RESULT([$DIST_ID $DIST_RELEASE])
+
+   AC_SUBST([DIST_ID])
+   AC_SUBST([DIST_RELEASE])
+
+   AC_MSG_CHECKING([if distribution is supported])
+   if test -d "$srcdir/scripts/distros/$DIST_ID"; then
+      AC_MSG_RESULT([yes])
+      distro="yes"
+   else
+      AC_MSG_RESULT([no])
+      distro="no"
+      AC_MSG_ERROR([
+        *** Your distribution is not supported. Helper scripts won't work. Just launch configure with --disable-service.])
+   fi
+fi
+AM_CONDITIONAL([ENABLE_SERVICE], [test "$lsb" = "yes" -a "$distro" = "yes"])
 ###
 ### END TOOLS CHECK
 ###
@@ -240,7 +270,13 @@ AC_ARG_ENABLE([man],
 	      [enable_man=yes])
 if test "x$enable_man" = "xyes"; then
    AC_CHECK_PROG(DB2MAN, xmlto, xmlto, )
+   if test -z "$DB2MAN"; then
+      AC_MSG_ERROR([
+	*** You need xmlto (or --disable-man)])
+   fi
 fi
+AC_SUBST(DB2MAN)
+AM_CONDITIONAL([ENABLE_MAN], [test -n "$DB2MAN"])
 ###
 ### END CHECK FOR DOCBOOK TOOLS
 ###
@@ -249,6 +285,7 @@ dnl files to generate with automake
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([patches/Makefile])
 AC_CONFIG_FILES([libs/Makefile libs/include/Makefile libs/libkerrighed/kerrighed.pc libs/libkerrighed/Makefile])
+AC_CONFIG_FILES([tools/Makefile])
 
 dnl write all stuff
 AC_OUTPUT
@@ -268,26 +305,50 @@ echo "  Kerrighed configuration is now complete"
 echo "********************************************************************"
 echo ""
 
-echo "    - Sources dir            : $srcdir"
+echo "    - Sources dir              : $srcdir"
 if test "$srcdir" != "$builddir"; then
-   echo "    - Build dir              : $builddir"
+   echo "    - Build dir                : $builddir"
 fi
-echo "    - Kernel source dir      : $kernelsrc"
+echo "    - Kernel source dir        : $kernelsrc"
 if test "$kernelsrc" != "$kernelbuild"; then
-   echo "    - Kernel build dir       : $kernelbuild"
+   echo "    - Kernel build dir         : $kernelbuild"
 fi
-echo "    - Kernel version         : $LINUX_VERSION$LINUX_EXTRAVERSION$patched"
-echo -n "    - Kernel configuration   : "
+echo "    - Kernel version           : $LINUX_VERSION$LINUX_EXTRAVERSION$patched"
+echo -n "    - Kernel configuration     : "
 if test -n "$kernelconfig"; then
   echo "$kernelconfig"
 else
   echo "none. Run 'make *config' in kernel source tree"
 fi
 
-echo "    - libkerrighed           : $enable_libkerrighed"
-echo "    - Kerrighed tools        : $enable_tools"
-echo "    - Kerrighed tests        : $enable_tests"
-echo "    - Kerrighed manpages     : $enable_man"
+echo "    - libkerrighed             : $enable_libkerrighed"
+echo "    - Kerrighed tools          : $enable_tools"
+echo -n "    - Documentation (manpages) : "
+if test -n "$DB2MAN"; then
+   echo "yes"
+else
+   echo "no"
+fi
+
+if test "$enable_service" = "no"; then
+   echo "    - Kerrighed service not installed (disabled)"
+else
+   if test "$lsb" = "yes"; then
+      echo "    - Detected distribution    : $DIST_ID $DIST_RELEASE"
+      if test "$distro" = "yes"; then
+         echo "    - Kerrighed service will be installed"
+      else
+         echo "    - Kerrighed service won't be installed (distribution not supported)."
+         echo "      You can send a request at $PACKAGE_BUGREPORT."
+      fi
+   else
+      echo "    - Kerrighed service not installed (missing lsb tools)"
+      echo "      Please install lsb_release"
+   fi
+fi
+
+echo "    - Kerrighed tests          : $enable_tests"
+echo "    - Kerrighed manpages       : $enable_man"
 
 echo ""
 echo "********************************************************************"

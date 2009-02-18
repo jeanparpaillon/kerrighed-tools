@@ -6,7 +6,7 @@
 # Author:
 #   Jean PARPAILLON <jean.parpaillon@kerlabs.com>
 #
-SUBDIRS = libs
+SUBDIRS = libs tools
 LINUX_SRC = @kernelsrc@
 LINUX_BUILD = @kernelbuild@
 KERNEL_CONFIG = @kernelconfig@
