@@ -1,22 +1,18 @@
 #!/bin/sh
-# 
-# Copyright 2006-2007 INRIA-IRISA
-#        Jean Parpaillon <jean.parpaillon@irisa.fr>
 #
+# Copyright 2006-2007 INRIA, All rights reserved
+# Copyright 2009 Kerlabs, All rights reserved
+#
+# Author:
+#   Jean Parpaillon <jean.parpaillon@kerlabs.com>
+#
+set -e
 
-MODULES_DIRS=". modules libs tools tests"
+AUTOGEN_FILES="aclocal.m4 autom4te.cache configure config.guess config.log config.sub config.status depcomp install-sh compile libtool ltmain.sh missing mkinstalldirs"
 
-AUTOGEN_FILES="aclocal.m4 autom4te.cache configure config.guess config.log config.sub config.status depcomp install-sh compile libtool ltmain.sh missing mkinstalldirs src/.deps"
+make distclean || true
 
-make distclean
-
-for module in $MODULES_DIRS; do
-    test -d $module && (
-	cd $module
-	echo "Clean $module"
-	
-	for file in $AUTOGEN_FILES; do
-	    rm -rf $file
-	done    
-    )
+echo "Clean autogen generated files"
+for file in $AUTOGEN_FILES; do
+    ( cd $(dirname $0) && rm -rf $file )
 done
