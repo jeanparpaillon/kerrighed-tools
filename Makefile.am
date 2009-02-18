@@ -1,14 +1,15 @@
 #
 # Kerrighed Makefile.am
 #
-# Copyright 2006-2007 INRIA-IRISA
-# 	Jean PARPAILLON <jean.parpaillon@irisa.fr>
+# Copyright 2006-2007 INRIA, All rights reserved
 #
-SUBDIRS = @build_modules@
+# Author:
+#   Jean PARPAILLON <jean.parpaillon@kerlabs.com>
+#
+SUBDIRS = libs
 LINUX_SRC = @kernelsrc@
 LINUX_BUILD = @kernelbuild@
 KERNEL_CONFIG = @kernelconfig@
-KERNEL_DEFCONFIG = @enable_kernel_defconfig@
 
 EXTRA_DIST = \
 	README \

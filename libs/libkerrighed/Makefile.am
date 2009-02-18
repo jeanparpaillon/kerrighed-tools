@@ -1,14 +1,17 @@
 ### Makefile.am for libkerrighed
-### 
-### Copyright 2006-2007 INRIA-IRISA
-###        Jean Parpaillon <jean.parpaillon@irisa.fr>
+###
+### Copyright 2006-2007 INRIA, All rights reserved
+### Copyright 2009, All rights reserved
+###
+### Author:
+###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
 EXTRA_DIST = kerrighed.pc.in
 
 INCLUDES = \
-	-I$(top_srcdir)/include \
+	-I$(top_srcdir)/libs/include \
 	-I@kernelsrc@/include \
-	-I@with_kerrighed@
+	-I@kerrighed_module@
 
 lib_LTLIBRARIES = libkerrighed.la
 

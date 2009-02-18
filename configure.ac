@@ -68,6 +68,11 @@ if test -z "$LSDIFF" -a "$srcdir" != "$builddir"; then
         *** You need lsdiff tool to compile out of source tree])
 fi
 
+### DEPRECATED: to be removed when Kerrighed modules are in kernel source tree
+kerrighed_module=$(cd $srcdir/modules && pwd)
+AC_SUBST([kerrighed_module])
+
+
 ###
 ### BEGIN LINUX SOURCE PATH CHECK
 ###
@@ -180,6 +185,7 @@ if test "x$enable_libkerrighed" = "xyes"; then
    AC_PROG_LIBTOOL
    AC_HEADER_STDC
 fi
+AM_CONDITIONAL([BUILD_LIBKERRIGHED], [test "$enable_libkerrighed" = "yes"])
 ###
 ### END LIBRARIES CHECK
 

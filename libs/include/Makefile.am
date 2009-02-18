@@ -1,7 +1,10 @@
 ### Makefile.am for kerrighed libraries headers
-### 
-### Copyright 2006-2007 INRIA-IRISA
-###        Jean Parpaillon <jean.parpaillon@irisa.fr>
+###
+### Copyright 2006-2007 INRIA, All rights reserved
+### Copyright 2009 Kerlabs
+###
+### Author:
+###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
 
 #
