@@ -8,11 +8,6 @@ dnl  Louis Rilling <louis.rilling@kerlabs.com>
 dnl
 dnl Process this file with autoconf to produce a configure script.
 
-###
-### This configure script is the top level one for Kerrighed project.
-### It propagates arguments to sub-configure.
-
-
 dnl autoconf version
 AC_PREREQ(2.59)
 
@@ -31,6 +26,13 @@ AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 
+dnl Add strictness options to the compiler
+CFLAGS="$CFLAGS -Wall -Werror"
+
+AC_SUBST(CFLAGS)
+AC_SUBST(CPPFLAGS)
+AC_SUBST(LDFLAGS)
+
 dnl check tools
 srcdir=`cd $srcdir && pwd`
 builddir=`pwd`
@@ -43,7 +45,7 @@ AC_PROG_INSTALL
 AC_CHECK_PROG(BZIP2, bzip2, bzip2, )
 if test -z "$BZIP2"; then
    AC_MSG_ERROR([
-   	*** You need bzip2 tool])
+      	*** You need bzip2 tool])
 fi
 AC_CHECK_PROG(PKGCONFIG, pkg-config, pkg-config, )
 if test -z "$PKGCONFIG"; then
@@ -127,7 +129,7 @@ if test -d "$kernelsrc/include/linux"; then
       # check version if not disabled
       good_version=true
       if test "x$enable_linux_check" = "xyes"; then
-	 if test "$COMP_LINUX_VERSION" != "$LINUX_VERSION$LINUX_EXTRAVERSION"; then	
+	 if test "$COMP_LINUX_VERSION" != "$LINUX_VERSION$LINUX_EXTRAVERSION"; then
 	    good_version=false
 	 fi
       fi
@@ -174,6 +176,10 @@ AC_ARG_ENABLE([libkerrighed],
 			      [Disable libkerrighed (disable also tools compilation) @<:@default=enable@:>@])],
 	      [],
 	      [enable_libkerrighed=yes])
+if test "x$enable_libkerrighed" = "xyes"; then
+   AC_PROG_LIBTOOL
+   AC_HEADER_STDC
+fi
 ###
 ### END LIBRARIES CHECK
 
@@ -236,6 +242,7 @@ fi
 dnl files to generate with automake
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([patches/Makefile])
+AC_CONFIG_FILES([libs/Makefile libs/include/Makefile libs/libkerrighed/kerrighed.pc libs/libkerrighed/Makefile])
 
 dnl write all stuff
 AC_OUTPUT
