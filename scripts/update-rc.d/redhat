@@ -2,10 +2,11 @@
 #
 # update-rc.d Register kerrighed service for RedHat-like distros
 #
-# Author:	Jean Parpaillon <jean.parpaillon@irisa.fr>
-#               PARIS Research Team - IRISA
+# Copyright 2006-2007 INRIA, All rights reserved
+# Copyright 2009 Kerlabs, All rights reserved
 #
-# Copyright:    INRIA-IRISA - 2006-2007
+# Author:
+#   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 #
 
 SCRIPT=/sbin/chkconfig
@@ -31,11 +32,13 @@ function failed() {
     fi
 }
 
+CHROOT_DIR=
 while getopts irc: option
 do
-  case $option in 
+  case $option in
       c)
-	  CHROOT=/usr/sbin/chroot $OPTARG
+	  CHROOT_DIR=$OPTARG
+	  CHROOT=/usr/sbin/chroot $CHROOT_DIR
 	  ;;
       i)
 	  action=install
@@ -45,6 +48,11 @@ do
 	  ;;
   esac
 done
+
+if test ! -x ${CHROOT_DIR}${SCRIPT}; then
+    echo "Missing ${CHROOT_DIR}${SCRIPT}, aborting..."
+    exit 0
+fi
 
 if test "$action" = "install"; then
     echo -n "Register kerrighed service"
