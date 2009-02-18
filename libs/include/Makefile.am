@@ -10,7 +10,7 @@
 #
 # libkerrighed
 #
-if BUILD_LIBKERRIGHED
+if ENABLE_LIBKERRIGHED
 kerrighedincludedir=$(includedir)/kerrighed
 
 kerrighedinclude_HEADERS = \

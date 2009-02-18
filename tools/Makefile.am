@@ -6,6 +6,8 @@
 ### Author:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
+dist_bin_SCRIPTS = krg_legacy_scheduler
+
 bin_PROGRAMS = migrate checkpoint restart krgcapset krgadm
 INCLUDES = -I@top_srcdir@/libs/include
 LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la

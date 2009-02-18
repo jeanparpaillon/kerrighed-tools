@@ -183,9 +183,10 @@ AC_ARG_ENABLE([libkerrighed],
 			      [Disable libkerrighed (disable also tools compilation) @<:@default=enable@:>@])],
 	      [],
 	      [enable_libkerrighed=yes])
-AM_CONDITIONAL([BUILD_LIBKERRIGHED], [test "$enable_libkerrighed" = "yes"])
+AM_CONDITIONAL([ENABLE_LIBKERRIGHED], [test "$enable_libkerrighed" = "yes"])
 ###
 ### END LIBRARIES CHECK
+###
 
 ###
 ### BEGIN TOOLS CHECK
@@ -286,6 +287,7 @@ AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([patches/Makefile])
 AC_CONFIG_FILES([libs/Makefile libs/include/Makefile libs/libkerrighed/kerrighed.pc libs/libkerrighed/Makefile])
 AC_CONFIG_FILES([tools/Makefile])
+AC_CONFIG_FILES([scripts/Makefile])
 
 dnl write all stuff
 AC_OUTPUT

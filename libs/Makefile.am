@@ -6,9 +6,4 @@
 ### Author:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
-if BUILD_LIBKERRIGHED
-LIBKERRIGHED = libkerrighed
-endif
-SUBDIRS= include $(LIBKERRIGHED)
-
-CLEANFILES =
+SUBDIRS= include libkerrighed

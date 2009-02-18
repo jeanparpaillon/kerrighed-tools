@@ -6,7 +6,14 @@
 # Author:
 #   Jean PARPAILLON <jean.parpaillon@kerlabs.com>
 #
-SUBDIRS = libs tools
+if ENABLE_SERVICE
+OPTSCRIPTS = scripts
+endif
+if ENABLE_LIBKERRIGHED
+OPTLIBKERRIGHED = libs tools
+endif
+
+SUBDIRS =  $(OPTLIBKERRIGHED) $(OPTSCRIPTS)
 LINUX_SRC = @kernelsrc@
 LINUX_BUILD = @kernelbuild@
 KERNEL_CONFIG = @kernelconfig@

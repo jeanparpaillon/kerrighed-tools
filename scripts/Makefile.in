@@ -1,7 +1,9 @@
 ### Makefile.in for kerrighed service
-### 
-### Copyright 2006-2007 INRIA-IRISA
-###        Jean Parpaillon <jean.parpaillon@irisa.fr>
+###
+### Copyright 2006-2007 INRIA, All rights reserved
+###
+### Author:
+###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
 SCRIPTS = initd
 CONFIG = default
@@ -12,14 +14,18 @@ LSB_ID = @DIST_ID@
 LSB_RELEASE = @DIST_RELEASE@
 
 ifneq ($(strip $(DESTDIR)),)
-CHROOT="-c $(DESTDIR)"
+CHROOT = -c $(DESTDIR)
 endif
 
 INSTALL = @INSTALL@
 install_sh = @install_sh@
 install_sh_DATA = $(install_sh) -c -m 644
 install_sh_SCRIPT = $(install_sh) -c
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+top_srcdir = @top_srcdir@
 srcdir = @srcdir@
+bindir = @bindir@
 
 LSB_PATH = $(shell \
 	if test -d $(srcdir)/distros/$(LSB_ID)/$(LSB_RELEASE); then \
@@ -36,7 +42,7 @@ all:
 install: all install-scripts install-config
 	$(LSB_PATH)/update-rc.d -i $(CHROOT)
 
-install-scripts: $(LSB_SCRIPTS)
+install-scripts: $(LSB_SCRIPTS) $(bin_SCRIPTS)
 	for file in $(SCRIPTS); do \
 	  $(install_sh_SCRIPT) $(LSB_PATH)/$$file $(DESTDIR)`cat $(LSB_PATH)/$$file.path` \
 	; done
@@ -49,10 +55,10 @@ install-config: $(LSB_CONFIG)
 uninstall:
 	$(LSB_PATH)/update-rc.d -r $(CHROOT)
 	for file in $(SCRIPTS); do \
-	  rm -f `cat $(LSB_PATH)/$$file.path` \
+	  rm -f $(DESTDIR)`cat $(LSB_PATH)/$$file.path` \
 	; done
 	for file in $(CONFIG); do \
-	  rm -f `cat $(LSB_PATH)/$$file.path` \
+	  rm -f $(DESTDIR)`cat $(LSB_PATH)/$$file.path` \
 	; done
 
 distdir: $(DISTFILES)
@@ -63,7 +69,6 @@ distdir: $(DISTFILES)
 	    cp -p $$file $(distdir)/$$file \
 	  ; fi \
 	; done
-	rm -rf `find $(distdir) -name '.svn'`
 
 clean:
 	rm -f `find -name '*~'`
