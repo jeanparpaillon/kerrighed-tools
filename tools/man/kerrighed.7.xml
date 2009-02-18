@@ -1,0 +1,124 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='kerrighed.7'>
+  <refmeta>
+    <refentrytitle>kerrighed</refentrytitle>
+    <manvolnum>7</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>kerrighed</refname>
+    <refpurpose> a Linux based Single System Image. </refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>Kerrighed</command>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      Kerrighed is a Single System Image operating system for clusters. Kerrighed offers
+      the view of a unique SMP machine on top of a cluster of standard PCs. Kerrighed 
+      main features are :  
+      
+      <variablelist>
+	<varlistentry>
+	  <term>Configurable Global Process Scheduler:</term>
+	  <listitem>
+	    <para>
+	      Processes and threads are 
+	      automatically scheduled over the cluster nodes to balance the CPU load using 
+	      the Kerrighed default scheduling algorithm. However, Kerrighed offers a 
+	      toolkit to easily write personal schedulers hot-loadable through kernel modules. 
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>Distributed Shared Memory:</term>
+	  <listitem>
+	    <para>
+	      Threads and System V memory segments can operate 
+	      through the whole cluster, just like on a SMP machine.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>High Performance Stream Migration Mechanism:</term>
+	  <listitem>
+	    <para>
+	      Processes using streams (socket, 
+	      pipe, fifo, char device, etc) can be migrated with no penalty on communications
+	      performance.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>Distributed File System:</term>
+	  <listitem>
+	    <para>
+	      A unique file name space is seen over the whole cluster. 
+	      All nodes disk are merged in an unique global virtual disk.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>Process Check-pointing:</term>
+	  <listitem>
+	    <para>
+	      Processes can be check-pointed and restarted on any 
+	      cluster node.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>Full System V Interface:</term>
+	  <listitem>
+	    <para>
+	      Full Posix Thread Interface.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+
+    <para>
+      Kerrighed is implemented as an extension to Linux operating system (a set of Linux 
+      modules and a small patch to the kernel). Kerrighed is independent of the cluster 
+      interconnection network.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Files</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term><filename>/etc/kerrighed_nodes</filename></term>
+	  <listitem>
+	    <para>
+	      This file contains the list of nodes used in the Kerrighed cluster. 
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Authors</title>
+    <para>
+      Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>See also</title>
+    <para>
+      krg_capabilities (7), migrate (1), krg_capset (1), checkpoint (1)
+    </para>
+  </refsect1>
+</refentry>

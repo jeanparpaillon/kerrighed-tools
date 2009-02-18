@@ -1,0 +1,75 @@
+The fields are:
+   name (N),
+   Institution (I),
+   email (E),
+   description (D),
+   yers (Y)
+
+N: -- Core developers --
+
+N: Pascal Gallard
+I: Kerlabs
+E: Pascal.Gallard@kerlabs.com
+D: tools, rpc, hotplug, stream
+Y: 2001-2008
+
+N: Renaud Lottiaux
+I: Kerlabs
+E: Renaud.Lottiaux@kerlabs.com
+D: ctnr, mm, fs, ipc, sync
+Y: 1999-2008
+
+N: Louis Rilling
+I: Kerlabs
+E: Louis.Rilling@kerlabs.com
+D: ghost, proc, epm, scheduler, procfs
+Y: 2006-2008
+
+N: Matthieu Fertre
+I: INRIA
+E: matthieu.fertre@irisa.fr
+D: proc, epm, ipc
+Y: 2005-2008
+
+N: -- Contributors --
+
+N: Jerome Gallard
+I: INRIA
+E: Jerome.Gallard@irisa.fr
+D: Fork delay
+Y: 2006
+
+N: Erich Focht
+I: NEC
+E: efocht@hpce.nec.com
+D: bug fixes, janitoring, port to 2.6.20
+Y: 2006-2008
+
+N: Jean Parpaillon
+I: Kerlabs
+E: Jean.Parpaillon@kerlabs.com
+D: Packaging, build system
+Y: 2005-2008
+
+N: -- Former contributors --
+
+N: Arkadiusz Danilecki
+I: University of Poznan
+E: arkadiusz.danilecki@cs.put.poznan.pl
+D: Port on 64 bits architecture
+Y: 2006
+
+N: Viet Hoa Dinh
+Y: 2001-2002
+
+N: David Margery
+I: INRIA
+E: dmargery@irisa.fr
+D: proc, epm, ctnr, ghost, stream
+Y: 2003-2004
+
+N: Geoffroy Vallee
+I: 
+E: geoffroy.vallee@gmail.com
+D: ghost, proc, epm, scheduler, procfs
+Y: 2001-2004

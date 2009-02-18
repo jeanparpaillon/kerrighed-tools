@@ -1,0 +1,6 @@
+Kerrighed (1.1.0)
+
+	[Jean Parpaillon]
+	* Build system now use autotools
+
+ -- Jean Parpaillon <jean.parpaillon@irisa.fr> Wed, 16 Aug 2006 15:34

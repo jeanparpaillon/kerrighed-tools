@@ -1,0 +1,177 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='kerrighed_capabilities.7'>
+  <refmeta>
+    <refentrytitle>kerrighed_capabilities</refentrytitle>
+    <manvolnum>7</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>kerrighed_capabilities</refname>
+    <refpurpose>overview of Kerrighed capabilities</refpurpose>
+  </refnamediv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      Kerrighed provides a (as yet incomplete) system of <emphasis>capabilities</emphasis>, 
+      which allows administrator and users to define the way their processes behave in 
+      term of SSI mechanisms. Kerrighed cluster wide mechanisms are divided into distinct 
+      units that can be independently enabled and disabled.
+    </para>
+      
+    <refsect2>
+      <title>Capabilities List</title>
+      <para>
+	The following capabilities are implemented: 
+	<variablelist>
+	  <varlistentry>
+	    <term>CAP_CHANGE_KERRIGHED_CAP</term>
+	    <listitem>
+	      <para>
+		Allow changing capabilities. 
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>CAP_CAN_MIGRATE</term>
+	    <listitem>
+	      <para>
+		Allow process to migrate.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>CAP_DISTANT_FORK</term>
+	    <listitem>
+	      <para>
+		This capability is used by the fork system call to decide if it should try 
+		to fork the new program on a distant node. Success of this operation is not 
+		guarantied.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>CAP_SEE_LOCAL_PROC_STAT</term>
+	    <listitem>
+	      <para>
+		Allow seeing <filename>/proc</filename> files of the local node instead of 
+		the globalized /proc of the cluster.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </para>
+    </refsect2>
+    
+    <refsect2>
+      <title>Process Capabilities</title>
+      <para>
+	Each process has four capability sets containing zero or more of the above 
+	capabilities: 
+	<variablelist>
+	  <varlistentry>
+	    <term>Effective: </term>
+	    <listitem>
+	      <para>
+		the capabilities used by the kernel to perform permission checks for the process. 
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>Permitted: </term>
+	    <listitem>
+	      <para>
+		the capabilities that the process may assume (i.e., a limiting superset for 
+		the the effective, inheritable and inheritable effective sets). If a process
+		drops a capability from its permitted set, it can never re-acquire that
+		capability (unless it execs a set-UID-root program).
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>Inheritable Permited: </term>
+	    <listitem>
+	      <para>
+		the capabilities preserved across an <command>execve</command>(2).
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>Inheritable Effective: </term>
+	    <listitem>
+	      <para>
+		the capabilities preserved across an <command>execve</command>(2).
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </para>
+    </refsect2>
+    
+    <refsect2>
+      <title>Capabilities Transmission</title>
+      <para>
+	During a fork, the kernel calculates the new capabilities of the process using 
+	the following algorithm:  
+	<programlisting>
+	  P'(permitted) = (P(inheritable permitted) &amp; F(allowed)) | F(forced)P'(effective) = P(inheritable effective) &amp; F(effective) &amp; P'(permitted)P'(inheritable permitted) = P(inherited permitted)     [i.e., unchanged]P'(inheritable effective) = P(inheritable effective)   [i.e., unchanged]
+	</programlisting>
+	where: 
+	<variablelist>
+	  <varlistentry>
+	    <term>P</term>
+	    <listitem>
+	      <para>denotes the value of a process capability set before the exec</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>P'</term>
+	    <listitem>
+	      <para>denotes the value of a capability set after the exec</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>F</term>
+	    <listitem>
+	      <para>denotes a file capability set</para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </para>
+    </refsect2>
+
+  </refsect1>
+  
+  <refsect1>
+    <title>Files</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term><filename>/etc/kerrighed_nodes</filename></term>
+	  <listitem>
+	    <para>
+	      This file contains the list of nodes used in the Kerrighed cluster. See 
+	      <command>kerrighed_nodes</command>(5) for further details.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Author</title>
+    <para>
+      Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>See Also</title>
+    <para>
+      <command>krgcapset</command>(1)
+    </para>
+  </refsect1>
+</refentry>

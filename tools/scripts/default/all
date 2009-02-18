@@ -1,0 +1,12 @@
+#=====================================================
+# /etc/default/kerrighed
+#
+#=====================================================
+
+# Start kerrighed cluster
+ENABLE=true
+#ENABLE=false
+
+# Enable/Disable legacy scheduler behaviour
+LEGACY_SCHED=true
+#LEGACY_SCHED=false

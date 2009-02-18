@@ -18,20 +18,38 @@ WHAT IS KERRIGHED ?
 
     * Customizable Cluster Wide Process Scheduler.
 
-        Processes are automatically scheduled over the cluster nodes
-        to balance the CPU load using the Kerrighed default scheduling
-        algorithm. However, Kerrighed offers a toolkit to easily write
-        customized schedulers hot-loadable through kernel modules.
+        Processes and threads are automatically scheduled over the
+        cluster nodes to balance the CPU load using the Kerrighed
+        default scheduling algorithm. However, Kerrighed offers a
+        toolkit to easily write customized schedulers hot-loadable
+        through kernel modules.
 
     * Cluster Wide Shared Memory.
 
-        System V memory segments can operate through the whole
-        cluster, just like on an SMP machine.
+        Threads and System V memory segments can operate through the
+        whole cluster, just like on an SMP machine.
+
+    * High Performance Stream Migration Mechanism.
+
+        Processes using streams (socket, pipe, fifo, char device, etc)
+        can be migrated with no penalty on communication performance
+        after migration.
+
+    * Distributed File System.
+
+        A unique file name space is seen over the whole cluster. All
+        cluster disks are merged in an unique virtual disk in a
+        customizable RAID-like fashion.
 
     * Process Checkpointing.
 
         Processes can be checkpointed and restarted on any cluster
         node.
+
+    * Full Posix Thread Interface.
+
+        The full Posix Thread interface can operate with threads
+        spread over cluster nodes.
 
     * Cluster Wide Unix Process Interface.
 
@@ -47,4 +65,5 @@ WHAT IS KERRIGHED ?
 
   The present implemention of Kerrighed is compatible with version
   2.6.20 of Linux kernel.
-
+  Kerrighed functionalities have been added to the Linux kernel through 
+  modules and some minor kernel modifications.

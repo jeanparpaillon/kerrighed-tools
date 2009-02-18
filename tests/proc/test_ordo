@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+
+declare -a pid
+
+krg_capset -d +CAN_MIGRATE
+
+echo "Lancement des tâches"
+
+    for i in $(seq 50);  do
+        ./bi -l $i &
+        pid[$i]=$!
+    done
+
+echo "Attend la terminaison des tâches"
+
+    for i in $(seq 50);  do
+        wait ${pid[$i]};
+    done
+
+echo "Terminé"
+

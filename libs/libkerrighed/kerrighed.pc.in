@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: kerrighed lib
+Description: SSI
+Version: @VERSION@
+Libs: -L${libdir} -lkerrighed
+Cflags: -I${includedir}/kerrighed

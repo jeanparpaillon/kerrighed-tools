@@ -1,0 +1,84 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id='krgcapset.2'>
+  <refmeta>
+    <refentrytitle>krgcapset</refentrytitle>
+    <manvolnum>2</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>krgcapset</refname>
+    <refpurpose>Set or modify capabilities of a process.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <funcsynopsis>
+      <funcsynopsisinfo>#include &lt;libkerrighed.h&gt;</funcsynopsisinfo>
+      <funcprototype>
+	<funcdef>int <function>krg_capset</function></funcdef>
+	<paramdef>struct krg_cap_t <parameter>*new_caps</parameter></paramdef>
+      </funcprototype>
+    </funcsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      The <function>krg_capset</function> system call modify calling process capabilities 
+      using the one passed through <parameter>new_caps</parameter>.  The <type>krg_cap_t</type>
+      structure contains the following fields:
+      
+      <programlisting>
+	struct krg_cap_t {    
+	  int   krg_cap_effective;    
+	  int   krg_cap_permitted;
+	  int   krg_cap_inheritable_permitted;
+	  int   krg_cap_inheritable_effective ;
+	};
+      </programlisting>
+    </para>
+    <para>
+      See <command>krg_capabilities</command>(7) for further details.
+    </para>
+  </refsect1>
+
+  <!-- TODO -->
+  <!-- refsect1>
+    <title>Examples</title>
+    <para> 
+    </para>
+  </refsect1 -->
+
+  <refsect1>
+    <title>Return Value</title>
+    <para>
+      On success, zero is returned.  On error, -1 is returned, and errno is set appropriately.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Errors</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term><varname>EPERM</varname></term>
+	  <listitem>
+	    <para>The process does not have the capability to have its permissions changed.</para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Author</title>
+    <para>Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email></para>
+  </refsect1>
+
+  <refsect1>
+    <title>See Also</title>
+    <para>
+      <command>krgcapget</command> (1), <command>kerrighed_capabilities</command>(7)
+    </para>
+  </refsect1>
+</refentry>

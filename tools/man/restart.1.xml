@@ -1,0 +1,72 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='restart.1'>
+  <refmeta>
+    <refentrytitle>restart</refentrytitle>
+    <manvolnum>1</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>restart</refname>
+    <refpurpose>Restart an application.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>restart</command>
+      <arg choice="plain" ><replaceable>appid</replaceable></arg>
+      <arg choice="plain" ><replaceable>version</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      <command>restart</command> restarts the application given by
+      <replaceable>appid</replaceable> from the <option>n</option>th checkpoint
+      (with <option>n</option> equals to <replaceable>version</replaceable>).
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Files</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term><filename>/etc/kerrighed_nodes</filename></term>
+	  <listitem>
+	    <para>
+	      This file contains the list of nodes used in the Kerrighed cluster.
+	      See <command>kerrighed_nodes</command>(5) for further details.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><filename>/var/chkpt</filename></term>
+	  <listitem>
+	    <para>
+	      This directory is default location for disk checkpoints.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Authors</title>
+    <para>
+      Matthieu Fertré <email>matthieu.fertre@kerlabs.com</email>,
+      Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>See Also</title>
+    <para>
+      <command>checkpoint</command>(1),
+      <command>krgcapset</command>(1)
+    </para>
+  </refsect1>
+</refentry>

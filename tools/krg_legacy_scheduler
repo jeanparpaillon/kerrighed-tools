@@ -1,0 +1,67 @@
+#!/bin/sh
+
+is_configfs_dir() {
+    [ "`/usr/bin/stat -f -c %t $1`" == 62656570 ]
+}
+
+# Make sure configfs is mounted on /config.
+if ! is_configfs_dir /config; then
+    echo "configfs is not mounted on /config, aborting."
+    echo
+    echo "configfs has to be mounted on /config."
+    echo
+    echo "To do so:"
+    echo "  1. mkdir /config (as root)"
+    echo "  2. Have the following line in /etc/fstab (reboot, or mount it"
+    echo "     manually on each node once it has just been addded):"
+    echo "        configfs /config configfs defaults 0 0"
+    echo
+    echo "Aborting, please adjust your system configuration and try again."
+    exit 1
+fi
+
+# Make sure Kerrighed is loaded.
+if ! is_configfs_dir /config/krg_scheduler; then
+    echo "Kerrighed does not seem to be loaded,"
+    echo "or the configurable scheduler framework seems disabled,"
+    echo "aborting."
+    exit 1
+fi
+
+# Round robin balancing with remote clone
+SCHEDULER_PATH=/config/krg_scheduler/schedulers/rr
+
+mkdir -p "$SCHEDULER_PATH/round_robin_balancer" && \
+echo 1 > "$SCHEDULER_PATH/process_set/handle_all"
+
+
+# Dynamic Mosix-like CPU load balancing with migration
+SCHEDULER_NAME=mosix
+# 2 seconds between each migration
+MIGRATION_INTERVAL=2000000000
+# Refresh remote node loads every second
+POLL_INTERVAL=1000
+
+SCHEDULER_PATH="schedulers/$SCHEDULER_NAME"
+POLICY_PATH="${SCHEDULER_PATH}/mosix_load_balancer"
+MOSIX_PROBE_PATH=probes/mosix_probe
+MIGRATION_PROBE_PATH=probes/migration_probe
+
+cd /config/krg_scheduler && \
+mkdir "$MOSIX_PROBE_PATH" && \
+mkdir "$MIGRATION_PROBE_PATH" && \
+mkdir -p "$POLICY_PATH" && \
+mkdir "${POLICY_PATH}/local_load/freq_limit_filter" && \
+echo $MIGRATION_INTERVAL > "${POLICY_PATH}/local_load/freq_limit_filter/min_interval" && \
+mkdir "${POLICY_PATH}/local_load/freq_limit_filter/threshold_filter" && \
+v=`< "${MOSIX_PROBE_PATH}/norm_single_process_load/value"` && \
+echo $((v*3/2)) > "${POLICY_PATH}/local_load/freq_limit_filter/threshold_filter/threshold" && \
+mkdir "${POLICY_PATH}/remote_load/remote_cache_filter" && \
+echo $POLL_INTERVAL > "${POLICY_PATH}/remote_load/remote_cache_filter/polling_period" && \
+mkdir "${POLICY_PATH}/single_process_load/remote_cache_filter" && \
+ln -s "${MIGRATION_PROBE_PATH}/last_migration" "${POLICY_PATH}/local_load/freq_limit_filter/last_event/migration" && \
+ln -s "${MOSIX_PROBE_PATH}/process_load" "${POLICY_PATH}/process_load/mosix" && \
+ln -s "${MOSIX_PROBE_PATH}/norm_upper_load" "${POLICY_PATH}/remote_load/remote_cache_filter/mosix_upper" && \
+ln -s "${MOSIX_PROBE_PATH}/norm_single_process_load" "${POLICY_PATH}/single_process_load/remote_cache_filter/mosix" && \
+ln -s "${MOSIX_PROBE_PATH}/norm_mean_load" "${POLICY_PATH}/local_load/freq_limit_filter/threshold_filter/mosix_mean" && \
+echo 1 > "${SCHEDULER_PATH}/process_set/handle_all"

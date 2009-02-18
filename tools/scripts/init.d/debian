@@ -1,0 +1,157 @@
+#! /bin/sh
+#
+# kerrighed     start or stop kerrighed cluster
+#
+# Authors:	Jean Parpaillon <jean.parpaillon@irisa.fr>
+#               Cyril Brulebois <cyril.brulebois@kerlabs.com>
+#
+# Copyright:    INRIA-IRISA - 2006-2007
+#               Kerlabs - 2008
+#
+
+### BEGIN INIT INFO
+# Provides:          kerrighed
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start kerrighed at boot time
+# Description:       Load the kerrighed module.
+### END INIT INFO
+
+set -e
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+NAME=kerrighed
+DESC="Kerrighed"
+
+KRG_MODULE=$NAME
+
+CFG=/etc/default/$NAME
+SCRIPTNAME=/etc/init.d/$NAME
+
+# Gracefully exit if the package has been removed.
+modinfo $KRG_MODULE &>/dev/null || exit 0
+
+# Read config file if it is present.
+if [ -r $CFG ]; then
+    . $CFG
+fi
+
+. /lib/lsb/init-functions
+
+#
+# Function that check if Kerrighed can be started
+#
+d_check_for_no_start() {
+    case "x$ENABLE" in
+	xtrue)
+	    ;;
+	xfalse)
+	    log_end_msg 0
+	    log_warning_msg "Kerrighed disabled in $CFG; not starting Kerrighed"
+	    exit 0
+	    ;;
+	*)
+	    log_end_msg 1
+	    log_failure_msg "Value of ENABLE in $CFG must be either 'true' or 'false';"
+	    exit 1
+	    ;;
+    esac
+}
+
+#
+# Function that starts the daemon/service.
+#
+d_start() {
+    /sbin/modprobe -q $KRG_MODULE $ARGS
+
+    case "x$LEGACY_SCHED" in
+	xtrue)
+	    d_trigger_krg_legacy_scheduler_start &
+	    ;;
+	xfalse)
+	    ;;
+	*)
+	    log_end_msg 1
+	    log_warning_msg "Value of LEGACY_SCHED in $CFG must be either 'true' or 'false';"
+	    ;;
+    esac
+}
+
+#
+# Function that puts a trigger in place so that the krg_legacy_scheduler
+# gets automatically started when the cluster is started.
+#
+d_trigger_krg_legacy_scheduler_start () {
+    # Wait for the cluster to be started.
+    krgadm cluster wait_start >/dev/null 2>&1
+
+    # Only run the scheduler on a single node. Arbitrarily, the first
+    # node (beware, the sort can't be numerical even if -n is passed,
+    # because of the non-numerical prefix, so it's ASCII).
+    self=$(readlink -f /proc/nodes/self)
+    first_ascii=$(ls -1d /proc/nodes/node*|sort|head -1)
+
+    if [ $self = $first_ascii ]; then
+	krg_legacy_scheduler
+    fi
+}
+
+
+#
+# Function that stops the daemon/service.
+#
+d_stop() {
+    true
+}
+
+#
+# Function that prints if kerrighed is started or not
+#
+d_status() {
+    if test ! -e /proc/nodes/nrnodes; then
+	echo -n "not loaded"
+    else
+	present=`cat /proc/nodes/nrnodes | grep 'PRESENT' | cut -d':' -f2`
+	possible=`cat /proc/nodes/nrnodes | grep 'POSSIBLE' | cut -d':' -f2`
+	if test $possible = 0; then
+	    echo -n "not started ($present nodes available)"
+	else
+	    echo -n "started on $possible nodes ($present nodes available)"
+	fi
+    fi
+}
+
+case "$1" in
+    start)
+	log_begin_msg "Starting $DESC: "
+	d_check_for_no_start
+	d_start || log_end_msg 1
+	log_end_msg 0
+	;;
+    stop)
+	log_begin_msg "Stopping $DESC: "
+	d_stop || log_end_msg 1
+	log_end_msg 0
+	;;
+    status)
+	log_begin_msg "$DESC status: "
+	d_status
+	log_end_msg 0
+	;;
+    restart)
+	log_begin_msg "Restart $DESC: "
+	d_stop || log_end_msg 1
+	d_check_for_no_start
+	d_start || log_end_msg 1
+	log_end_msg 0
+	;;	
+    *)
+	log_succes_msg "Usage: $SCRIPTNAME {start|stop|restart|status}"
+	exit 1
+	;;
+esac
+
+exit 0

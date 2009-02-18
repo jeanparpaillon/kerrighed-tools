@@ -1,0 +1,202 @@
+#!/bin/bash
+###############################################################################
+##
+## Copyright (c) INRIA, 2007
+##
+## This program is free software;  you can redistribute it and#or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+## or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+## for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program;  if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+##
+###############################################################################
+#
+# Description:  Stress test program for Kerrighed checkpoint/restart of single
+#               process.
+#
+# Author:       Matthieu Fertré, matthieu.fertre@irisa.fr
+#
+
+source `dirname $0`/lib_cr.sh
+
+min_chkpt_id=1
+last_chkpt_id=0
+next_chkpt_id=1
+
+running=0
+
+checkpoint_wrong_pcus()
+{
+    LTP_print_info "$FUNCNAME"
+
+    checkpoint_process_must_fail 42 $TESTCMD || return $?
+}
+
+checkpoint_pcus()
+{
+    LTP_print_info "$FUNCNAME"
+
+    if [ $running -eq 1 ]; then
+	checkpoint_process $PID $TESTCMD || return $?
+	next_chkpt_id=$[$next_chkpt_id+1]
+	last_chkpt_id=$[$last_chkpt_id+1]
+    else
+	checkpoint_process_must_fail $PID $TESTCMD || return $?
+    fi
+}
+
+rm_chkpt()
+{
+    LTP_print_info "$FUNCNAME"
+
+    from=$min_chkpt_id
+    to=$[$last_chkpt_id/2]
+
+    i=$from
+    while [ $i -lt $to ]; do
+	rm -rf /var/chkpt/$PID/v$i/
+	i=$[$i+1]
+    done
+    min_chkpt_id=$to
+
+    if [ $min_chkpt_id -eq 0 ]; then
+	min_chkpt_id=1
+    fi
+}
+
+restart_from_last_chkpt()
+{
+    LTP_print_info "$FUNCNAME"
+
+    if [ $running -eq 0 ]; then
+	restart_process $PID $last_chkpt_id $TESTCMD || return $?
+	running=1
+    else
+	restart_process_must_fail $PID $last_chkpt_id $TESTCMD || return $?
+    fi
+}
+
+restart_from_random_chkpt()
+{
+    LTP_print_info "$FUNCNAME"
+
+    if [ $last_chkpt_id -eq 0 ]; then
+	return $?
+    else
+	interval=$[$last_chkpt_id-$min_chkpt_id+1]
+	random_id=$[$RANDOM%$interval]
+	random_id=$[$random_id+$min_chkpt_id]
+    fi
+
+    if [ $running -eq 0 ]; then
+	restart_process $PID $random_id $TESTCMD || return $?
+	next_chkpt_id=$[$random_id+1]
+	running=1
+    else
+	restart_process_must_fail $PID $random_id $TESTCMD || return $?
+    fi
+}
+
+restart_from_stupid_random_chkpt()
+{
+    LTP_print_info "$FUNCNAME"
+
+    random_id=$RANDOM
+    while [ $random_id -ge $min_chkpt_id ] && [ $random_id -le $next_chkpt_id ]; do
+	random_id=$RANDOM
+    done
+
+    restart_process_must_fail $PID $random_id $TESTCMD || return $?
+}
+
+kill_pcus()
+{
+    LTP_print_info "$FUNCNAME"
+
+    if [ $running -eq 1 ]; then
+	kill_group $PID $TESTCMD || return $?
+	running=0
+    fi
+}
+
+migrate_pcus()
+{
+    LTP_print_info "$FUNCNAME"
+
+    if [ $running -eq 1 ]; then
+	migrate_process $PID $TESTCMD || return $?
+    fi
+}
+
+migrate_pcus_comeback()
+{
+    LTP_print_info "$FUNCNAME"
+
+    if [ $running -eq 1 ]; then
+	migrate_process_comeback $PID $TESTCMD || return $?
+    fi
+}
+
+choose_action()
+{
+    TST_COUNT=$[$TST_COUNT+1]
+
+    nbactions=9
+    action=$[$RANDOM%$nbactions+1]
+
+    case $action in
+	1) checkpoint_wrong_pcus || return $?;;
+	2) checkpoint_pcus || return $?;;
+	3) restart_from_last_chkpt || return $?;;
+	4) restart_from_random_chkpt || return $?;;
+	5) restart_from_stupid_random_chkpt || return $?;;
+	6) migrate_pcus || return $?;;
+	7) migrate_pcus_comeback || return $?;;
+	8) kill_pcus || return $?;;
+	9) rm_chkpt || return $?;;
+    esac
+}
+
+cr_stress()
+{
+    TCID="$FUNCNAME"               # Identifier of this testcase.
+    TST_COUNT=$[$TST_COUNT+1]      # Test case number.
+    RC=0                           # return code from commands.
+
+    LTP_print_info \
+	"WARNING: This test will never end unless it crashes"
+
+    runcommand CHECKPOINTABLE,CAN_MIGRATE || return $?
+    running=1
+
+    checkpoint_pcus || return $?
+
+    while [ true ]; do
+	choose_action || return $?
+    done
+
+    kill_group $PID $TESTCMD || return $?
+
+    print_success
+    return $?
+}
+
+CR_cleanup
+
+CR_setup $@ || exit $?
+
+cr_stress || exit $?
+
+if [ $? -ne 0 ]; then
+    echo "cr_stress ends with error $?"
+fi
+
+CR_cleanup

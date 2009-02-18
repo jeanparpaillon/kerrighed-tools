@@ -1,0 +1,136 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id='krgcapset.1'>
+  <refmeta>
+    <refentrytitle>krgadm</refentrytitle>
+    <manvolnum>1</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>krgadm</refname>
+    <refpurpose>Start, stop, join or leave a cluster</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>krgadm</command>
+      <group choice="opt" >
+	<arg choice="plain">-h</arg>
+	<arg choice="plain">--help</arg>
+      </group>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>krgadm</command>
+      <arg choice="plain" >cluster</arg>
+      <group choice="req" >
+	<arg choice="plain">status</arg>
+	<arg choice="plain">start</arg>
+	<arg choice="plain">wait_start</arg>
+	<arg choice="plain">poweroff</arg>
+	<arg choice="plain">reboot</arg>
+      </group>
+      <group choice="opt" >
+	<arg choice="plain" >-s</arg>
+	<arg choice="plain" >--subsessions</arg>
+      </group>
+      <group choice="opt"> 
+	<arg choice="plain" >-n</arg>
+	<arg choice="plain" >--nodes</arg>
+      </group>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>krgadm</command>
+      <arg choice="plain">nodes</arg>
+      <group choice="req" >
+	<arg choice="plain">status</arg>
+	<arg choice="plain">add</arg>
+	<arg choice="plain">del</arg>
+	<arg choice="plain">poweroff</arg>
+	<arg choice="plain">reboot</arg>
+	<arg choice="plain">fail</arg>
+	<arg choice="plain">swap</arg>
+	<arg choice="plain">ban</arg>
+	<arg choice="plain">unban</arg>
+      </group>
+      <group choice="opt" >
+	<arg choice="plain" >-s</arg>
+	<arg choice="plain" >--subsessions</arg>
+      </group>
+      <group choice="opt"> 
+	<arg choice="plain" >-n</arg>
+	<arg choice="plain" >--nodes</arg>
+      </group>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      <command>krgadm</command> allows the user a unique command to manage the cluster,
+      from start to stop, by adding or removing nodes or monitoring the cluster status.
+    </para>
+    
+    <para>
+      Each <command>krgadm</command> invocation is followed by a command and some options
+      relative to this command.
+      <variablelist>
+	<varlistentry>
+	  <term>cluster</term>
+	  <listitem>
+	    <para>Start, stop or see the cluster status.</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>nodes</term>
+	  <listitem>
+	    <para>Manage cluster nodes.</para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Options</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term>-h</term>
+	  <term>--help</term>
+	  <listitem>
+	    <para>Print help and exit</para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Cluster and Nodes mode options</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term>-s</term>
+	  <term>--subsession</term>
+	  <listitem>
+	    <para>Subsession id</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>-n</term>
+	  <term>--nodes</term>
+	  <listitem>
+	    <para>Comma-separated list of nodes</para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Author</title>
+    <para>
+      Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email>
+    </para>
+  </refsect1>
+</refentry>

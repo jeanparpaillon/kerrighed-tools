@@ -1,0 +1,61 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='migrate.1'>
+  <refmeta>
+    <refentrytitle>migrate</refentrytitle>
+    <manvolnum>1</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>migrate</refname>
+    <refpurpose>Migrate a process to a given node.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>migrate</command>
+      <arg choice="plain" >pid</arg>
+      <arg choice="plain" >nodeid</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      <command>migrate</command> migrate the process given by <varname>pid</varname> 
+      to the cluster node <varname>nodeid</varname>.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Files</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term><filename>/etc/kerrighed_nodes</filename></term>
+	  <listitem>
+	    <para>
+	      This file contains the list of nodes used in the Kerrighed cluster. 
+	      See <command>kerrighed_nodes</command>(5) for further details.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Author</title>
+    <para>
+      Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>See Also</title>
+    <para>
+      <command>onnode</command>(1), <command>krg_capset</command>(1)
+    </para>
+  </refsect1>
+</refentry>

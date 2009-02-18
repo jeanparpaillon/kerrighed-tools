@@ -1,0 +1,88 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='kerrighed_nodes.5'>
+  <refmeta>
+    <refentrytitle>kerrighed_nodes</refentrytitle>
+    <manvolnum>5</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>kerrighed_nodes </refname>
+    <refpurpose>File hosting nodes list and session number of a Kerrighed cluster.</refpurpose>
+  </refnamediv>
+
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      The <filename>kerrighed_nodes</filename> file contains the list of nodes belonging 
+      to the Kerrighed cluster. Each node name is on a separate line and is followed by 
+      the logical node number and the name of the network device to
+      use for Kerrighed communications.
+    </para>
+    <para>
+      The <varname>session</varname> field contains identifier of the
+      cluster. When several Kerrighed clusters have to share the same
+      Ethernet switch, each cluster should define a different session
+      identifier to avoid collisions. A session identifier is a simple
+      integer.
+    </para>
+    <para>
+      The <varname>nbmin</varname> field is used to define the number
+      of nodes to be automatically started when a Kerrighed cluster is
+      booting. This field is optional. When this field is set, the use
+      of the <command>krgadm</command> is not needed any more. During
+      the boot phase of cluster nodes when the kerrighed module is
+      loaded, Kerrighed waits for "nbmin" nodes to be up. Then the
+      required number of nodes are up, Kerrighed is automatically
+      started.
+    </para>
+    <para>
+    </para>
+    <example>
+      <title><filename>kerrighed_nodes</filename></title>
+      <programlisting>
+        session=1
+        nbmin=4
+        node1:0:eth0
+        node2:1:eth0
+        node3:2:eth0
+        node4:3:eth0
+      </programlisting>
+    </example>
+    <para>
+      The default location for the <filename>kerrighed_nodes</filename> file is the 
+      <filename>/etc/kerrighed/</filename> directory.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Files</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term><filename>/etc/kerrighed_nodes</filename></term>
+	  <listitem>
+	    <para>
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Author</title>
+    <para>
+      Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>See Also</title>
+    <para>
+      kerrighed_session (5), krgadm (1)
+    </para>
+  </refsect1>
+</refentry>

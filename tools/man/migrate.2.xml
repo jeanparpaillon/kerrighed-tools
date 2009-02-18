@@ -1,0 +1,95 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='migrate.2'>
+  <refmeta>
+    <refentrytitle>migrate</refentrytitle>
+    <manvolnum>2</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>migrate</refname>
+    <refpurpose>Migrate a process to a given node.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <funcsynopsis>
+      <funcsynopsisinfo>#include &lt;libkerrighed.h&gt;</funcsynopsisinfo>
+      <funcprototype>
+	<funcdef>int <function>migrate</function></funcdef>
+	<paramdef>pid_t <parameter>pid</parameter></paramdef>
+	<paramdef>int <parameter>node_id</parameter></paramdef>
+      </funcprototype>
+    </funcsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      <command>migrate</command> migrates the process given by <varname>pid</varname> to 
+      the cluster node <varname>nodeid</varname>.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Return Value</title>
+    <para>On success, zero is returned.  On error, -1 is returned, and  errno is set appropriately. 
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Errors</title>
+    <para> 
+      <variablelist>
+	<varlistentry>
+	  <term><varname>ESRCH</varname></term>
+	  <listitem>
+	    <para>The  pid or process group does not exist.</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><varname>EPERM</varname></term>
+	  <listitem>
+	    <para>
+	      The process does not have permission to migrate the given process. This can
+	      occurs if the process does not have the right capabilities (see 
+	      <command>krg_capability</command>(7) for further details) or if it has
+	      local streams opened.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Files</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term><filename>/etc/kerrighed_nodes</filename></term>
+	  <listitem>
+	    <para>
+	      This file contains the list of nodes used in the Kerrighed cluster. 
+	      See <command>kerrighed_nodes</command>(5) for further details.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Author</title>
+    <para>
+      Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>See Also</title>
+    <para>
+      <command>migrate_self</command>(2), <command>krg_capability</command>(7)
+    </para>
+  </refsect1>
+</refentry>

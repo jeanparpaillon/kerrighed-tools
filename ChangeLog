@@ -1,0 +1,259 @@
+   Features:
+   * Remote vfork()
+   * New RPC transmission engine that highly increases performance
+
+Kerrighed version 2.3.1
+   Fixes:
+   * Fix incompatibilities with IPv6 tunnels and other special net devices
+   * Various bugfixes in RPCs
+   * Fix wrong attempts to migrate threads when this is not supported
+   * Fix random userspace memory access when using fcntl on files remotely open
+   * Fix BUG when the parent of an exiting multi-threaded process is/was remote
+
+Kerrighed version 2.3.0
+   Fixes:
+   * Fix uninitialized anonymous memory mapping
+   * Limit network bandwidth consumption due to abusive packet retransmissions
+   * Fix root user's ability to kill other's processes when they are remote
+   * Fix bug in FAF version of recv and recvfrom
+   * Fix user-level deadlocks when interrupting read/write operations with FAF
+   * Fix build issues on systems having not sh pointing to bash
+   * Fix compile error with debugs and debugfs disabled
+   * Fix BUG when processes having multi-threaded children have remote children
+   * Fix crash when the scheduler attempts to migrate dead tasks
+   * Fix compile error on x86_64
+   * Fix unpredictable locking behavior due to the use of a wrong prototype
+   * Fix memory leak of slab obj_entry.
+   * Fix rare close_faf_file BUG during process migration / distant fork.
+   * Fix various signal issues in the FAF mechanism.
+   * Fix various signal issues in the communication layer.
+   * Fix permission checking when sending a signal to a remote task
+   * Fix compilation when building kernel with CONFIG_HIGHMEM_64 on x86_32
+   * Add support for disabled CONFIG_COMPAT_VDSO option.
+   * Fix system V SHM in SMP mode
+   * Fix system V FIFO in SMP mode
+   * Fix system V SEM in SMP mode
+   * Fix craches related to the use of the recvmsg function
+	
+Kerrighed version 2.2.1
+   Fixes:
+   * Fix crash in fcntl64 with recent libc
+   * Fix memory leak in migration and remote fork
+   * Fix access to freed memory after migration
+   * Fix NUL byte inserted in the first line of /proc/stat
+   * Fix memory leaks in FAFed recvmsg() and exit of remote forked processes
+   * Fix deadlock when killing non existing (but realistic) pgrp
+
+Kerrighed version 2.2.0
+   * SMP support
+   * Full distributed IPC support
+   * Lots of bug fixes.
+
+Kerrighed version 2.1.0
+
+   * Port to 2.6.20
+   * Rewritting of the communication layer on top of TIPC.
+   * Lots of bug fixes.
+
+Kerrighed version 2.0.0
+
+   Strong refactoring and janitoring.
+   This version is the basis for our future developments.
+   Less features than in the previous versions, but more stability and
+   much cleaner code.
+   Features removed in this version will be re-enabled in the next
+   releases.
+
+   Features removed temporarily:
+   * KerFS
+   * Distributed threads
+   * Checkpoint
+   * Dynamic streams.
+
+Kerrighed version 1.1.0-beta
+
+   Features:
+   * Port to Linux 2.6.11.
+
+Kerrighed version 1.0.2
+   Fixes:
+   * Fix random signal delivering in some cases.
+   * Fix useless network traffic when some applications are running
+     (xosview for instance).
+   * Fix some deadlock cases in the global lock mechanism.
+   * Fix a kernel ooops in distributed thread brk function.
+   * Fix large memory leak with Kerrighed threads and process migration.
+   * Fix some distributed lock problems using Kerrighed threads.
+   * Fix a memory leak in KerFS.
+
+   Features:
+   * Enable to see on which node a process is running in the top/ps commands.
+
+Kerrighed version 1.0.1
+   Fixes:
+   * Remove deprecated dependancy on PERFCTNR.
+   * Fix crash with global INET socket in some corner cases.
+   * Fix major issue when HIGHMEM support is activated.
+
+   Features:
+   * Port to Linux 2.4.29.
+   * Enable to use Kerrighed threads through LD_PRE_LOAD.
+
+Kerrighed version 1.0.0
+   Fixes:
+   * Add permission check on commands "migrate" and "checkpoint".
+   * Avoid process migration on a non existing node !
+   * Fix up cluster wide PIDs problems for threads.
+   * Fix crash during process migration with containers in some corner cases.
+   * Fix a crash in some corner cases when reading a KerFS directory.
+   * Fix problem when migrating an opened but not attached socket.
+   * Fix a problem with migrated programs whose initial shell was openned
+     before Kerrighed was started
+   * Fix numerous problems in checkpoint / restart mechanism.
+   * Fix a crash when reading /proc/<pid>/fd for a process having
+     a large number of open files.
+   * Fix a crash when reading /proc/kerrighed/<pid>/segment for a deamon
+     process
+   * Fix applications seg-fault 
+
+   Features:
+   * Support for "mv" in the distributed file system.
+   * krg_capset now accepts a -k option to change and view capabilities of any
+     process if permitted
+
+Kerrighed version 1.0-rc10
+   Fixes:
+   * Fix a bug causing random crashes and user level bugs.
+   * Fix strange behavior with global process scheduler.
+   * Fixup node crash when migrating a process using local streams.
+   * Fix a bug during KerFS file access in some corner cases.
+   * Fix some crashes when opening a corrupted KerFS file (no data on
+     disk but an entry in a directory).
+
+   Features:
+   * Enable forwarding of terminals after a process migration. More
+     generally, enable access to char and block open files after migration.
+   * The REOPEN_TERM capability is operationnal.
+
+Kerrighed version 1.0-rc9
+   Fixes:
+   * Break the dependancy with gcc 2.95
+   * Fix strange behavior with global process scheduler.
+   * Fix seg-fault during fork-exec in some corner cases.
+   * Fix crash when trying to access a removed directory.
+   * Fix most problems when removing a directory still in use remotly.
+   * Add a coherent C interface for Kerrighed capabilities.
+
+   Features:
+   * Global /proc/<pid>, allowing global "ps" and "top".
+
+Kerrighed version 1.0-rc8
+   Fixes:
+   * Fix process crash in some distant fork corner cases.
+   * Fix some "corner case" crashes when reading some Kerrighed /proc files.
+   * Fix some "corner case" crashes when removing a file.
+   * Fix some bad process wake-up during a read on a migrated pipe.
+   * Fix bug 720, where rate mimiting would cycle
+
+Kerrighed version 1.0-rc7
+   Fixes:
+   * Fix the limit of 4096 inodes per node in the distributed file system.
+   * Fix some "rm" side effects in the distributed file system.
+   * Fix dead-lock on concurrent access to ctnrfs pages in cache.
+   * Fix incoherent content of some ctnrfs pages in some corner cases.
+   * Fix crash when re-writting on a distant file.
+   * Fix a crash when removing a directory in the distributed file system.
+   * Fix problem with llseek.
+   * Fix incorrect behaviour of palantir_pipe_read
+   * Fix crash on release of a palantir pipe
+   * Fix loss of environment when using krg-rsh
+
+Kerrighed version 1.0-rc6
+   Fixes:
+   * Fix crash when opening a directory.
+   * Fix incoherence problem with shared file mapping.
+   * Fix crash when too many containers have been opened.
+   * Fix crash when removing a file created on a remote node.
+   * Fix some bugs related to the mmap function.
+   * Fix crash when using distant fork to fork more than the number of nodes in the cluster
+
+   Features:
+   * Enhance file writing performance in the distributed file system.
+
+Kerrighed version 1.0-rc5
+   Fixes:
+   * Fix ctnrfs directory content coherence problems.
+   * Fix problem with shmat.
+
+   Features:
+   * Support for pipes migration.
+   * Support for "rmdir", "ln -s" in the distributed file system.
+   * Add some man pages.
+   * Add support for pipes accross nodes
+
+Kerrighed version 1.0-rc4
+   Fixes:
+   * Fix Some bugs when accessing opened files after a process migration.
+   * Fix memory leaks in global memory management.
+   * Fix memory leaks in the communication layer.
+   * Fix up crash when re-writing on a file in the global file system.
+   * Fix some bugs related to stream migration.
+   * Fix deadlock when more than one thread dies unexpectedly
+   * Fix crash when a migrated process exits before a son it had created
+
+   Features:
+   * Enhance process migration speed.
+   * Enhance file read throughput after a process migration.
+   * USE_CONTAINERS capability is now effective.
+   * Add the code to remove a file in the distributed file system.
+   * Add the code to enable use by the scheduler of groups of nodes and processes
+
+Kerrighed version 1.0-rc3
+   Fixes:
+   * Fix an allocation problem in the mosix probe
+   * Fix remaining page injection crashes
+   * Tweak the default scheduler (cpu_scheduler2) to make it more reactive when lots of jobs are submitted in a short timeframe on the same node
+   * Correct an installation problem related to the default scheduler
+   * Fix some bugs related to migration and distant sons
+   * Fix bugs with Highmem support (4GB).
+   * Fix some bugs related to stream migration.
+
+Kerrighed version 1.0-rc2
+
+   Fixes:
+   * Fix the main memory leak of 1.0-rc1 in gimli
+   * Fix crash during page injection.
+
+Kerrighed version 1.0-rc1
+
+   Features:
+   * Automatic global process scheduler.
+   * Cluster Distributed File System.
+   * Migrable sockets.
+   * Globally visible and usable process, session and groups ids.
+   * Kill, waitpid and wait4 see all the cluster and support groups.
+   * Global management of /proc (cpuinfo, meminfo, loadavg, stat and
+     uptime).
+   * Support for open, read, dup, dup2 and some command of fcntl
+     accross threads of a process.
+
+   Fixes:
+   * Fix crash during thread migration.
+   * Fix many bugs in the communication layer.
+
+Kerrighed version 0.81
+
+   Features:
+   * Kerrighed barriers are compliant with POSIX pthread barrier interface.
+
+   Fixes:
+   * Fix crash related to some file accesses (Especially NFS files).
+   * Fix crash during thread migration.
+   * Fix crash during a loop-back process migration.
+   * Fix some bugs in the Kerrighed communication layer.
+   * Fix some memory leaks.
+
+Kerrighed version 0.80
+
+   General:
+   * Port to linux 2.4.24

@@ -1,0 +1,291 @@
+#!/usr/bin/perl
+
+$file_name = "/tmp/krgltp-slabinfo.dat";
+$leak_thr = 1.1;
+
+#############################################################################
+
+$run=-1;
+
+open (F, "$file_name") || die ("File $slab_file_name not found...\n");
+
+$ligne = <F>;
+
+if (!(($nr_run) = ($ligne =~ /KRGLTP: nbrun=([0-9]*)/)))
+{
+    die ("Malformed slab data file\n");
+}
+
+open (FRES, ">krgltp-slabinfo.res") || die ("Cannot create file krgltp-slabinfo.res...\n");
+
+while ($ligne = <F>)
+{
+    if ( ($cur_run) = ($ligne =~ /KRGLTP: run \#([0-9]*)/) )
+    {
+	$run++;
+	if ($run != $cur_run)
+	{
+	    die ("Malformed slab data file\n");
+	}
+    }
+    else
+    {
+	if ( ($slab_name,$slab_count) = ($ligne =~ /([a-zA-Z0-9_\-\(\)]+) +([0-9]+).*/) )
+	{
+	    $tab{$slab_name} .= " $slab_count";
+
+	    if ($run == $nr_run) {
+		@n = split(' ', $tab{$slab_name});
+				
+		# Check memory leak
+		
+		$leak = "-";
+		if (@n[0] != 0) {
+		    $leak = int(100 * @n[$nr_run] / @n[0]) / 100;
+		}
+
+		$str = sprintf("%-20s ($leak)", $slab_name);
+		for $v (@n) {
+		    $str = $str."\t$v";
+		}
+		$str = $str."\n";
+		
+		print FRES $str;
+
+		if ((@n[$nr_run] > 100) && ($leak > $leak_thr)) {
+		    printf "*** WARN - $str";
+		}
+	    }
+	}
+    }
+}
+close (F);
+close (FRES);
+
+sub draw_slab
+{
+    $slab_name = shift;
+
+    open (PLOT_FILE, ">$slab_name.plot") || die ("Cannot create file $slab_name.plot...\n");
+    print PLOT_FILE << "END";
+        set encoding iso_8859_1
+	set terminal postscript dashed color eps "Helvetica" 22
+	set size 2.5,2.5
+	set output "$slab_name.eps"
+	set xlabel "KRGLTP iteration"
+	set ylabel "Number of objects"
+	set xtics 1
+	set pointsize 2.5
+	set linestyle linewidth 2
+	
+END
+	
+    $i=0;
+    for $slab (@_)
+    {
+	@n = split(' ', $tab{$slab});
+
+	open (F, ">$slab.dat") || die ("Cannot create file $slab.dat...\n");
+	for $v (@n) {
+	    print F "$v\n";
+	}
+	close (F);
+	if ($i == 0) {
+	    print PLOT_FILE "plot '$slab.dat' title \"$slab\" with linespoints lt $i pt $i,\\\n";
+	}
+	elsif ($i == scalar(@_) - 1) {
+	    print PLOT_FILE "     '$slab.dat' title \"$slab\" with linespoints lt $i pt $i\n";
+	}
+	else {
+	    print PLOT_FILE "     '$slab.dat' title \"$slab\" with linespoints lt $i pt $i,\\\n";
+	}
+	$i++;
+    }
+    print PLOT_FILE "show output\n";
+    close PLOT_FILE;
+    system "gnuplot $slab_name.plot &> /dev/null";
+    system "rm -f *.dat";
+    system "rm -f $slab_name.plot";
+}
+
+### Memory allocation slabs
+
+@size_tags=("size-131072",
+	    "size-65536",
+	    "size-32768",
+	    "size-16384",
+	    "size-8192",
+	    "size-4096",
+	    "size-2048",
+	    "size-1024",
+	    "size-512",
+	    "size-256",
+	    "size-192",
+	    "size-128",
+	    "size-96",
+	    "size-64",
+	    "size-32");
+draw_slab("size", @size_tags);
+
+### Memory allocation slabs (DMA)
+
+@size_dma_tags=("size-131072(DMA)",
+		"size-65536(DMA)",
+		"size-32768(DMA)",
+		"size-16384(DMA)",
+		"size-8192(DMA)",
+		"size-4096(DMA)",
+		"size-2048(DMA)",
+		"size-1024(DMA)",
+		"size-512(DMA)",
+		"size-256(DMA)",
+		"size-192(DMA)",
+		"size-128(DMA)",
+		"size-96(DMA)",
+		"size-64(DMA)",
+		"size-32(DMA)");
+draw_slab("size-DMA", @size_dma_tags);
+
+### Process related slabs
+
+@process_tags=("pgd",
+	       "pid",
+	       "uid_cache",
+	       "signal_cache",
+	       "sigqueue",
+	       "sighand_cache",
+	       "task_struct");
+draw_slab("process", @process_tags);
+
+### VFS slabs
+
+@vfs_tags=("files_cache",
+	   "fs_cache",
+	   "mnt_cache",
+	   "inode_cache",
+	   "dentry_cache",
+	   "filp",
+	   "file_lock_cache",
+	   "dnotify_cache",
+	   "inotify_event_cache",
+	   "inotify_watch_cache",
+	   "fasync_cache",
+	   "buffer_head",
+	   "eventpoll_pwq",
+	   "eventpoll_epi",
+	   "names_cache");
+draw_slab("vfs", @vfs_tags);
+
+### Various FS slabs
+
+@fs_tags=("nfs_write_data",
+	  "nfs_read_data",
+	  "nfs_inode_cache",
+	  "nfs_page",
+	  "proc_inode_cache",
+	  "sysfs_dir_cache",
+	  "shmem_inode_cache",
+	  "ext2_inode_cache");
+
+draw_slab("fs", @fs_tags);
+
+### MM slabs
+
+@mm_tags=("vm_area_struct",
+	  "anon_vma",
+	  "mm_struct");
+draw_slab("mm", @mm_tags);
+
+### Kerrighed slabs
+
+@krg_tags=("pid_ctnr_object",
+	   "sighand_struct_ctnr",
+	   "krg_parent_head",
+	   "remote_child",
+	   "children_kddm_obj",
+	   "signal_struct_ctnr",
+	   "task_kddm_obj",
+	   "ghost",
+	   "kddm_ns",
+	   "kddm_set",
+	   "kddm_obj",
+	   "kddm_tree",
+	   "kddm_tree_lvl",
+	   "kddm_info",
+	   "shmid_object",
+	   "ipcmap_object",
+	   "dvfs_file",
+	   "faf_client_data",
+	   "rpc_desc_elem",
+	   "rpc_tx_elem",
+	   "rpc_desc_recv",
+	   "rpc_desc_send",
+	   "rpc_desc");
+
+draw_slab("krg", @krg_tags);
+
+### Block device slabs
+
+@dev_tags=("pid_ctnr_object",
+	   "bdev_cache",
+	   "biovec-256",
+	   "biovec-128",
+	   "biovec-64",
+	   "biovec-16",
+	   "biovec-4",
+	   "biovec-1",
+	   "bio",
+	   "kiocb",
+	   "cfq_ioc_pool",
+	   "cfq_pool",
+	   "kioctx",
+	   "blkdev_ioc",
+	   "blkdev_queue",
+	   "blkdev_requests");
+
+draw_slab("dev", @dev_tags);
+
+### Comm slabs
+
+@com_tags=(
+	   "skbuff_fclone_cache",
+	   "skbuff_head_cache",
+	   "flow_cache",
+	   "sock_inode_cache",
+	   "tcp_bind_bucket",
+	   "ip_fib_alias",
+	   "ip_fib_hash",
+	   "ip_dst_cache",
+	   "arp_cache",
+	   "inet_peer_cache",
+	   "tipc_queue_items",
+	   "rpc_buffers",
+	   "rpc_tasks",
+	   "rpc_inode_cache");
+
+draw_slab("com", @dev_tags);
+
+### Misc slabs
+
+@misc_tags=("TIPC",
+	    "UNIX",
+	    "posix_timers_cache",
+	    "UDP-Lite",
+	    "secpath_cache",
+	    "xfrm_dst_cache",
+	    "RAW",
+	    "UDP",
+	    "tw_sock_TCP",
+	    "request_sock_TCP",
+	    "TCP",
+	    "sgpool-128",
+	    "sgpool-64",
+	    "sgpool-32",
+	    "sgpool-16",
+	    "sgpool-8",
+	    "scsi_io_context",
+	    "idr_layer_cache",
+	    "radix_tree_node",
+	    "kmem_cache");
+
+draw_slab("misc", @misc_tags);

@@ -1,0 +1,175 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='checkpoint.1'>
+  <refmeta>
+    <refentrytitle>checkpoint</refentrytitle>
+    <manvolnum>1</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>checkpoint</refname>
+    <refpurpose>Checkpoint an application.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>checkpoint</command>
+      <arg choice="opt" ><replaceable>OPTIONS</replaceable></arg>
+      <arg choice="plain" ><replaceable>pid</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      <command>checkpoint</command> checkpoints a running application identified
+      by one of its processes given by <varname>pid</varname>.
+    </para>
+    <para>
+      Checkpointing an application consists in three steps: freezing the
+      application, saving the application state on disk, unfreezing the
+      application. By default, all three steps are run in sequence.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Options</title>
+    <para>
+      <variablelist>
+
+	<varlistentry>
+	  <term><option>-h</option></term>
+	  <term><option>--help</option></term>
+	  <listitem>
+	    <para>Print help and exit.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term><option>-a</option></term>
+	  <term><option>--from-appid</option></term>
+	  <listitem>
+	    <para>Use <varname>pid</varname> as an application identifier, not
+	      as a standard process identifier.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term><option>-f</option></term>
+	  <term><option>--freeze</option></term>
+	  <listitem>
+	    <para>
+	      Freeze an application without checkpointing it. It is useful if
+	      you have to save some objects (such as files) before running the
+	      checkpoint without racing with the application.
+	    </para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term><option>-u</option> <optional><replaceable>signal</replaceable></optional></term>
+	  <term><option>--unfreeze</option>=<optional><replaceable>signal</replaceable></optional></term>
+	  <listitem>
+	    <para>
+	      Unfreeze an application previously frozen without checkpointing
+	      it. Optionnaly, it sends a signal <replaceable>signal</replaceable>
+	      to all processes of the application just before unfreezing it. The
+	      signal will be handled by each process as soon as the process is
+	      woken up. By default, no signal is sent.
+	      <replaceable>signal</replaceable> must be given as a numerical
+	      value. The list of signal numbers can be retrieved with
+	      <command>kill -L</command>.
+	    </para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term><option>-c</option></term>
+	  <term><option>--ckpt-only</option></term>
+	  <listitem>
+	    <para>Checkpoint an already frozen application.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term><option>-k</option> <optional><replaceable>signal</replaceable></optional></term>
+	  <term><option>--kill</option>=<optional><replaceable>signal</replaceable></optional></term>
+	  <listitem>
+	    <para>
+	      Send a signal <replaceable>signal</replaceable> to all processes
+	      of the application after checkpointing the running application
+	      and before unfreezing the application. The signal will be handled
+	      by each process as soon as the process is woken up. By default, it
+	      sends the SIGTERM signal. <replaceable>signal</replaceable> must
+	      be given as a numerical value. The list of signal numbers can be
+	      retrieved with <command>kill -L</command>.
+	    </para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term><option>-d <replaceable>description</replaceable></option></term>
+	  <term><option>--description=<replaceable>description</replaceable></option></term>
+	  <listitem>
+	    <para>
+	      Associate a description <replaceable>description</replaceable>
+	      with the checkpoint. The description is recorded in
+	      <filename>description.txt</filename> in the
+	      checkpoint folder (see FILES below).
+	    </para>
+	    <para>
+	      This option makes sense only when really checkpointing the application.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+
+    <para>
+      Options <option>-f</option>, <option>-c</option>, <option>-u</option>,
+      <option>-k</option> are mutually exclusive.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Files</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term><filename>/etc/kerrighed_nodes</filename></term>
+	  <listitem>
+	    <para>
+	      This file contains the list of nodes used in the Kerrighed cluster.
+	      See <command>kerrighed_nodes</command>(5) for further details.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><filename>/var/chkpt</filename></term>
+	  <listitem>
+	    <para>
+	      This directory is default location for disk checkpoints.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Authors</title>
+    <para>
+      Matthieu Fertré <email>matthieu.fertre@kerlabs.com</email>,
+      Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>See Also</title>
+    <para>
+      <command>restart</command>(1),
+      <command>krgcapset</command>(1)
+    </para>
+  </refsect1>
+</refentry>

@@ -1,0 +1,67 @@
+#!/bin/sh
+#
+
+if [ ! -d /proc/kerrighed ]; then
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+	echo "! You have to install/run Kerrighed before this test !"
+	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+	exit 0
+fi;
+
+if [ ! -d /var/chkpt ]; then
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+	echo "!           /var/chkpt directory not found           !"
+	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+	exit 0
+fi;
+
+which mem_restart disk_restart > /dev/null
+if [ $? -ne 0 ]; then
+  echo "You have to install Kerrighed tools"
+fi;
+
+echo "Aragorn test..."
+    krg_capset -d +DISTANT_FORK
+
+    ./fork_test || failed=1
+
+    krg_capset -d -DISTANT_FORK
+
+    krg_capset -d +CAN_MIGRATE
+
+    ./up-gs_migr || failed=1
+
+    ./up-gs_migr -C || failed=1
+
+    krg_capset -d -CAN_MIGRATE
+
+    ./up-gs_cp -D -c 500 -r 500 &
+    pid=$!
+    wait $pid
+		if [ $? -eq 0 ]; then
+      echo "---- Enter Restart test on disk without containers (process $pid) --"
+      restart $pid || failed=1
+      sleep 5
+		else
+			echo -e "\n\n"
+		fi
+
+    ./up-gs_cp -D -C -c 500 -r 500 &
+    pid=$!
+    wait $pid
+		if [ $? -eq 0 ]; then
+	    echo "---- Enter Restart test on disk with containers (process $pid) --"
+  	  restart $pid || failed=1
+    	sleep 5
+		else
+			echo -e "\n\n"
+		fi
+
+   	echo "********************************"
+		if [ "$failed" == "" ]; then
+    	echo "Aragorn test OK"
+		else
+			echo "Aragorn test FAILED"
+		fi
+   	echo "********************************"
+  

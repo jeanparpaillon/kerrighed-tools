@@ -1,0 +1,202 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id='krgcapset.1'>
+  <refmeta>
+    <refentrytitle>krgcapset</refentrytitle>
+    <manvolnum>1</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>krgcapset</refname>
+    <refpurpose>Set or modify capabilities of a process.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>krgcapset</command>
+      <group choice="opt" >
+	<arg choice="plain" >-h</arg>
+	<arg choice="plain" >--help</arg>
+      </group>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>krgcapset</command>
+      <group choice="opt" >
+	<arg choice="plain" >-s</arg>
+	<arg choice="plain" >--show</arg>
+      </group>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>krgcapset</command>
+      <group choice="opt" >
+	<arg choice="plain" >-f</arg>
+	<arg choice="plain" >--force</arg>
+      </group>
+      <group choice="opt" >
+	<arg choice="plain" >-k</arg>
+	<arg choice="plain" >--pid</arg>
+      </group>
+      <group choice="req" rep="repeat" >
+	<arg choice="plain" >SET</arg>
+	<group choice="req" >
+	  <arg choice="plain" >
+	    <group choice="opt" >
+	      <arg choice="plain" >+</arg>
+	      <arg choice="plain" >-</arg>
+	    </group>
+	    <arg choice="plain" >CAPABILITY LIST</arg>
+	  </arg>
+	  <arg choice="plain" >OCTAL VALUE</arg>
+	</group>
+      </group>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+<refsect1>
+    <title>Set</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term>-e</term>
+	  <term>--effective</term>
+	  <listitem>
+	    <para>Set up <command>effective</command> capabilities.</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>-p</term>
+	  <term>--permitted</term>
+	  <listitem>
+	    <para>Set up <command>permitted</command> capabilities.</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>-d</term>
+	  <term>--inheritable-effective</term>
+	  <listitem>
+	    <para>Set up <command>inheritable effective</command> capabilities.</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>-i</term>
+	  <term>--inheritable-permitted</term>
+	  <listitem>
+	    <para>Set up <command>inheritable permitted</command> capabilities.</para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      Kerrighed provides a system of <emphasis>capabilities</emphasis>, which allows 
+      administrator and users to define the way their processes behave in term of SSI
+      mechanisms. Kerrighed cluster wide mechanisms are divided into distinct units that
+      can be independently enabled and disabled.  Each process has four capability sets:
+      <itemizedlist>
+	<listitem>
+	  <para><command>Effective</command>,</para>
+	</listitem>
+	<listitem>
+	  <para><command>Permitted</command>,</para>
+	</listitem>
+	<listitem>
+	  <para><command>Inheritable Effective</command>,</para>
+	</listitem>
+	<listitem>
+	  <para><command>Inheritable Permitted</command>.</para>
+	</listitem>
+	</itemizedlist>
+    </para>
+
+    <para>
+      See <command>kerrighed_capabilities</command>(7) for further details.  
+      <command>krgcapset</command> modify calling process capabilities.  
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Options</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term>-h</term>
+	  <term>--help</term>
+	  <listitem>
+	    <para>Print help and exit.</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>-s</term>
+	  <term>--show</term>
+	  <listitem>
+	    <para>Show the capabilities of the calling process.</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>-f</term>
+	  <term>--force</term>
+	  <listitem>
+	    <para>Do not ask for confirmation when removing CHANGE_KERRIGHED_CAP.</para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Examples</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term>krgcapset --show</term>
+	  <listitem>
+	    <para>
+	      Show capabilities of the calling process.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>krgcapset --effective +CAN_MIGRATE</term>
+	  <listitem>
+	    <para>
+	      Add the "CAN_MIGRATE" effective capability to the calling process.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>krgcapset --effective -CAN_MIGRATE</term>
+	  <listitem>
+	    <para>
+	      Remove the "CAN_MIGRATE" effective capability to the calling process.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>krgcapset --effective 07</term>
+	  <listitem>
+	    <para>
+	      Set effective capabilities to CHANGE_KERRIGHED_CAP, USE_CONTAINERS, CAN_MIGRATE.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Author</title>
+    <para>
+      Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>See Also</title>
+    <para>
+      <command>kerrighed_capabilities</command>(7)
+    </para>
+  </refsect1>
+</refentry>

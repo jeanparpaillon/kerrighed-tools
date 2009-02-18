@@ -1,0 +1,53 @@
+#!/bin/bash
+###############################################################################
+##
+## Copyright (c) INRIA, 2007
+##
+## This program is free software;  you can redistribute it and#or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+## or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+## for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program;  if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+##
+###############################################################################
+#
+# Description:  to run after other C/R tests
+#
+# Author:       Matthieu Fertré, matthieu.fertre@irisa.fr
+#
+
+source `dirname $0`/lib_cr.sh
+
+description="to run before after C/R tests"
+
+SCHED_FILE="/config/krg_scheduler/schedulers/mosix/process_set/handle_all"
+
+cr-post()
+{
+    TCID="$FUNCNAME"               # Identifier of this testcase.
+    TST_COUNT=$[$TST_COUNT+1]      # Test case number.
+
+    CR_cleanup
+
+    # re-enable the scheduler
+    if [ -e $SCHED_FILE ]; then
+	echo 1 > $SCHED_FILE
+    else
+	tst_resm TINFO "No scheduler ?!?"
+    fi
+
+    print_success $?
+    return $?
+}
+
+CR_setup $@ || exit $?
+
+cr-post || exit $?
