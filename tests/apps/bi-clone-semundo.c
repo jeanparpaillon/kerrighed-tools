@@ -58,6 +58,12 @@ int main(int argc, char *argv[])
 	}
 
 	pid = (pid_t)syscall(SYS_clone, SIGCHLD | CLONE_SYSVSEM, NULL);
+	if (pid == -1) {
+		perror("clone");
+		exit(EXIT_FAILURE);
+	}
+
+	close_sync_pipe();
 
 	do_all_loops(quiet, numloops);
 

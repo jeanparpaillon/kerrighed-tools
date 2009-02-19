@@ -72,6 +72,8 @@ int main(int argc, char *argv[])
 		fclose(stderr);
 	}
 
+	close_sync_pipe();
+
 	do_all_loops(quiet, numloops);
 
 	return 0;

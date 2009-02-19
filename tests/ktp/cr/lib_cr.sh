@@ -594,7 +594,7 @@ to do that, give --" 1>&2
     if [ $krg_cap != "--" ]; then
 	optcap="-c $krg_cap"
     fi
-    setsid-cr $optcap -o $sessionfile -- ${TESTCMD} ${TESTCMD_OPTIONS}
+    setsid-cr $optcap -o $sessionfile -s -- ${TESTCMD} ${TESTCMD_OPTIONS}
     r=$?
     if [ $r -ne 0 ]; then
 	tst_brkm TFAIL NULL "Fail to run the application with relevant capabilities"

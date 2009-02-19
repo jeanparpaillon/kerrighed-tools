@@ -48,8 +48,13 @@ int main(int argc, char *argv[])
 
 	parse_args(argc, argv);
 
-	fork();
-	pid = getpid();
+	pid = fork();
+	if (pid == -1) {
+		perror("clone");
+		exit(EXIT_FAILURE);
+	}
+
+	close_sync_pipe();
 
 	if (close_stdbuffers) {
 		fclose(stdin);

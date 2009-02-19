@@ -40,3 +40,9 @@ void do_all_loops(int quiet, int numloops)
 
 	__do_all_loops(quiet, &i, numloops);
 }
+
+void close_sync_pipe()
+{
+	close(4);
+}
+

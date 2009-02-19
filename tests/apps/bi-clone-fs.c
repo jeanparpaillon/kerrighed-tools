@@ -52,6 +52,13 @@ int main(int argc, char *argv[])
 	parse_args(argc, argv);
 
 	pid = (pid_t)syscall(SYS_clone, SIGCHLD | CLONE_FS, NULL);
+	if (pid == -1) {
+		perror("clone");
+		exit(EXIT_FAILURE);
+	}
+
+	close_sync_pipe();
+
 	if (quiet) {
 		fclose(stdin);
 		fclose(stdout);

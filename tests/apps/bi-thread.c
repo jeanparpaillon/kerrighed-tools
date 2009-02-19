@@ -72,6 +72,8 @@ int main(int argc, char *argv[])
 	for (i=0; i<NB_THREADS; i++)
 		r[i] = pthread_create(&(thread[i]), NULL, main_loop, NULL);
 
+	close_sync_pipe();
+
 	for (i=0; i<NB_THREADS; i++)
 		pthread_join(thread[i], NULL);
 

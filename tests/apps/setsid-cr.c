@@ -35,8 +35,10 @@
 
 #define MAX_LEN_CAP 256
 #define MAX_FILEPATH 256
+#define MAX_LEN_ARGS 512
 
 short foreground = 0;
+short sync_w_pipe = 0;
 char inheritable_capabilities[MAX_LEN_CAP];
 char filepath[MAX_FILEPATH];
 pid_t pid;
@@ -73,7 +75,7 @@ void parse_args(int argc, char *argv[])
 	int c;
 
 	while (1){
-		c = getopt(argc, argv, "hfo:c:");
+		c = getopt(argc, argv, "hfso:c:");
 		if (c == -1)
 			break;
 		switch (c) {
@@ -82,6 +84,9 @@ void parse_args(int argc, char *argv[])
 			break;
 		case 'f':
 			foreground = 1;
+			break;
+		case 's':
+			sync_w_pipe = 1;
 			break;
 		case 'o':
 			snprintf(filepath, MAX_FILEPATH, optarg);
@@ -96,6 +101,9 @@ void parse_args(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 		}
 	}
+
+	if (foreground)
+		sync_w_pipe = 0;
 }
 
 void relay_signal(int signum)
@@ -107,6 +115,7 @@ int main(int argc, char *argv[])
 {
 	pid_t sid;
 	FILE* f;
+	int pipefd[2];
 
 	if (argc < 2) {
 		print_usage(argv[0]);
@@ -130,6 +139,13 @@ int main(int argc, char *argv[])
 		snprintf(capabilities, MAX_LEN_CAP, "-d %s",
 			 inheritable_capabilities);
 		set_capabilities(pid, capabilities);
+	}
+
+	/* open a pipe to synchronize with the child application */
+	if (sync_w_pipe &&
+	    pipe(pipefd) == -1) {
+		perror("pipe");
+		exit(EXIT_FAILURE);
 	}
 
 	/*
@@ -160,10 +176,24 @@ int main(int argc, char *argv[])
 			wait(&exit_status);
 			if (exit_status)
 				exit(EXIT_FAILURE);
+		} else if (sync_w_pipe) {
+			int r;
+			char buff[2];
+
+			close(pipefd[1]);
+
+			r = read(pipefd[0], buff, 1);
+			if (r == -1)
+				perror("read");
+			close(pipefd[0]);
+
 		}
 
 		exit(EXIT_SUCCESS);
 	}
+
+	if (sync_w_pipe)
+		close(pipefd[0]);
 
 	sid = setsid();
 
