@@ -1,9 +1,0 @@
-obj-m += krgbuiltin.o
-
-krgbuiltin-objs := proc.o libproc.o \
-	task.o signal_management.o krg_exit.o \
-	distant_syscalls.o
-krgbuiltin-$(CONFIG_KRG_EPM) += krg_fork.o \
-	pid_management.o sighand_management.o children.o
-
-EXTRA_CFLAGS += -I$(M) -Wall -Werror

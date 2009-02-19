@@ -1,5 +1,0 @@
-obj-m += krgbuiltin.o
-
-krgbuiltin-objs := capability.o
-
-EXTRA_CFLAGS += -I$(M) -Wall -Werror

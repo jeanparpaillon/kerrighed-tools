@@ -1,7 +1,0 @@
-obj-m += krgbuiltin.o
-
-krgbuiltin-objs := hotplug.o failure.o remove.o add.o replace.o \
-	hooks.o cluster.o hotplug_notifier.o membership.o
-
-EXTRA_CFLAGS += -I$(M) -Wall -Werror
-

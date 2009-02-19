@@ -1,8 +1,0 @@
-obj-m += krgbuiltin.o
-
-krgbuiltin-objs := krg_um.o
-
-krgbuiltin-$(CONFIG_KRG_EPM) += fork.o ghost.o
-
-EXTRA_CFLAGS += -I$(M)
-

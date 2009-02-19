@@ -9,9 +9,7 @@
 EXTRA_DIST = kerrighed.pc.in
 
 INCLUDES = \
-	-I$(top_srcdir)/libs/include \
-	-I@kernelsrc@/include \
-	-I@kerrighed_module@
+	-I$(top_srcdir)/libs/include
 
 lib_LTLIBRARIES = libkerrighed.la
 

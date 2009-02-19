@@ -1,5 +1,0 @@
-obj-m += krgbuiltin.o
-
-krgbuiltin-objs := ghost.o file_ghost.o ghost_api.o network_ghost.o memory_ghost.o
-
-EXTRA_CFLAGS += -I$(M) -Wall -Werror

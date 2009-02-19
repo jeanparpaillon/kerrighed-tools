@@ -1,7 +1,0 @@
-obj-m += krgbuiltin.o
-
-krgbuiltin-objs := module.o krg_tools.o procfs.o \
-                   krg_sysfs.o krg_syscalls.o debug_tools2.o
-
-EXTRA_CFLAGS += -I$(M) -Wall -Werror
-

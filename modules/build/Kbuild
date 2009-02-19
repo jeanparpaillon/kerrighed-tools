@@ -1,4 +1,0 @@
-obj-m += kerrighed.o
-
-#kerrighed-objs := _tools.o _knetdev.o
-

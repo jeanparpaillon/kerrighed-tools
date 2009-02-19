@@ -56,11 +56,6 @@ if test -z "$RSYNC"; then
    AC_MSG_ERROR([
         *** You need rsync tool])
 fi
-
-### DEPRECATED: to be removed when Kerrighed modules are in kernel source tree
-kerrighed_module=$(cd $srcdir/modules && pwd)
-AC_SUBST([kerrighed_module])
-
 ###
 ### BEGIN LIBRARIES CHECK
 ###
@@ -207,13 +202,6 @@ AC_CONFIG_FILES([tests/ktp/krgltp-smp.sh])
 
 dnl write all stuff
 AC_OUTPUT
-
-if test "$kernelsrc" != "$kernelbuild"; then
-   AC_MSG_NOTICE([Creates Linux Makefile in output dir])
-   mkdir -p "$kernelbuild"
-   ( cd "$kernelbuild" && \
-     make -C "$kernelsrc" outputmakefile O="$kernelbuild" 2> /dev/null > /dev/null || true )
-fi
 
 ###
 ### Display results
