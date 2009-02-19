@@ -19,12 +19,16 @@
  * 2009-02-04 Matthieu Fertré <matthieu.fertre@kerlabs.com>
  * - use getopt to manage options
  *
+ * 2009-02-11 Matthieu Fertré <matthieu.fertre@kerlabs.com>
+ * - add a signal handler on sigterm/sigint to kill the children
+ *
  */
 
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sched.h>
+#include <signal.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <getopt.h>
@@ -35,7 +39,7 @@
 short foreground = 0;
 char inheritable_capabilities[MAX_LEN_CAP];
 char filepath[MAX_FILEPATH];
-
+pid_t pid;
 
 void print_usage(char *cmd)
 {
@@ -94,9 +98,14 @@ void parse_args(int argc, char *argv[])
 	}
 }
 
+void relay_signal(int signum)
+{
+	kill(pid, signum);
+}
+
 int main(int argc, char *argv[])
 {
-	pid_t pid, sid;
+	pid_t sid;
 	FILE* f;
 
 	if (argc < 2) {
@@ -137,7 +146,17 @@ int main(int argc, char *argv[])
 		break;
 	default:	/* parent */
 		if (foreground) {
-			int exit_status;
+			int r, exit_status;
+			struct sigaction action;
+
+			action.sa_handler = &relay_signal;
+			r = sigaction(SIGINT, &action, NULL);
+			if (r)
+				perror("sigaction");
+			r = sigaction(SIGTERM, &action, NULL);
+			if (r)
+				perror("sigaction");
+
 			wait(&exit_status);
 			if (exit_status)
 				exit(EXIT_FAILURE);
