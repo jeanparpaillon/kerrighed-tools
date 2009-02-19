@@ -38,7 +38,7 @@ cr_thread01()
     TCID="$FUNCNAME"               # Identifier of this testcase.
     TST_COUNT=$[$TST_COUNT+1]      # Test case number.
 
-    runcommand CHECKPOINTABLE 1 || return $?
+    runcommand +CHECKPOINTABLE 1 || return $?
 
     checkpoint_process $PID $TESTCMD || return $?
 

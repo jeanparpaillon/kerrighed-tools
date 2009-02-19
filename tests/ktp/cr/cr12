@@ -35,7 +35,7 @@ cr12()
     TCID="$FUNCNAME"               # Identifier of this testcase.
     TST_COUNT=$[$TST_COUNT+1]      # Test case number.
 
-    runcommand CHECKPOINTABLE,CAN_MIGRATE || return $?
+    runcommand +CHECKPOINTABLE,CAN_MIGRATE || return $?
 
     migrate_process $PID $TESTCMD || return $?
 

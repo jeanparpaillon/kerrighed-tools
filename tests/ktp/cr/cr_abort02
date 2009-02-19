@@ -46,7 +46,7 @@ cr_abort02()
 
     export PATH="$workdir/:$OLDPATH"
 
-    runcommand CHECKPOINTABLE || return $?
+    runcommand +CHECKPOINTABLE || return $?
 
     export PATH=$OLDPATH
 

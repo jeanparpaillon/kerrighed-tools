@@ -16,6 +16,9 @@
  * - use vfork to ensure that child process has made a call to execve
  * - allow to give Kerrighed capabilities to child process
  *
+ * 2009-02-04 Matthieu Fertré <matthieu.fertre@kerlabs.com>
+ * - use getopt to manage options
+ *
  */
 
 #include <stdio.h>
@@ -24,10 +27,21 @@
 #include <sched.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <getopt.h>
+
+#define MAX_LEN_CAP 256
+#define MAX_FILEPATH 256
+
+short foreground = 0;
+char inheritable_capabilities[MAX_LEN_CAP];
+char filepath[MAX_FILEPATH];
+
 
 void print_usage(char *cmd)
 {
-	fprintf(stderr, "usage: %s [capabilities|--] file program [arg ...]\n", cmd);
+	fprintf(stderr,
+		"usage: %s [-c capabilities] [-o file] [-f] "
+		"program [arg ...]\n", cmd);
 
 }
 
@@ -50,31 +64,62 @@ void set_capabilities(pid_t pid, char* args)
 	}
 }
 
+void parse_args(int argc, char *argv[])
+{
+	int c;
+
+	while (1){
+		c = getopt(argc, argv, "hfo:c:");
+		if (c == -1)
+			break;
+		switch (c) {
+		case 'c':
+			snprintf(inheritable_capabilities, MAX_LEN_CAP, optarg);
+			break;
+		case 'f':
+			foreground = 1;
+			break;
+		case 'o':
+			snprintf(filepath, MAX_FILEPATH, optarg);
+			break;
+		case 'h':
+			print_usage(argv[0]);
+			exit(EXIT_SUCCESS);
+			break;
+		default:
+			printf("** unknown option\n");
+			print_usage(argv[0]);
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	pid_t pid, sid;
 	FILE* f;
 
-	if (argc < 4) {
+	if (argc < 2) {
 		print_usage(argv[0]);
 		exit(EXIT_FAILURE);
 	}
+	inheritable_capabilities[0]='\0';
+	filepath[0]='\0';
+
+	parse_args(argc, argv);
 
 	/*
 	 * set the right Kerrighed capabilities
 	 */
-	if (strcmp(argv[1], "--") != 0) {
-		char capabilities[256];
+	if (strcmp(inheritable_capabilities, "") != 0) {
+		char capabilities[MAX_LEN_CAP];
 
 		/* quick and dirty... */
 		pid = getpid();
 
-		/* remove pre-existing capabilies */
-		/* set_capabilities(pid, "-d CHANGE_KERRIGHED_CAP");*/
-		/* set_capabilities(pid, "-e CHANGE_KERRIGHED_CAP");*/
-
 		/* setting the new ones */
-		snprintf(capabilities, 256, "-d +%s", argv[1]);
+		snprintf(capabilities, MAX_LEN_CAP, "-d %s",
+			 inheritable_capabilities);
 		set_capabilities(pid, capabilities);
 	}
 
@@ -91,6 +136,13 @@ int main(int argc, char *argv[])
 	case 0:		/* child */
 		break;
 	default:	/* parent */
+		if (foreground) {
+			int exit_status;
+			wait(&exit_status);
+			if (exit_status)
+				exit(EXIT_FAILURE);
+		}
+
 		exit(EXIT_SUCCESS);
 	}
 
@@ -102,15 +154,17 @@ int main(int argc, char *argv[])
 	}
 
 	/* write the session id in the file */
-	f = fopen(argv[2], "w");
-	if (!f) {
-		perror("fopen");
-		exit(EXIT_FAILURE);
+	if (strcmp(filepath, "") != 0) {
+		f = fopen(filepath, "w");
+		if (!f) {
+			perror("fopen");
+			exit(EXIT_FAILURE);
+		}
+		fprintf(f, "%d", sid);
+		fclose(f);
 	}
-	fprintf(f, "%d", sid);
-	fclose(f);
 
-	execvp(argv[3], argv + 3);
+	execvp(argv[optind], argv + optind);
 	perror("execvp");
 	exit(EXIT_FAILURE);
 }

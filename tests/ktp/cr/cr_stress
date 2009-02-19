@@ -174,7 +174,7 @@ cr_stress()
     LTP_print_info \
 	"WARNING: This test will never end unless it crashes"
 
-    runcommand CHECKPOINTABLE,CAN_MIGRATE || return $?
+    runcommand +CHECKPOINTABLE,CAN_MIGRATE || return $?
     running=1
 
     checkpoint_pcus || return $?

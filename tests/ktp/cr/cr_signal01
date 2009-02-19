@@ -42,7 +42,7 @@ cr-signal01()
     TCID="$FUNCNAME"               # Identifier of this testcase.
     TST_COUNT=$[$TST_COUNT+1]      # Test case number.
 
-    runcommand CHECKPOINTABLE 2 || return $?
+    runcommand +CHECKPOINTABLE 2 || return $?
 
     checkpoint_process_w_signal $PID $TESTCMD $SIGTERM || return $?
 
