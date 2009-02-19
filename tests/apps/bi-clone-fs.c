@@ -47,7 +47,6 @@ void parse_args(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	int i, n;
 	pid_t pid;
 
 	parse_args(argc, argv);
@@ -59,18 +58,7 @@ int main(int argc, char *argv[])
 		fclose(stderr);
 	}
 
-	pid = getpid();
-
-	printf ("-- Enter bi (%d) --\n", pid);
-
-	n = 0;
-	for (i = 0; numloops < 0 || i < numloops; i++)
-	{
-		do_one_loop(i, &n);
-		printf("(%d) %d\n", pid, i);
-	}
-
-	printf("-- End of bi (%d) with %d loops --\n", pid, i);
+	do_all_loops(quiet, numloops);
 
 	return 0;
 }

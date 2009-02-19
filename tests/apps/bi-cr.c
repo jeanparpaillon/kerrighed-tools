@@ -11,7 +11,7 @@ int close_stdbuffers = 0;
 void parse_args(int argc, char *argv[])
 {
 	int c;
-    
+
 	while (1){
 		c = getopt(argc, argv, "l:qhc");
 		if (c == -1)
@@ -44,28 +44,15 @@ void parse_args(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	int i, n;
-	
 	parse_args(argc, argv);
 
-	if (!quiet)
-		printf ("-- Enter bi (%d) --\n", getpid());
-	else if (close_stdbuffers) {
+	if (close_stdbuffers) {
 		fclose(stdin);
 		fclose(stdout);
 		fclose(stderr);
 	}
-	
-	n = 0;
-	for (i = 0; numloops < 0 || i < numloops; i++)
-	{
-		do_one_loop(i, &n);
-		if (!quiet)
-			printf("%d\n", i);
-	}
 
-	if (!quiet)
-		printf("-- End of bi (%d) with %d loops --\n", getpid(), i);
+	do_all_loops(quiet, numloops);
 
 	return 0;
 }

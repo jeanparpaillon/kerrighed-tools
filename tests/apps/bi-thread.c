@@ -10,6 +10,7 @@
 #define NB_THREADS 3
 
 int i=0;
+int j=0;
 int numloops = -1 ;
 int quiet = 0;
 int close_stdbuffers = 0;
@@ -50,22 +51,7 @@ void parse_args(int argc, char *argv[])
 
 void * main_loop()
 {
-	int n;
-	pid_t pid, tid;
-
-	pid = getpid();
-	tid = (pid_t)syscall(SYS_gettid);
-
-	printf ("-- Enter bi (%d-%d) --\n", pid, tid);
-
-	n = 0;
-	for (i = 0; numloops < 0 || i < numloops; i++)
-	{
-		do_one_loop(i, &n);
-		printf("(%d-%d) %d\n", pid, tid, i);
-	}
-
-	printf("-- End of bi (%d-%d) with %d loops --\n", pid, tid, i);
+	__do_all_loops(quiet, &j, numloops);
 	return NULL;
 }
 
