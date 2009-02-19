@@ -1,21 +1,21 @@
 ### Makefile.am for kerrighed tests
-### 
-### Copyright 2006-2007 INRIA-IRISA
-###                     Jean Parpaillon <jean.parpaillon@irisa.fr>
 ###
+### Copyright 2006-2007 INRIA, All rights reserved
+###
+### Author:
+###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
+###
+SUBDIRS = include
+
 if ENABLE_APPS
-APPS = apps
+SUBDIRS += apps
 endif
 if ENABLE_PROC
-PROC = proc
+SUBDIRS += proc
 endif
 if ENABLE_KTP
-KTP = ktp
+SUBDIRS += ktp
 endif
 if ENABLE_BENCHMARK
-BENCHMARK = benchmark
+SUBDIRS += benchmark
 endif
-
-TESTS_SUBDIRS = ${APPS} ${PROC} ${KTP}
-
-SUBDIRS = include ${TESTS_SUBDIRS} ${BENCHMARK}
