@@ -12,7 +12,7 @@ dnl autoconf version
 AC_PREREQ(2.59)
 
 dnl mandatory stuff
-AC_INIT([kerrighed-tools], [2.4.0], [kerrighed.users@irisa.fr])
+AC_INIT([kerrighed-tools], [2.5.0], [kerrighed.users@irisa.fr])
 
 dnl Linux versions compatible with Kerrighed
 COMP_LINUX_VERSION=2.6.29
