@@ -78,7 +78,7 @@ static inline unsigned int control_vars()
   printf("%d %d %d %d %d ", numcols, numrows, numloops, verbose, save_matrix) ;
   printf("%d %d %d %d %d %d ", migration, use_ctnr, nr_migrations, next_node, nr_nodes, initial_node) ;
   res = checksum (mat, sizeof (mat)) ;
-  printf("%d mat checksum on size %d\n", res , sizeof(mat)) ;
+  printf("%d mat checksum on size %zd\n", res , sizeof(mat)) ;
   return res ;
 }
 
