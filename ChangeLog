@@ -1,3 +1,8 @@
+Kerrighed version 2.5.0
+   Build changes:
+	* Replace xmlto with xsltproc to build manpages
+
+Kerrighed version 2.4.0
    Features:
    * Remote vfork()
    * New RPC transmission engine that highly increases performance
@@ -34,7 +39,7 @@ Kerrighed version 2.3.0
    * Fix system V FIFO in SMP mode
    * Fix system V SEM in SMP mode
    * Fix craches related to the use of the recvmsg function
-	
+
 Kerrighed version 2.2.1
    Fixes:
    * Fix crash in fcntl64 with recent libc
