@@ -6,8 +6,7 @@
 ### Author:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
-CFLAGS = -Wall -Werror
-LDADD =
+AM_CFLAGS = -Wall -Werror
 
 bin_PROGRAMS = bi bi-cr bi-cr-static bi-file bi-signal bi-double bi-clone-files bi-clone-fs bi-clone-semundo bi-thread setsid-cr ipcshm-tool
 lib_LTLIBRARIES = libbi.la

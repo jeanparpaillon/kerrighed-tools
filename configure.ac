@@ -23,7 +23,7 @@ AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([-Wno-portability])
 # http://sources.redhat.com/automake/automake.html#maintainer_002dmode
 #AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])
