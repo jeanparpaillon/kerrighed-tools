@@ -15,7 +15,7 @@ dnl mandatory stuff
 AC_INIT([kerrighed-tools], [2.4.0], [kerrighed.users@irisa.fr])
 
 dnl Linux versions compatible with Kerrighed
-COMP_LINUX_VERSION=2.6.20
+COMP_LINUX_VERSION=2.6.29
 AC_SUBST([COMP_LINUX_VERSION])
 
 dnl check host and target
@@ -24,7 +24,8 @@ AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE
-AM_MAINTAINER_MODE
+# http://sources.redhat.com/automake/automake.html#maintainer_002dmode
+#AM_MAINTAINER_MODE
 
 dnl Add strictness options to the compiler
 CFLAGS="$CFLAGS -Wall -Werror"
@@ -263,21 +264,7 @@ AC_ARG_ENABLE([tests],
 ###
 ### BEGIN CHECK FOR DOCBOOK TOOLS
 ###
-dnl Just pass it to tools' configure and display this option with --help
-AC_ARG_ENABLE([man],
-	      [AS_HELP_STRING([--disable-man],
-			      [Disable manpages @<:@default=enable@:>@])],
-	      [],
-	      [enable_man=yes])
-if test "x$enable_man" = "xyes"; then
-   AC_CHECK_PROG(DB2MAN, xmlto, xmlto, )
-   if test -z "$DB2MAN"; then
-      AC_MSG_ERROR([
-	*** You need xmlto (or --disable-man)])
-   fi
-fi
-AC_SUBST(DB2MAN)
-AM_CONDITIONAL([ENABLE_MAN], [test -n "$DB2MAN"])
+AC_CHECK_PROG(xsltproc, xsltproc, yes, no)
 ###
 ### END CHECK FOR DOCBOOK TOOLS
 ###
@@ -288,6 +275,7 @@ AC_CONFIG_FILES([patches/Makefile])
 AC_CONFIG_FILES([libs/Makefile libs/include/Makefile libs/libkerrighed/kerrighed.pc libs/libkerrighed/Makefile])
 AC_CONFIG_FILES([tools/Makefile])
 AC_CONFIG_FILES([scripts/Makefile])
+AC_CONFIG_FILES([man/Makefile])
 
 dnl write all stuff
 AC_OUTPUT
@@ -323,15 +311,10 @@ else
   echo "none. Run 'make *config' in kernel source tree"
 fi
 
+echo ""
 echo "    - libkerrighed             : $enable_libkerrighed"
+echo ""
 echo "    - Kerrighed tools          : $enable_tools"
-echo -n "    - Documentation (manpages) : "
-if test -n "$DB2MAN"; then
-   echo "yes"
-else
-   echo "no"
-fi
-
 if test "$enable_service" = "no"; then
    echo "    - Kerrighed service not installed (disabled)"
 else
@@ -348,9 +331,10 @@ else
       echo "      Please install lsb_release"
    fi
 fi
-
+echo ""
+echo "    - Manpages build           : $xsltproc (only needed in maintainer mode)"
+echo ""
 echo "    - Kerrighed tests          : $enable_tests"
-echo "    - Kerrighed manpages       : $enable_man"
 
 echo ""
 echo "********************************************************************"

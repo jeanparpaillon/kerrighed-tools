@@ -82,7 +82,8 @@
   <refsect1>
     <title>See Also</title>
     <para>
-      kerrighed_session (5), krgadm (1)
+      <ulink url="kerrighed_session.5.html" ><command>kerrighed_session</command> (5)</ulink>, 
+      <ulink url="krgadm.1.html" ><command>krgadm</command> (1)</ulink>
     </para>
   </refsect1>
 </refentry>

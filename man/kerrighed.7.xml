@@ -118,7 +118,10 @@
   <refsect1>
     <title>See also</title>
     <para>
-      krg_capabilities (7), migrate (1), krg_capset (1), checkpoint (1)
+      <ulink url="kerrighed_capabilities.7.html" ><command>kerrighed_capabilities</command> (7)</ulink>, 
+      <ulink url="migrate.1.html" ><command>migrate</command> (1)</ulink>, 
+      <ulink url="krgcapset.1.html" ><command>krgcapset</command> (1)</ulink>, 
+      <ulink url="checkpoint.1.html" ><command>checkpoint</command> (1)</ulink>
     </para>
   </refsect1>
 </refentry>

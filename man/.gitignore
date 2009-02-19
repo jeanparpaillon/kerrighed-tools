@@ -1,2 +1,15 @@
 # not using automake
 !Makefile.in
+Makefile.in
+checkpoint.1
+index.html
+kerrighed.7
+kerrighed_capabilities.7
+kerrighed_nodes.5
+krgadm.1
+krgcapset.1
+krgcapset.2
+migrate.1
+migrate.2
+migrate_self.2
+restart.1

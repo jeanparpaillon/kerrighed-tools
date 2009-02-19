@@ -65,8 +65,8 @@
   <refsect1>
     <title>See Also</title>
     <para>
-      <command>checkpoint</command>(1),
-      <command>krgcapset</command>(1)
+      <ulink url="checkpoint.1.xml" ><command>checkpoint</command>(1)</ulink>,
+      <ulink url="krgcapset" ><command>krgcapset</command>(1)</ulink>
     </para>
   </refsect1>
 </refentry>

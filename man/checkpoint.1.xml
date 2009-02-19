@@ -165,11 +165,11 @@
     </para>
   </refsect1>
 
-  <refsect1>
+  <refsect1 id="see_also" >
     <title>See Also</title>
     <para>
-      <command>restart</command>(1),
-      <command>krgcapset</command>(1)
+      <ulink url="restart.1.html" ><command>restart</command>(1)</ulink>,
+      <ulink url="krgcapset.1.html" ><command>krgcapset</command>(1)</ulink>
     </para>
   </refsect1>
 </refentry>

@@ -27,30 +27,29 @@ Table of contents
 
 - automake      : version >= 1.9
 - autoconf      : version >= 2.59
-- Various standard tools: 
+- Various standard tools:
 		libtool, pkg-config, awk (GNU awk is preferred), bzip2, rsync
-- gcc           : 3.3.x is the recommended compiler for Linux Kernel. 
-  		  Kerrighed is reported to build with 4.1 series.
-- linux sources : Kerrighed is available for following versions of Linux:
-  		  - 2.6.20
+- gcc           : see linux 2.6.29 gcc recommendations (<linux>/Documentation/Changes)
+- linux sources : Kerrighed is currently based on linux 2.6.29
 
    Optional features requires the following:
 
 - lsb_release	: to install Kerrighed startup scripts into /etc/init.d
-- xmlto         : a tool to create manpages from docbook
+- xsltproc      : allow to create documentation in various formats (only needed by
+  		  maintainer.
 
-   To compile out of source dir, you need the following tools:
+   to compile out of source dir, you need the following tools:
 - lsdiff
 - lndir
 
 2/ Quick install
 ================
 
-   If you have a compatible Linux source tree in 
-`/lib/modules/`uname -r`/source`, type the following in the base 
-directory of the Kerrighed distribution:
+Type the following in the base directory of the Kerrighed
+distribution:
 
-	  % ./configure
+	  % ./configure --with-kernel=<path_to_kernel_source_tree>
+	  % make -C <path_to_kernel_source_tree> menuconfig
 	  % make kernel
 	  % make
 	  % make kernel-install
@@ -148,37 +147,14 @@ operates.
   --with-kernel-config=PATH
                           Path to a kernel .config file. Sample files are
                           provided in 'samples' directory.
-
-3.5/ Configure libs
-===================
-
-   Following options can be passed to the libs configure script:
-
-  --enable-libkerrighed   Enable libkerrighed [default=enable]
-  --with-kernel=PATH      Path to kernel kernel source
-                          [default=/lib/modules/`uname -r`/source]
-  --with-kerrighed=PATH   Path to Kerrighed module headers
-                          [default=../kerrighed]
-
-3.6/ Configure tools
-====================
-
-   Following options can be passed to the tools configure script:
-
   --disable-service       Do not install kerrighed service [default: enable]
-
-3.7/ Configure tests
-====================
-
-   Following options can be passed to the tests configure script:
-
   --disable-ktp           Disable 'ktp' part [default: enable]
   --disable-apps          Disable 'apps' part [default: enable]
   --disable-proc          Disable 'proc' part [default: enable]
 
   --with-ltp-base	  Path to ltp base dir [default: enable]
 
-3.8/ Build from outside of source tree
+3.5/ Build from outside of source tree
 ======================================
 
    Compilation and installation can be done from outside of source dir.

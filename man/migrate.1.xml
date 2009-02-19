@@ -55,7 +55,7 @@
   <refsect1>
     <title>See Also</title>
     <para>
-      <command>onnode</command>(1), <command>krg_capset</command>(1)
+      <ulink url="krgcapset.1.html" ><command>krgcapset</command>(1)</ulink>
     </para>
   </refsect1>
 </refentry>

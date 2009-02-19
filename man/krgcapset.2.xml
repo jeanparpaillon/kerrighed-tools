@@ -78,7 +78,8 @@
   <refsect1>
     <title>See Also</title>
     <para>
-      <command>krgcapget</command> (1), <command>kerrighed_capabilities</command>(7)
+      <ulink url="krgcapset.1.html" ><command>krgcapget</command> (1)</ulink>, 
+      <ulink url="kerrighed_capabilities.7.html" ><command>kerrighed_capabilities</command>(7)</ulink>
     </para>
   </refsect1>
 </refentry>

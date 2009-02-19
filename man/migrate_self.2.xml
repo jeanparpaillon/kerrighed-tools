@@ -82,7 +82,8 @@
   <refsect1>
     <title>See Also</title>
     <para>
-      <command>migrate</command>(2), <command>krg_capability</command>(7)
+      <ulink url="migrate.2.html" ><command>migrate</command>(2)</ulink>, 
+      <ulink url="kerrighed_capabilities.7.html" ><command>krg_capability</command>(7)</ulink>
     </para>
   </refsect1>
 </refentry>
