@@ -48,6 +48,8 @@ int main(int argc, char *argv[])
 
 	parse_args(argc, argv);
 
+	close_stdioe(close_stdbuffers);
+
 	pid = fork();
 	if (pid == -1) {
 		perror("clone");
@@ -55,12 +57,6 @@ int main(int argc, char *argv[])
 	}
 
 	close_sync_pipe();
-
-	if (close_stdbuffers) {
-		fclose(stdin);
-		fclose(stdout);
-		fclose(stderr);
-	}
 
 	do_all_loops(quiet, numloops);
 

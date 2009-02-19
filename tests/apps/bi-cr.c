@@ -46,11 +46,7 @@ int main(int argc, char *argv[])
 {
 	parse_args(argc, argv);
 
-	if (close_stdbuffers) {
-		fclose(stdin);
-		fclose(stdout);
-		fclose(stderr);
-	}
+	close_stdioe(close_stdbuffers);
 
 	close_sync_pipe();
 

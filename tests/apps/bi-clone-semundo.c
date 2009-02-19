@@ -51,11 +51,7 @@ int main(int argc, char *argv[])
 
 	parse_args(argc, argv);
 
-	if (quiet) {
-		fclose(stdin);
-		fclose(stdout);
-		fclose(stderr);
-	}
+	close_stdioe(close_stdbuffers);
 
 	pid = (pid_t)syscall(SYS_clone, SIGCHLD | CLONE_SYSVSEM, NULL);
 	if (pid == -1) {

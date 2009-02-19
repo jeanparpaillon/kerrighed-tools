@@ -63,11 +63,7 @@ int main(int argc, char *argv[])
 
 	parse_args(argc, argv);
 
-	if (quiet) {
-		fclose(stdin);
-		fclose(stdout);
-		fclose(stderr);
-	}
+	close_stdioe(close_stdbuffers);
 
 	for (i=0; i<NB_THREADS; i++)
 		r[i] = pthread_create(&(thread[i]), NULL, main_loop, NULL);

@@ -56,6 +56,8 @@ int main(int argc, char *argv[])
 
 	parse_args(argc, argv);
 
+	close_stdioe(close_stdbuffers);
+
 	action.sa_handler = signal_handler;
 	sigemptyset (&action.sa_mask);
 	action.sa_flags = 0;
@@ -63,13 +65,6 @@ int main(int argc, char *argv[])
 	if (r) {
 		perror("sigaction");
 		return r;
-	}
-
-
-	if (close_stdbuffers) {
-		fclose(stdin);
-		fclose(stdout);
-		fclose(stderr);
 	}
 
 	close_sync_pipe();

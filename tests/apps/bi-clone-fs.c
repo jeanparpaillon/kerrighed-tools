@@ -51,6 +51,8 @@ int main(int argc, char *argv[])
 
 	parse_args(argc, argv);
 
+	close_stdioe(close_stdbuffers);
+
 	pid = (pid_t)syscall(SYS_clone, SIGCHLD | CLONE_FS, NULL);
 	if (pid == -1) {
 		perror("clone");
@@ -58,12 +60,6 @@ int main(int argc, char *argv[])
 	}
 
 	close_sync_pipe();
-
-	if (quiet) {
-		fclose(stdin);
-		fclose(stdout);
-		fclose(stderr);
-	}
 
 	do_all_loops(quiet, numloops);
 

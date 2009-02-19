@@ -46,3 +46,12 @@ void close_sync_pipe()
 	close(4);
 }
 
+void close_stdioe(int closing)
+{
+	if (closing) {
+		fclose(stdin);
+		fclose(stdout);
+		fclose(stderr);
+	}
+}
+

@@ -51,18 +51,14 @@ int main(int argc, char *argv[])
 
 	parse_args(argc, argv);
 
+	close_stdioe(close_stdbuffers);
+
 	pid = (pid_t)syscall(SYS_clone, SIGCHLD | CLONE_FILES, NULL);
 	if (pid == -1) {
 		perror("clone");
 		exit(EXIT_FAILURE);
 	} else if (pid != 0)
 		close_sync_pipe();
-
-	if (pid == 0 && quiet) {
-		fclose(stdin);
-		fclose(stdout);
-		fclose(stderr);
-	}
 
 	do_all_loops(quiet, numloops);
 
