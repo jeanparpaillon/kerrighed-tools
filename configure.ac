@@ -193,6 +193,7 @@ AC_ARG_ENABLE([capability],
 			      [Disable capability part of libkerrighed @<:@default=enable@:>@])],
 	      [],
 	      [enable_capability=yes])
+AM_CONDITIONAL([ENABLE_CAPABILITY], [test "x$enable_capability" = "xyes"])
 if test "x$enable_capability" = "xyes"; then
    AC_DEFINE([CAPABILITY])
 fi
