@@ -185,6 +185,16 @@ AC_ARG_ENABLE([libkerrighed],
 	      [],
 	      [enable_libkerrighed=yes])
 AM_CONDITIONAL([ENABLE_LIBKERRIGHED], [test "$enable_libkerrighed" = "yes"])
+
+AH_TEMPLATE([CAPABILITY], [Capabilities part of libkerrighed])
+AC_ARG_ENABLE([capability],
+	      [AS_HELP_STRING([--disable-capability],
+			      [Disable capability part of libkerrighed @<:@default=enable@:>@])],
+	      [],
+	      [enable_capability=yes])
+if test "x$enable_capability" = "xyes"; then
+   AC_DEFINE([CAPABILITY])
+fi
 ###
 ### END LIBRARIES CHECK
 ###
@@ -268,6 +278,8 @@ AC_CHECK_PROG(xsltproc, xsltproc, yes, no)
 ###
 ### END CHECK FOR DOCBOOK TOOLS
 ###
+
+AC_CONFIG_HEADERS([config.h])
 
 dnl files to generate with automake
 AC_CONFIG_FILES([Makefile])
