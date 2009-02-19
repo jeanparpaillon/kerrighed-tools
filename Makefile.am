@@ -6,14 +6,21 @@
 # Author:
 #   Jean PARPAILLON <jean.parpaillon@kerlabs.com>
 #
+
+# Handle new form of aclocal.m4
+ACLOCAL_AMFLAGS = -I m4
+
 if ENABLE_SERVICE
 OPTSCRIPTS = scripts
 endif
 if ENABLE_LIBKERRIGHED
 OPTLIBKERRIGHED = libs tools
 endif
+if ENABLE_TESTS
+OPTTESTS = tests
+endif
 
-SUBDIRS =  $(OPTLIBKERRIGHED) $(OPTSCRIPTS) man
+SUBDIRS =  $(OPTLIBKERRIGHED) $(OPTSCRIPTS) man $(OPTTESTS)
 LINUX_SRC = @kernelsrc@
 LINUX_BUILD = @kernelbuild@
 KERNEL_CONFIG = @kernelconfig@

@@ -26,6 +26,7 @@ AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE
 # http://sources.redhat.com/automake/automake.html#maintainer_002dmode
 #AM_MAINTAINER_MODE
+AC_CONFIG_MACRO_DIR([m4])
 
 dnl Add strictness options to the compiler
 CFLAGS="$CFLAGS -Wall -Werror"
@@ -255,18 +256,45 @@ AM_CONDITIONAL([ENABLE_SERVICE], [test "$lsb" = "yes" -a "$distro" = "yes"])
 ###
 ### BEGIN TESTS CHECK
 ###
+AC_ARG_ENABLE([tests],
+ 	      [AS_HELP_STRING([--enable-tests],
+ 			      [Globally enable tests @<:@default=disable@:>@])],
+ 	      [],
+ 	      [enable_tests=no])
+AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" = "xyes"])
+
+AC_ARG_ENABLE([tests-ktp],
+	      [AS_HELP_STRING([--disable-tests-ktp],
+			      [Disable 'ktp' tests @<:@default: enable@:>@])],
+	      [],
+	      [enable_tests_ktp=yes])
+AC_ARG_ENABLE([tests-apps],
+	      [AS_HELP_STRING([--disable-tests-apps],
+			      [Disable 'apps' tests @<:@default: enable@:>@])],
+	      [],
+	      [enable_tests_apps=yes])
+AC_ARG_ENABLE([tests-proc],
+	      [AS_HELP_STRING([--disable-tests-proc],
+			      [Disable 'proc' tests @<:@default: enable@:>@])],
+	      [],
+	      [enable_tests_proc=yes])
+AC_ARG_ENABLE([tests-benchmark],
+	      [AS_HELP_STRING([--disable-tests-benchmark],
+			      [Disable 'benchmark' tests @<:@default: enable@:>@])],
+	      [],
+	      [enable_tests_benchmark=yes])
+
+AM_CONDITIONAL([ENABLE_KTP], [test "$enable_tests_ktp" = "yes" -a "x$enable_tests" = "xyes"])
+AM_CONDITIONAL([ENABLE_APPS], [test "$enable_tests_apps" = "yes" -a "x$enable_tests" = "xyes"])
+AM_CONDITIONAL([ENABLE_PROC], [test "$enable_tests_proc" = "yes" -a "x$enable_tests" = "xyes"])
+AM_CONDITIONAL([ENABLE_BENCHMARK], [test "$enable_tests_benchmark" = "yes" -a "x$enable_tests" = "xyes"])
+
 AC_ARG_WITH([ltp-base],
 	    [AS_HELP_STRING([--with-ltp-base=PATH],
 			    [Path to ltp base dir @<:@default=/usr/lib/debian-test/tests/linux@:>@])],
 	    [ltpbase="$withval"],
 	    [ltpbase="/usr/lib/debian-test/tests/linux"])
 AC_SUBST([ltpbase])
-
-AC_ARG_ENABLE([tests],
- 	      [AS_HELP_STRING([--enable-tests],
- 			      [Enable tests @<:@default=disable@:>@])],
- 	      [],
- 	      [enable_tests=no])
 ###
 ### END TESTS CHECK
 ###
@@ -288,6 +316,9 @@ AC_CONFIG_FILES([libs/Makefile libs/include/Makefile libs/libkerrighed/kerrighed
 AC_CONFIG_FILES([tools/Makefile])
 AC_CONFIG_FILES([scripts/Makefile])
 AC_CONFIG_FILES([man/Makefile])
+AC_CONFIG_FILES([tests/Makefile tests/include/Makefile tests/apps/Makefile tests/proc/Makefile])
+AC_CONFIG_FILES([tests/ktp/Makefile tests/ktp/cr/Makefile tests/benchmark/Makefile])
+AC_CONFIG_FILES([tests/ktp/krgltp-smp.sh])
 
 dnl write all stuff
 AC_OUTPUT
@@ -347,6 +378,12 @@ echo ""
 echo "    - Manpages build           : $xsltproc (only needed in maintainer mode)"
 echo ""
 echo "    - Kerrighed tests          : $enable_tests"
+if test "x$enable_tests" = "xyes"; then
+echo "    - Kerrighed apps tests     : $enable_tests_apps"
+echo "    - Kerrighed proc tests     : $enable_tests_proc"
+echo "    - Kerrighed ktp tests      : $enable_tests_ktp"
+echo "    - Kerrighed benchmark tests: $enable_tests_benchmark"
+fi
 
 echo ""
 echo "********************************************************************"
