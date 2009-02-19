@@ -39,8 +39,8 @@ if test -f $(dirname $0)/configure.ac; then
     (
 	cd $(dirname $0)
 	echo "Regenerating autoconf/libtoolize files"
-	libtoolize -c
 	$ACLOCAL
+	libtoolize -c
 	autoheader
 	$AUTOMAKE --add-missing --foreign
 	autoconf
