@@ -51,131 +51,15 @@ if test -z "$BZIP2"; then
    AC_MSG_ERROR([
       	*** You need bzip2 tool])
 fi
-AC_CHECK_PROG(PKGCONFIG, pkg-config, pkg-config, )
-if test -z "$PKGCONFIG"; then
-   AC_MSG_ERROR([
-        *** You need pkg-config tool])
-fi
 AC_CHECK_PROG(RSYNC, rsync, rsync, )
 if test -z "$RSYNC"; then
    AC_MSG_ERROR([
         *** You need rsync tool])
 fi
-AC_CHECK_PROG(LNDIR, lndir, lndir, )
-if test -z "$LNDIR" -a "$srcdir" != "$builddir"; then
-   AC_MSG_ERROR([
-        *** You need lndir tool to compile out of source tree])
-fi
-AC_CHECK_PROG(LSDIFF, lsdiff, lsdiff, )
-if test -z "$LSDIFF" -a "$srcdir" != "$builddir"; then
-   AC_MSG_ERROR([
-        *** You need lsdiff tool to compile out of source tree])
-fi
 
 ### DEPRECATED: to be removed when Kerrighed modules are in kernel source tree
 kerrighed_module=$(cd $srcdir/modules && pwd)
 AC_SUBST([kerrighed_module])
-
-
-###
-### BEGIN LINUX SOURCE PATH CHECK
-###
-AC_ARG_ENABLE([linux-check],
-	      [AS_HELP_STRING([--disable-linux-check],
-	      		      [Check for the Linux sources to be compatible with Kerrighed (!!! disable at your own risk !!!) @<:@default=enable@:>@])],
-	      [],
-	      [enable_linux_check=yes])
-AC_SUBST([enable_linux_check])
-
-AC_ARG_WITH([kernel],
-	    [AS_HELP_STRING([--with-kernel=PATH],
-	      		    [Path to kernel source !!!MANDATORY])],
-            [kernelsrc="$withval"],
-	    [])
-if test -z "$kernelsrc"; then
-   AC_MSG_ERROR([
-   *** Please specify the location of the kernel source tree with
-   *** the '--with-kernel=SRCDIR' option])
-fi
-kernelsrc=$(cd $kernelsrc; pwd)
-AC_SUBST([kernelsrc])
-
-if test "$srcdir" = "$builddir"; then
-   kernelbuild="$kernelsrc"
-else
-   kernelbuild="$builddir/kernel-build"
-fi
-AC_SUBST([kernelbuild])
-
-dnl check paths are valid
-AC_MSG_CHECKING([kernel source directory])
-if test -z "$kernelsrc" -o -z "$kernelbuild"; then
-   AC_MSG_RESULT([Not found])
-   AC_MSG_ERROR([
-   	*** Please specify the location of the kernel source with
-	*** the '--with-kernel=SRCDIR' option])
-else
-  AC_MSG_RESULT([$kernelsrc])
-  AC_MSG_CHECKING([kernel build directory])
-  AC_MSG_RESULT([$kernelbuild])
-fi
-
-dnl check Linux version
-AC_MSG_CHECKING([kernel source version])
-linux_makefile="$kernelsrc/Makefile"
-if test -d "$kernelsrc/include/linux"; then
-
-   # Get Linux version
-   LINUX_VERSION=`"$srcdir/linux_version.sh" $linux_makefile V.P.S`
-   LINUX_EXTRAVERSION=`"$srcdir/linux_version.sh" $linux_makefile E`
-
-   if test -d "$kernelsrc/include/kerrighed"; then
-      # Sources have already been patched
-      kernel_patched="yes"
-      patched=" (already patched)"
-   else
-      kernel_patched="no"
-      # check version if not disabled
-      good_version=true
-      if test "x$enable_linux_check" = "xyes"; then
-	 if test "$COMP_LINUX_VERSION" != "$LINUX_VERSION$LINUX_EXTRAVERSION"; then
-	    good_version=false
-	 fi
-      fi
-   fi
-   AC_MSG_RESULT([$LINUX_VERSION$LINUX_EXTRAVERSION$patched])
-   if test "$good_version" = "false"; then
-      AC_MSG_ERROR([
-*** 
-*** This Linux version is not compatible with Kerrighed
-*** Compatible versions: $COMP_LINUX_VERSIONS
-*** 
-*** You can override this with --disable-linux-check (!!! do it at your own risk !!!)
-***])
-   fi
-else
-   if test "$enable_linux_check" = "yes"; then
-      AC_MSG_ERROR([*** $kernelsrc does not contain kernel sources])
-   fi
-fi
-###
-### END LINUX SOURCE PATH CHECK
-###
-
-###
-### BEGIN LINUX CONFIG OPTION
-###
-AC_ARG_WITH([kernel-config],
-	    [AS_HELP_STRING([--with-kernel-config=PATH],
-			    [Path to a kernel .config file. Sample files are provided in 'samples' directory. Implies --disable-kernel-defconfig @<:@default=none@:>@])],
-	    [kernelconfig="$withval"])
-if test -n "$kernelconfig"; then
-  kernelconfig=`(cd \`dirname $kernelconfig\`; pwd)`/`basename $kernelconfig`
-fi
-AC_SUBST([kernelconfig])
-###
-### END LINUX CONFIG
-###
 
 ###
 ### BEGIN LIBRARIES CHECK
@@ -343,18 +227,6 @@ echo "    - Sources dir              : $srcdir"
 if test "$srcdir" != "$builddir"; then
    echo "    - Build dir                : $builddir"
 fi
-echo "    - Kernel source dir        : $kernelsrc"
-if test "$kernelsrc" != "$kernelbuild"; then
-   echo "    - Kernel build dir         : $kernelbuild"
-fi
-echo "    - Kernel version           : $LINUX_VERSION$LINUX_EXTRAVERSION$patched"
-echo -n "    - Kernel configuration     : "
-if test -n "$kernelconfig"; then
-  echo "$kernelconfig"
-else
-  echo "none. Run 'make *config' in kernel source tree"
-fi
-
 echo ""
 echo "    - libkerrighed             : $enable_libkerrighed"
 echo ""
@@ -391,17 +263,7 @@ echo "********************************************************************"
 echo ""
 echo " To build the system:"
 
-if test "x$kernel_patched" = "xno"; then
-   echo " - run 'make patch' to patch the kernel sources"
-fi
-
-echo " - run 'make defconfig' to create a default configuration for the kernel"
-echo " - configure the kernel for your needs by running one of 'make *config' in the kernel source tree"
-echo " - run 'make kernel' to build your kernel"
-echo ""
 echo " - run 'make' to build tools, libs, tests and so on"
-echo ""
-echo " - as root, run 'make kernel-install'"
 echo " - as root, run 'make install'"
 echo ""
 echo "********************************************************************"

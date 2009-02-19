@@ -14,11 +14,8 @@ Table of contents
 3.1/ Generic configure options
 3.2/ Installation Names
 3.3/ Operation Controls
-3.4/ Configure the whole distribution
-3.5/ Configure libs
-3.6/ Configure tools
-3.7/ Configure tests
-3.8/ Build from outside of source dir
+3.4/ Specific configure options
+3.5/ Build from outside of source dir
 
 1/ Pre-requisites
 =================
@@ -48,11 +45,8 @@ Table of contents
 Type the following in the base directory of the Kerrighed
 distribution:
 
-	  % ./configure --with-kernel=<path_to_kernel_source_tree>
-	  % make -C <path_to_kernel_source_tree> menuconfig
-	  % make kernel
+	  % ./configure
 	  % make
-	  % make kernel-install
 	  % make install
 
 3/ Detailed configuration
@@ -125,7 +119,7 @@ operates.
      Print the version of Autoconf used to generate the `configure'
      script, and exit.
 
-3.4/ Configure the whole distribution
+3.4/ Specific configure options
 =====================================
 
    Following options can be passed to the toplevel configure script:
