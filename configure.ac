@@ -42,24 +42,16 @@ AC_PROG_LN_S
 AC_PROG_INSTALL
 AC_HEADER_STDC
 
-AC_CHECK_PROG(bzip2, bzip2, yes, no)
-if test -z "$bzip2"; then
-   AC_MSG_ERROR([
-      	*** You need bzip2 tool])
-fi
-AC_CHECK_PROG(patch, patch, yes, no)
-if test -z "$patch"; then
-   AC_MSG_ERROR([
-        *** You need patch tool])
-fi
-AC_CHECK_PROG(wget, wget, yes, no)
-if test -z "$wget"; then
-   AC_MSG_ERROR([
-        *** You need wget tool])
-fi
 ###
 ### BEGIN KERNEL OPTIONS
 ###
+AC_ARG_ENABLE([kernel],
+	      [AS_HELP_STRING([--disable-kernel],
+			      [Disable kernel preparation (fetch linux sources and apply Kerrighed patch) @<:@default=enable@:>@])],
+	      [],
+	      [enable_kernel=yes])
+AM_CONDITIONAL([ENABLE_KERNEL], [test "$enable_kernel" = "yes"])
+
 dnl Linux vanilla version on which is based Kerrighed
 vanilla_linux_version=2.6.29-rc4
 AC_SUBST([vanilla_linux_version])
@@ -70,6 +62,24 @@ AC_ARG_WITH([kernel-mirror],
 	    [],
 	    [kernel_mirror="ftp.eu.kernel.org"])
 AC_SUBST([kernel_mirror])
+
+if test "x$enable_kernel" = "xyes"; then
+   AC_CHECK_PROG(bzip2, bzip2, yes, no)
+   if test -z "$bzip2"; then
+      AC_MSG_ERROR([
+            	*** You need bzip2 tool])
+   fi
+   AC_CHECK_PROG(patch, patch, yes, no)
+   if test -z "$patch"; then
+      AC_MSG_ERROR([
+              *** You need patch tool])
+   fi
+   AC_CHECK_PROG(wget, wget, yes, no)
+   if test -z "$wget"; then
+      AC_MSG_ERROR([
+              *** You need wget tool])
+   fi
+fi
 ###
 ### END KERNEL OPTIONS
 ###
@@ -234,6 +244,8 @@ if test "$srcdir" != "$builddir"; then
    echo "    - Build dir                : $builddir"
 fi
 echo ""
+echo "    - Kernel preparation       : $enable_kernel"
+echo ""
 echo "    - libkerrighed             : $enable_libkerrighed"
 echo ""
 echo "    - Kerrighed tools          : $enable_tools"
@@ -272,7 +284,9 @@ echo " To build the tools:"
 echo " - run 'make' to build tools, libs, tests and so on"
 echo " - as root, run 'make install'"
 echo ""
+if test "$enable_kernel" = "yes"; then
 echo " To build the Kerrighed kernel, cd into kernel/linux-$vanilla_linux_version"
 echo " and build a Linux kernel as usual."
 echo ""
+fi
 echo "********************************************************************"

@@ -19,8 +19,11 @@ endif
 if ENABLE_TESTS
 OPTTESTS = tests
 endif
+if ENABLE_KERNEL
+OPTKERNEL = kernel
+endif
 
-SUBDIRS =  $(OPTLIBKERRIGHED) $(OPTSCRIPTS) man $(OPTTESTS) kernel
+SUBDIRS =  $(OPTLIBKERRIGHED) $(OPTSCRIPTS) man $(OPTTESTS) $(OPTKERNEL)
 EXTRA_DIST = README INSTALL NEWS ChangeLog
 
 install-data-hook: print_notice
