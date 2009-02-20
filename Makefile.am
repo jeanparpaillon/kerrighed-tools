@@ -20,8 +20,8 @@ if ENABLE_TESTS
 OPTTESTS = tests
 endif
 
-SUBDIRS =  $(OPTLIBKERRIGHED) $(OPTSCRIPTS) man $(OPTTESTS)
-EXTRA_DIST = README INSTALL
+SUBDIRS =  $(OPTLIBKERRIGHED) $(OPTSCRIPTS) man $(OPTTESTS) kernel
+EXTRA_DIST = README INSTALL NEWS ChangeLog
 
 install-data-hook: print_notice
 
@@ -34,5 +34,3 @@ print_notice:
 	@echo -e "***   \033[34mhttp://kerrighed.org/php/clusterslist.php\033[0m"
 	@echo -e "***"
 	@echo -e "****************************************************************"
-
-.PHONY: kernel kernel_install kernel-install kernel_config kernel-config patch dist-patch

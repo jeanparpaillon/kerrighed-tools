@@ -24,20 +24,20 @@ Table of contents
 
 - automake      : version >= 1.9
 - autoconf      : version >= 2.59
-- Various standard tools:
-		libtool, pkg-config, awk (GNU awk is preferred), bzip2, rsync
 - gcc           : see linux 2.6.29 gcc recommendations (<linux>/Documentation/Changes)
-- linux sources : Kerrighed is currently based on linux 2.6.29
+- Various tools :
+  - libtool
+  - pkg-config
+  - awk (GNU awk is preferred)
+  - bzip2
+  - patch
+  - wget
 
    Optional features requires the following:
 
 - lsb_release	: to install Kerrighed startup scripts into /etc/init.d
 - xsltproc      : allow to create documentation in various formats (only needed by
   		  maintainer.
-
-   to compile out of source dir, you need the following tools:
-- lsdiff
-- lndir
 
 2/ Quick install
 ================

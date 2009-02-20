@@ -12,11 +12,7 @@ dnl autoconf version
 AC_PREREQ(2.59)
 
 dnl mandatory stuff
-AC_INIT([kerrighed-tools], [2.5.0], [kerrighed.users@irisa.fr])
-
-dnl Linux versions compatible with Kerrighed
-COMP_LINUX_VERSION=2.6.29
-AC_SUBST([COMP_LINUX_VERSION])
+AC_INIT([kerrighed], [2.5.0], [kerrighed.users@irisa.fr])
 
 dnl check host and target
 AC_CANONICAL_BUILD
@@ -46,16 +42,38 @@ AC_PROG_LN_S
 AC_PROG_INSTALL
 AC_HEADER_STDC
 
-AC_CHECK_PROG(BZIP2, bzip2, bzip2, )
-if test -z "$BZIP2"; then
+AC_CHECK_PROG(bzip2, bzip2, yes, no)
+if test -z "$bzip2"; then
    AC_MSG_ERROR([
       	*** You need bzip2 tool])
 fi
-AC_CHECK_PROG(RSYNC, rsync, rsync, )
-if test -z "$RSYNC"; then
+AC_CHECK_PROG(patch, patch, yes, no)
+if test -z "$patch"; then
    AC_MSG_ERROR([
-        *** You need rsync tool])
+        *** You need patch tool])
 fi
+AC_CHECK_PROG(wget, wget, yes, no)
+if test -z "$wget"; then
+   AC_MSG_ERROR([
+        *** You need wget tool])
+fi
+###
+### BEGIN KERNEL OPTIONS
+###
+dnl Linux vanilla version on which is based Kerrighed
+vanilla_linux_version=2.6.29-rc4
+AC_SUBST([vanilla_linux_version])
+
+AC_ARG_WITH([kernel-mirror],
+	    [AS_HELP_STRING([--with-kernel-mirror],
+			    [kernel.org mirror used to get vanilla kernel @<:@default=ftp.eu.kernel.org@:>@])],
+	    [],
+	    [kernel_mirror="ftp.eu.kernel.org"])
+AC_SUBST([kernel_mirror])
+###
+### END KERNEL OPTIONS
+###
+
 ###
 ### BEGIN LIBRARIES CHECK
 ###
@@ -191,7 +209,7 @@ AC_CONFIG_HEADERS([config.h])
 
 dnl files to generate with automake
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([patches/Makefile])
+AC_CONFIG_FILES([kernel/Makefile])
 AC_CONFIG_FILES([libs/Makefile libs/include/Makefile libs/libkerrighed/kerrighed.pc libs/libkerrighed/Makefile])
 AC_CONFIG_FILES([tools/Makefile])
 AC_CONFIG_FILES([scripts/Makefile])
@@ -249,9 +267,12 @@ fi
 echo ""
 echo "********************************************************************"
 echo ""
-echo " To build the system:"
+echo " To build the tools:"
 
 echo " - run 'make' to build tools, libs, tests and so on"
 echo " - as root, run 'make install'"
+echo ""
+echo " To build the Kerrighed kernel, cd into kernel/linux-$vanilla_linux_version"
+echo " and build a Linux kernel as usual."
 echo ""
 echo "********************************************************************"
