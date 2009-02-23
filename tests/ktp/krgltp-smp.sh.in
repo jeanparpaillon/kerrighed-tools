@@ -154,8 +154,8 @@ function usage(){
 	echo "usage: $name [-t] [-n <nr_loops>] [-p <nr_process>]]"
 	echo "           Run all tests <nr_loops> times (default $nr_run), each test being run with <nr_process> concurrent instances (default $nr_ps)."
 	echo
-	echo "       $name -s <testname>"
-	echo "           Run test <testname>"
+	echo "       $name [-n <nr_loops>] -s <testname>"
+	echo "           Run test <testname> (<nr_loops> times, default is 1)"
 	echo
 	echo "       $name -b <testname>"
 	echo "           Run test <testname> in an infinite loop"
@@ -1392,7 +1392,9 @@ export KTP_NR_PS=$nr_ps
 # Check if we just want a single test
 if [ ! -z "$onetest" ]; then
 	if [ -z "$infiniteloop" ]; then
-		r $onetest $@
+		for i in $(seq 1 $nr_run); do
+			r $onetest $@
+		done
 		exit 0
 	else
 		while /bin/true; do
