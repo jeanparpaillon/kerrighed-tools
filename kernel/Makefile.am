@@ -1,5 +1,5 @@
 # =============================================
-#            KERNEL PATCH MAKEFILE
+# Create a patched kernel source tree
 #
 # Copyright 2006 INRIA-IRISA
 # Copyright 2009 Kerlabs
@@ -26,7 +26,7 @@ patched_dir = $(vanilla_dir)-krg
 
 EXTRA_DIST = $(krgpatch)
 
-all: $(patched_dir)
+all-local: $(patched_dir)
 
 $(patched_dir): $(vanilla_archive) $(krgpatch)
 	bzcat $< | tar xf -
