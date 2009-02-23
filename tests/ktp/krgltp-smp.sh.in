@@ -15,6 +15,23 @@ PATH=${PATH}:@ltpbase@/tools:$BASETEST
 ###############################
 
 
+# Check for possible prerequisites
+function check_environment(){
+	# creat08
+	if ! grep -qs ^nobody: /etc/group ; then
+		echo 'Unable to find "nobody" in /etc/group.'
+		echo 'Needed for at least: creat08'
+		exit 1
+	fi
+
+	# getdtablesize01
+	if [ ! -f /etc/hosts ]; then
+		echo 'Unable to find the /etc/hosts file.'
+		echo 'Needed for at least: getdtablesize01'
+		exit 1
+	fi
+}
+
 # Tell which loop of all tests is currently running
 function print_progress(){
 	local run_nr
@@ -1300,6 +1317,7 @@ cleanup_dirs
 # Run all the tests and display a report
 # run_tests <nr_run>
 function run_tests(){
+	check_environment
 	time main $1
 
 	let total=nbpassed+nbfailed+nbcrash
