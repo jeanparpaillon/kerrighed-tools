@@ -23,8 +23,7 @@ man_sources = $(patsubst %,%.xml,$(man_MANS))
 
 EXTRA_DIST=$(man_MANS) $(man_sources) manual-man.xsl manual-xhtml.xsl
 CLEANFILES = $(html_MANS)
-
-all: $(man_MANS)
+MAINTAINERCLEANFILES = $(man_MANS)
 
 html: $(html_MANS)
 
@@ -33,8 +32,5 @@ $(man_MANS): %: %.xml manual-man.xsl
 
 $(html_MANS): %.html: %.xml manual-xhtml.xsl
 	xsltproc --nonet --output $@ manual-xhtml.xsl $<
-
-maintainer-clean:
-	rm -f $(man_MANS)
 
 .PHONY: html
