@@ -1393,11 +1393,17 @@ export KTP_NR_PS=$nr_ps
 if [ ! -z "$onetest" ]; then
 	if [ -z "$infiniteloop" ]; then
 		for i in $(seq 1 $nr_run); do
+			echo
+			echo "[ITERATION $i/$nr_run starts...]"
 			r $onetest $@
 		done
 		exit 0
 	else
+		i=0
 		while /bin/true; do
+			i=$((i+1))
+			echo
+			echo "[ITERATION $i/infinity starts...]"
 			r $onetest $@
 		done
 	fi
