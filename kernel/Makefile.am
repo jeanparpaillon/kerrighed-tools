@@ -14,9 +14,8 @@ krgpatch = $(srcdir)/kerrighed.patch
 orig_version = @vanilla_linux_version@
 kernel_mirror = @kernel_mirror@
 
-#repos = git://mirrors.git.kernel.org/cluster/kerrighed/kernel
-#repos = git://git-externe.kerlabs.com/kerrighed-kernel.git
-repos = ssh://git.kerlabs.com/git/interne/kerrighed-kernel.git
+#KERRIGHED_REPOS ?= git://mirrors.git.kernel.org/cluster/kerrighed/kernel
+KERRIGHED_REPOS ?= git://git-externe.kerlabs.com/kerrighed-kernel.git
 orig_tag = v$(orig_version)
 
 vanilla_dir = linux-$(orig_version)
@@ -41,7 +40,7 @@ linux-$(orig_version).tar.bz2:
 	fi
 
 $(krgpatch):
-	git clone --bare --no-checkout $(repos) kernel.git
+	git clone --bare --no-checkout $(KERRIGHED_REPOS) kernel.git
 	cd kernel.git && git diff $(orig_tag).. > $(krgpatch)
 
 maintainer-clean-local:
@@ -53,5 +52,3 @@ maintainer-clean-local:
 
 clean-local:
 	-rm -rf kernel.git
-
-.PHONY:
