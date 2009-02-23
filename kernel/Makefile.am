@@ -43,6 +43,21 @@ $(krgpatch):
 	git clone --bare --no-checkout $(KERRIGHED_REPOS) kernel.git
 	cd kernel.git && git diff $(orig_tag).. > $(krgpatch)
 
+kernel: $(patched_dir)
+	@if [ ! -e $</.config ]; then \
+	  echo "***"; \
+	  echo "*** Kernel sources are not configured. "; \
+	  echo "***"; \
+	  exit 1; \
+	fi
+	$(MAKE) -C $< bzImage
+	$(MAKE) -C $< modules
+
+kernel-install: $(patched_dir)
+	test -z "$(DESTDIR)" || mkdir -p $(DESTDIR)/boot
+	$(MAKE) -C $< install INSTALL_PATH=$(DESTDIR)/boot
+	$(MAKE) -C $< modules_install INSTALL_MOD_PATH=$(DESTDIR)
+
 maintainer-clean-local:
 	rm -f $(krgpatch)
 	rm -rf $(patched_dir)

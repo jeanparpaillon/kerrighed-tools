@@ -26,6 +26,9 @@ endif
 SUBDIRS =  $(OPTLIBKERRIGHED) $(OPTSCRIPTS) man $(OPTTESTS) $(OPTKERNEL)
 EXTRA_DIST = README INSTALL NEWS ChangeLog
 
+kernel kernel-install: %:
+	$(MAKE) -C kernel $@
+
 install-data-hook: print_notice
 
 print_notice:
@@ -37,3 +40,5 @@ print_notice:
 	@echo -e "***   \033[34mhttp://kerrighed.org/php/clusterslist.php\033[0m"
 	@echo -e "***"
 	@echo -e "****************************************************************"
+
+.PHONY: kernel
