@@ -46,10 +46,10 @@ AC_HEADER_STDC
 ### BEGIN KERNEL OPTIONS
 ###
 AC_ARG_ENABLE([kernel],
-	      [AS_HELP_STRING([--disable-kernel],
-			      [Disable kernel preparation (fetch linux sources and apply Kerrighed patch) @<:@default=enable@:>@])],
-	      [],
-	      [enable_kernel=yes])
+             [AS_HELP_STRING([--disable-kernel],
+                             [Disable kernel preparation (fetch linux sources and apply Kerrighed patch) @<:@default=enable@:>@])],
+             [],
+             [enable_kernel=yes])
 AM_CONDITIONAL([ENABLE_KERNEL], [test "$enable_kernel" = "yes"])
 
 dnl Linux vanilla version on which is based Kerrighed
@@ -225,7 +225,7 @@ AC_CONFIG_HEADERS([config.h])
 
 dnl files to generate with automake
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([kernel/Makefile])
+AC_CONFIG_FILES([patches/Makefile])
 AC_CONFIG_FILES([libs/Makefile libs/include/Makefile libs/libkerrighed/kerrighed.pc libs/libkerrighed/Makefile])
 AC_CONFIG_FILES([tools/Makefile])
 AC_CONFIG_FILES([scripts/Makefile])
@@ -291,7 +291,7 @@ echo " - run 'make' to build tools, libs, tests and so on"
 echo " - as root, run 'make install'"
 echo ""
 if test "$enable_kernel" = "yes"; then
-echo " To build the Kerrighed kernel, cd into kernel/linux-$vanilla_linux_version"
+echo " To build the Kerrighed kernel, cd into kernel/"
 echo " and build a Linux kernel as usual."
 echo ""
 fi

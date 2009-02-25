@@ -22,13 +22,14 @@ orig_tag = v$(orig_version)
 vanilla_dir = linux-$(orig_version)
 vanilla_archive = $(vanilla_dir).tar.bz2
 vanilla_url = http://$(kernel_mirror)/pub/linux/kernel/v2.6$(if $(findstring rc,$(orig_version)),/testing)/$(vanilla_archive)
-patched_dir = $(vanilla_dir)-krg
+patched_dir = $(top_srcdir)/kernel
 
 EXTRA_DIST = $(krgpatch)
 
-all-local: $(patched_dir)
+kernel-prepare: $(patched_dir)
 
-$(patched_dir): $(vanilla_archive) $(krgpatch)
+$(patched_dir):
+	$(MAKE) $(vanilla_archive) $(krgpatch)
 	bzcat $< | tar xf -
 	cd $(vanilla_dir) && patch -p1 < $(krgpatch)
 	mv $(vanilla_dir) $(patched_dir)
@@ -44,9 +45,9 @@ $(krgpatch):
 	git clone --bare --no-checkout $(KERRIGHED_REPOS) kernel.git
 	cd kernel.git && git diff $(orig_tag).. > $(krgpatch)
 
-kernel: kernel-config
-	$(MAKE) -C $< bzImage
-	$(MAKE) -C $< modules
+kernel:
+	$(MAKE) -C $(patched_dir) bzImage
+	$(MAKE) -C $(patched_dir) modules
 
 kernel-config: $(patched_dir)/.config
 
@@ -74,4 +75,4 @@ maintainer-clean-local:
 clean-local:
 	-rm -rf kernel.git
 
-.PHONY: kernel kernel-config kernel-install
+.PHONY: kernel kernel-prepare kernel-config kernel-install

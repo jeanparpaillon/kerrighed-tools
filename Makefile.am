@@ -20,14 +20,18 @@ if ENABLE_TESTS
 OPTTESTS = tests
 endif
 if ENABLE_KERNEL
-OPTKERNEL = kernel
+OPTKERNEL = patches
 endif
 
 SUBDIRS =  $(OPTLIBKERRIGHED) $(OPTSCRIPTS) man $(OPTTESTS) $(OPTKERNEL)
 EXTRA_DIST = README INSTALL NEWS ChangeLog
 
-kernel kernel-install kernel-config: %:
-	$(MAKE) -C kernel $@
+if ENABLE_KERNEL
+all-local: kernel-prepare
+endif
+
+kernel kernel-prepare kernel-config kernel-install: %:
+	$(MAKE) -C patches $@
 
 install-data-hook: print_notice
 
@@ -41,4 +45,4 @@ print_notice:
 	@echo -e "***"
 	@echo -e "****************************************************************"
 
-.PHONY: kernel
+.PHONY: kernel kernel-prepare kernel-install kernel-config print_notice
