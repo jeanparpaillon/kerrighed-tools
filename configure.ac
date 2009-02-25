@@ -63,6 +63,12 @@ AC_ARG_WITH([kernel-mirror],
 	    [kernel_mirror="ftp.eu.kernel.org"])
 AC_SUBST([kernel_mirror])
 
+AC_ARG_WITH([kernel-config],
+	    [AS_HELP_STRING([--with-kernel-config],
+			    [.config file for kernel building @<:@default=none, use make *config@:>@])],
+	    [kernel_config="$withval"])
+AC_SUBST([kernel_config])
+
 if test "x$enable_kernel" = "xyes"; then
    AC_CHECK_PROG(bzip2, bzip2, yes, no)
    if test -z "$bzip2"; then

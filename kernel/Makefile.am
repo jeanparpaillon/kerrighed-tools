@@ -13,6 +13,7 @@
 krgpatch = $(srcdir)/kerrighed.patch
 orig_version = @vanilla_linux_version@
 kernel_mirror = @kernel_mirror@
+kernel_config = @kernel_config@
 
 #KERRIGHED_REPOS ?= git://mirrors.git.kernel.org/cluster/kerrighed/kernel
 KERRIGHED_REPOS ?= git://git-externe.kerlabs.com/kerrighed-kernel.git
@@ -43,17 +44,22 @@ $(krgpatch):
 	git clone --bare --no-checkout $(KERRIGHED_REPOS) kernel.git
 	cd kernel.git && git diff $(orig_tag).. > $(krgpatch)
 
-kernel: $(patched_dir)
-	@if [ ! -e $</.config ]; then \
-	  echo "***"; \
-	  echo "*** Kernel sources are not configured. "; \
-	  echo "***"; \
-	  exit 1; \
-	fi
+kernel: kernel-config
 	$(MAKE) -C $< bzImage
 	$(MAKE) -C $< modules
 
-kernel-install: $(patched_dir)
+kernel-config: $(patched_dir)/.config
+
+$(patched_dir)/.config: $(patched_dir) $(kernel_config)
+	@if [  -z "$(kernel_config)"  ]; then \
+	  echo "***"; \
+	  echo "*** Kernel sources are not configured and no --with-kernel-config option given. Aborting. "; \
+	  echo "***"; \
+	  exit 1; \
+	fi
+	cp $< $@
+
+kernel-install: kernel
 	test -z "$(DESTDIR)" || mkdir -p $(DESTDIR)/boot
 	$(MAKE) -C $< install INSTALL_PATH=$(DESTDIR)/boot
 	$(MAKE) -C $< modules_install INSTALL_MOD_PATH=$(DESTDIR)
@@ -67,3 +73,5 @@ maintainer-clean-local:
 
 clean-local:
 	-rm -rf kernel.git
+
+.PHONY: kernel kernel-config kernel-install

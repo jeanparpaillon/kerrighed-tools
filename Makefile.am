@@ -26,7 +26,7 @@ endif
 SUBDIRS =  $(OPTLIBKERRIGHED) $(OPTSCRIPTS) man $(OPTTESTS) $(OPTKERNEL)
 EXTRA_DIST = README INSTALL NEWS ChangeLog
 
-kernel kernel-install: %:
+kernel kernel-install kernel-config: %:
 	$(MAKE) -C kernel $@
 
 install-data-hook: print_notice
