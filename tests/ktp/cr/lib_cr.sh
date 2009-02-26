@@ -577,6 +577,7 @@ runcommand()
     local r=0
     local krg_cap=$1 # Kerrighed capabilities needed for the processes
     local nb_processes=$2 #number of awaited processes
+    local nosync=$3
 
     if [ "$krg_cap" = "" ]; then
 	echo "runcommand(): No Kerrighed capabilities given, if you really want \
@@ -594,7 +595,12 @@ to do that, give --" 1>&2
     if [ $krg_cap != "--" ]; then
 	optcap="-c $krg_cap"
     fi
-    setsid-cr $optcap -o $sessionfile -s -- ${TESTCMD} ${TESTCMD_OPTIONS}
+
+    local sync=""
+    if [ "$nosync" == "" ]; then
+	sync="-s"
+    fi
+    setsid-cr $optcap -o $sessionfile $sync -- ${TESTCMD} ${TESTCMD_OPTIONS}
     r=$?
     if [ $r -ne 0 ]; then
 	tst_brkm TFAIL NULL "Fail to run the application with relevant capabilities"
