@@ -28,9 +28,9 @@ MAINTAINERCLEANFILES = $(man_MANS)
 html: $(html_MANS)
 
 $(man_MANS): %: %.xml manual-man.xsl
-	xsltproc --nonet manual-man.xsl $<
+	xsltproc --nonet $(srcdir)/manual-man.xsl $<
 
 $(html_MANS): %.html: %.xml manual-xhtml.xsl
-	xsltproc --nonet --output $@ manual-xhtml.xsl $<
+	xsltproc --nonet --output $@ $(srcdir)/manual-xhtml.xsl $<
 
 .PHONY: html
