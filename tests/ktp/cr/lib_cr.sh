@@ -378,7 +378,7 @@ restart_process()
     local r=0
 
     # Restart process
-    restart $_pid $_version > /dev/null
+    restart -q -t $_pid $_version
 
     r=$?
     if [ $r -ne 0 ]; then
