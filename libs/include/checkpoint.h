@@ -29,6 +29,9 @@ typedef struct checkpoint_info
 	int signal;
 } checkpoint_infos_t ;
 
+
+#define GET_RESTART_CMD_PTS 1
+
 typedef struct restart_request
 {
 	long app_id;

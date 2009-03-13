@@ -25,6 +25,6 @@ int application_unfreeze_from_pid(long app_id, int signal);
 checkpoint_infos_t application_checkpoint_from_appid (media_t media, long app_id);
 checkpoint_infos_t application_checkpoint_from_pid(media_t media, pid_t pid);
 
-int application_restart(media_t media, long app_id, int chkpt_sn);
+int application_restart(media_t media, long app_id, int chkpt_sn, int flags);
 
 #endif // LIBPROC_H

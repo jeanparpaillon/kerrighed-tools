@@ -21,12 +21,13 @@
 long appid ;
 int version ;
 media_t media;
+int flags = 0;
 short foreground = 0;
 
 void show_help()
 {
 	printf ("Restart an application\nusage: restart [-h]"
-		" [--media DISK|MEMORY] [-f] id version\n");
+		" [--media DISK|MEMORY] [-f|-t] id version\n");
 	printf ("  -h : This help\n");
 	exit(1);
 }
@@ -35,11 +36,12 @@ void parse_args(int argc, char *argv[])
 {
 	char c;
 	int option_index = 0;
-	char * short_options= "hm:f";
+	char * short_options= "hm:ft";
 	static struct option long_options[] =
 		{
 			{"help", no_argument, 0, 'h'},
 			{"foreground", no_argument, 0, 'f'},
+			{"replace-tty", no_argument, 0, 't'},
 			{"media", required_argument, 0, 'm'},
 			{0, 0, 0, 0}
 		};
@@ -60,6 +62,10 @@ void parse_args(int argc, char *argv[])
 			break;
 		case 'f':
 			foreground = 1;
+			flags |= GET_RESTART_CMD_PTS;
+			break;
+		case 't':
+			flags |= GET_RESTART_CMD_PTS;
 			break;
 		default:
 			printf("** unknown option\n");
@@ -92,7 +98,7 @@ int main(int argc, char *argv[])
 
 	printf("Restarting application %ld (v%d) ...\n", appid, version);
 
-	r = application_restart (media, appid, version);
+	r = application_restart (media, appid, version, flags);
 	if (r != 0)
 		r = errno;
 

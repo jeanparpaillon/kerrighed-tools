@@ -183,13 +183,13 @@ checkpoint_infos_t application_checkpoint_from_pid(media_t media, pid_t pid)
 }
 
 
-int application_restart(media_t media, long app_id, int chkpt_sn)
+int application_restart(media_t media, long app_id, int chkpt_sn, int flags)
 {
   restart_request_t rst_req;
 
   rst_req.app_id = app_id;
   rst_req.chkpt_sn = chkpt_sn;
-  rst_req.flags = 0;
+  rst_req.flags = flags;
   rst_req.media = media;
 
   return  call_kerrighed_services(KSYS_APP_RESTART, &rst_req);
