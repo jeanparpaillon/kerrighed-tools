@@ -23,6 +23,7 @@ int version ;
 media_t media;
 int flags = 0;
 short foreground = 0;
+short quiet = 0;
 
 void show_help()
 {
@@ -36,12 +37,13 @@ void parse_args(int argc, char *argv[])
 {
 	char c;
 	int option_index = 0;
-	char * short_options= "hm:ft";
+	char * short_options= "hm:ftq";
 	static struct option long_options[] =
 		{
 			{"help", no_argument, 0, 'h'},
 			{"foreground", no_argument, 0, 'f'},
 			{"replace-tty", no_argument, 0, 't'},
+			{"quiet", no_argument, 0, 'q'},
 			{"media", required_argument, 0, 'm'},
 			{0, 0, 0, 0}
 		};
@@ -67,8 +69,11 @@ void parse_args(int argc, char *argv[])
 		case 't':
 			flags |= GET_RESTART_CMD_PTS;
 			break;
+		case 'q':
+			quiet = 1;
+			break;
 		default:
-			printf("** unknown option\n");
+			fprintf(stderr, "** unknown option\n");
 		}
 	}
 
@@ -90,13 +95,15 @@ int main(int argc, char *argv[])
 
 	if (get_nr_cpu() == -1)
 	{
-		printf ("%s: no kerrighed nodes found\n", argv[0]);
+		fprintf (stderr, "%s: no kerrighed nodes found\n", argv[0]);
 		exit(-1);
 	}
 
 	parse_args(argc, argv);
 
-	printf("Restarting application %ld (v%d) ...\n", appid, version);
+	if (!quiet)
+		printf("Restarting application %ld (v%d) ...\n",
+		       appid, version);
 
 	r = application_restart (media, appid, version, flags);
 	if (r != 0)
@@ -104,7 +111,8 @@ int main(int argc, char *argv[])
 
 	switch (r) {
 	case 0:
-		printf("Done\n");
+		if (!quiet)
+			printf("Done\n");
 		break;
 	case E_CR_APPBUSY:
 		fprintf(stderr, "restart: an application using appid %ld is already "
