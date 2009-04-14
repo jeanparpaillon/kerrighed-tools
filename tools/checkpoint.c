@@ -169,18 +169,18 @@ int write_description(char *description,
 	return 0;
 }
 
-int checkpoint_app(int pid)
+int checkpoint_app(long pid)
 {
 	int r;
 
 	checkpoint_infos_t infos;
 	if (from_appid) {
-		printf("Checkpointing application %d...\n", pid);
+		printf("Checkpointing application %ld...\n", pid);
 		infos = application_checkpoint_from_appid(media, pid);
 	} else {
 		printf("Checkpointing application in which "
-		       "process %d is involved...\n", pid);
-		infos = application_checkpoint_from_pid(media, pid);
+		       "process %d is involved...\n", (pid_t)pid);
+		infos = application_checkpoint_from_pid(media, (pid_t)pid);
 	}
 
 	r = infos.result;
@@ -191,37 +191,37 @@ int checkpoint_app(int pid)
 	return r;
 }
 
-int freeze_app(int pid)
+int freeze_app(long pid)
 {
 	int r;
 	if (from_appid) {
-		printf("Freezing application %d...\n", pid);
+		printf("Freezing application %ld...\n", pid);
 		r = application_freeze_from_appid(pid);
 	} else {
 		printf("Freezing application in which "
-		       "process %d is involved...\n", pid);
-		r = application_freeze_from_pid(pid);
+		       "process %d is involved...\n", (pid_t)pid);
+		r = application_freeze_from_pid((pid_t)pid);
 	}
 
 	return r;
 }
 
-int unfreeze_app(int pid)
+int unfreeze_app(long pid)
 {
 	int r;
 	if (from_appid) {
-		printf("Unfreezing application %d...\n", pid);
+		printf("Unfreezing application %ld...\n", pid);
 		r = application_unfreeze_from_appid(pid, sig);
 	} else {
 		printf("Unfreezing application in which "
-		       "process %d is involved...\n", pid);
-		r = application_unfreeze_from_pid(pid, sig);
+		       "process %d is involved...\n", (pid_t)pid);
+		r = application_unfreeze_from_pid((pid_t)pid, sig);
 	}
 
 	return r;
 }
 
-int freeze_checkpoint_unfreeze(int pid)
+int freeze_checkpoint_unfreeze(long pid)
 {
 	int r;
 
@@ -240,7 +240,7 @@ out:
 int main(int argc, char *argv[])
 {
 	int r = 0;
-	int pid = -1;
+	long pid = -1;
 
 	/* Check environment */
 	check_environment();
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
 	parse_args(argc, argv);
 
 	/* get the pid */
-	pid = atoi( argv[argc-1] );
+	pid = atol( argv[argc-1] );
 	if (pid < 2) {
 		r = -EINVAL;
 		goto exit;

@@ -80,7 +80,7 @@ void parse_args(int argc, char *argv[])
 	if (argc - optind < 2)
 		goto err;
 
-	appid = atoi(argv[argc-2]);
+	appid = atol(argv[argc-2]);
 	version = atoi(argv[argc-1]);
 
 	return ;
