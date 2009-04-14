@@ -126,13 +126,15 @@ void check_environment(void)
 	}
 }
 
-int write_description(char * description,
-		      checkpoint_infos_t * infos)
+int write_description(char *description,
+		      checkpoint_infos_t *infos)
 {
-	if (description == NULL)
-		description = "No description";
-
+	FILE* fd;
+	char path[256];
 	time_t date = time(NULL);
+
+	if (!description)
+		description = "No description";
 
 	printf("Identifier: %ld\n"
 	       "Version: %d\n"
@@ -144,27 +146,26 @@ int write_description(char * description,
 	       ctime(&date));
 
 	// need to write it in a file
-	FILE* fd;
-
-	char path[256];
 	sprintf(path, "%s/%ld/v%d/description.txt", CHKPT_DIR,
 		infos->app_id, infos->chkpt_sn);
 
-	if ((fd = fopen(path, "a")) == NULL)  {
+	fd = fopen(path, "a");
+	if (!fd) {
 		perror(path);
 		return -1;
-	} else {
-		fprintf(fd,
-			"Identifier: %ld\n"
-			"Version: %d\n"
-			"Description: %s\n"
-			"Date: %ld\n",
-			infos->app_id,
-			infos->chkpt_sn,
-			description,
-			date);
-		fclose(fd);
 	}
+
+	fprintf(fd,
+		"Identifier: %ld\n"
+		"Version: %d\n"
+		"Description: %s\n"
+		"Date: %ld\n",
+		infos->app_id,
+		infos->chkpt_sn,
+		description,
+		date);
+	fclose(fd);
+
 	return 0;
 }
 
