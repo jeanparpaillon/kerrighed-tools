@@ -25,6 +25,7 @@ typedef enum {
 } app_action_t;
 
 short from_appid = 0;
+short quiet = 0;
 media_t media = DISK;
 int sig = 0;
 char * description = NULL;
@@ -48,9 +49,10 @@ void parse_args(int argc, char *argv[])
 {
 	char c;
 	int option_index = 0;
-	char * short_options= "ham:cd:fu::k::";
+	char * short_options= "hqam:cd:fu::k::";
 	static struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
+		{"quiet", no_argument, 0, 'q'},
 		{"from-appid", no_argument, 0, 'a'},
 		{"media", required_argument, 0, 'm'},
 		{"ckpt-only", no_argument, 0, 'c'},
@@ -67,6 +69,9 @@ void parse_args(int argc, char *argv[])
 		case 'h':
 			show_help();
 			return;
+		case 'q':
+			quiet=1;
+			break;
 		case 'a':
 			from_appid=1;
 			break;
@@ -169,17 +174,32 @@ int write_description(char *description,
 	return 0;
 }
 
-int checkpoint_app(long pid)
+void show_error(int _errno)
+{
+	switch (_errno) {
+	case E_CR_TASKDEAD:
+		fprintf(stderr, "checkpoint: can not checkpoint an application with dead/zombie process\n");
+		break;
+	default:
+		perror("checkpoint");
+		break;
+	}
+}
+
+int checkpoint_app(long pid, short _quiet)
 {
 	int r;
 
 	checkpoint_infos_t infos;
 	if (from_appid) {
-		printf("Checkpointing application %ld...\n", pid);
+		if (!_quiet)
+			printf("Checkpointing application %ld...\n", pid);
+
 		infos = application_checkpoint_from_appid(media, pid);
 	} else {
-		printf("Checkpointing application in which "
-		       "process %d is involved...\n", (pid_t)pid);
+		if (!_quiet)
+			printf("Checkpointing application in which "
+			       "process %d is involved...\n", (pid_t)pid);
 		infos = application_checkpoint_from_pid(media, (pid_t)pid);
 	}
 
@@ -187,53 +207,74 @@ int checkpoint_app(long pid)
 
 	if (!r)
 		write_description(description, &infos);
+	else
+		show_error(errno);
 
 	return r;
 }
 
-int freeze_app(long pid)
+int freeze_app(long pid, int _quiet)
 {
 	int r;
 	if (from_appid) {
-		printf("Freezing application %ld...\n", pid);
+		if (!_quiet)
+			printf("Freezing application %ld...\n", pid);
+
 		r = application_freeze_from_appid(pid);
 	} else {
-		printf("Freezing application in which "
-		       "process %d is involved...\n", (pid_t)pid);
+		if (!_quiet)
+			printf("Freezing application in which "
+			       "process %d is involved...\n", (pid_t)pid);
+
 		r = application_freeze_from_pid((pid_t)pid);
 	}
 
+	if (r)
+		show_error(errno);
+
 	return r;
 }
 
-int unfreeze_app(long pid)
+int unfreeze_app(long pid, int signal, short _quiet)
 {
 	int r;
 	if (from_appid) {
-		printf("Unfreezing application %ld...\n", pid);
-		r = application_unfreeze_from_appid(pid, sig);
+		if (!_quiet)
+			printf("Unfreezing application %ld...\n", pid);
+
+		r = application_unfreeze_from_appid(pid, signal);
 	} else {
-		printf("Unfreezing application in which "
-		       "process %d is involved...\n", (pid_t)pid);
-		r = application_unfreeze_from_pid((pid_t)pid, sig);
+		if (!_quiet)
+			printf("Unfreezing application in which "
+			       "process %d is involved...\n", (pid_t)pid);
+
+		r = application_unfreeze_from_pid((pid_t)pid, signal);
 	}
+
+	if (r)
+		show_error(errno);
 
 	return r;
 }
 
-int freeze_checkpoint_unfreeze(long pid)
+int freeze_checkpoint_unfreeze(long pid, int signal, short _quiet)
 {
 	int r;
 
-	r = freeze_app(pid);
+	r = freeze_app(pid, _quiet);
 	if (r)
-		goto out;
-	r = checkpoint_app(pid);
+		goto err_freeze;
+	r = checkpoint_app(pid, _quiet);
 	if (r)
-		goto out;
-	r = unfreeze_app(pid);
+		goto err_chkpt;
+	r = unfreeze_app(pid, signal, _quiet);
 
-out:
+err_freeze:
+	return r;
+
+err_chkpt:
+	/* silently unfreezing without any signal*/
+	unfreeze_app(pid, 0, 1);
 	return r;
 }
 
@@ -261,32 +302,22 @@ int main(int argc, char *argv[])
 
 	switch (action) {
 	case CHECKPOINT:
-		r = checkpoint_app(pid);
+		r = checkpoint_app(pid, quiet);
 		break;
 	case FREEZE:
-		r = freeze_app(pid);
+		r = freeze_app(pid, quiet);
 		break;
 	case UNFREEZE:
-		r = unfreeze_app(pid);
+		r = unfreeze_app(pid, sig, quiet);
 		break;
 	case ALL:
-		r = freeze_checkpoint_unfreeze(pid);
+		r = freeze_checkpoint_unfreeze(pid, sig, quiet);
+		break;
 	}
-
-	if (r!=0)
-		r = errno;
 
 exit:
-	switch (r) {
-	case 0:
-		break;
-	case E_CR_TASKDEAD:
-		fprintf(stderr, "checkpoint: can not checkpoint an application with dead/zombie process\n");
-		break;
-	default:
-		perror("checkpoint");
-		break;
-	}
+	if (r)
+		exit(EXIT_FAILURE);
 
-	return r;
+	exit(EXIT_SUCCESS);
 }
