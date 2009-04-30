@@ -10,12 +10,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-
+#include <dirent.h>
 #include <getopt.h>
 #include <time.h>
 #include <kerrighed.h>
 
-#define CHKPT_DIR "/var/chkpt/"
+#define CHKPT_DIR "/var/chkpt"
 
 typedef enum {
 	ALL,
@@ -186,6 +186,63 @@ void show_error(int _errno)
 	}
 }
 
+void clean_checkpoint_dir(checkpoint_infos_t *infos)
+{
+	DIR *dir;
+	struct dirent *ent;
+	char path[256];
+	int r;
+
+	if (!infos->chkpt_sn)
+		return;
+
+	/* to refresh NFS cache... */
+	dir = opendir(CHKPT_DIR);
+	if (!dir) {
+		perror("opendir");
+		return;
+	}
+	closedir(dir);
+
+	sprintf(path, "%s/%ld/", CHKPT_DIR, infos->app_id);
+	dir = opendir(path);
+	if (!dir) {
+		perror("opendir");
+		return;
+	}
+	closedir(dir);
+
+	sprintf(path, "%s/%ld/v%d/", CHKPT_DIR,
+		infos->app_id, infos->chkpt_sn);
+
+	/* remove the file and directory */
+	dir = opendir(path);
+	if (!dir) {
+		perror("opendir");
+		return;
+	}
+
+	while ((ent = readdir(dir)) != NULL) {
+		if (ent->d_type == DT_REG) {
+			sprintf(path, "%s/%ld/v%d/%s", CHKPT_DIR,
+				infos->app_id, infos->chkpt_sn, ent->d_name);
+			r = remove(path);
+			if (r)
+				perror("remove");
+		}
+	}
+	closedir(dir);
+
+	sprintf(path, "%s/%ld/v%d/", CHKPT_DIR,
+		infos->app_id, infos->chkpt_sn);
+	r = remove(path);
+	if (r)
+		perror("remove");
+
+	sprintf(path, "%s/%ld/", CHKPT_DIR, infos->app_id);
+	remove(path);
+}
+
 int checkpoint_app(long pid, short _quiet)
 {
 	int r;
@@ -207,8 +264,10 @@ int checkpoint_app(long pid, short _quiet)
 
 	if (!r)
 		write_description(description, &infos);
-	else
+	else {
 		show_error(errno);
+		clean_checkpoint_dir(&infos);
+	}
 
 	return r;
 }
