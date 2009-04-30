@@ -1,3 +1,5 @@
+#include <linux/types.h>
+
 #ifndef CHECKPOINT_TYPES_H
 #define CHECKPOINT_TYPES_H
 
@@ -29,7 +31,6 @@ typedef struct checkpoint_info
 	int signal;
 } checkpoint_infos_t ;
 
-
 #define GET_RESTART_CMD_PTS 1
 
 typedef struct restart_request
@@ -39,5 +40,12 @@ typedef struct restart_request
 	int flags;
 	media_t media;
 } restart_request_t;
+
+typedef struct app_userdata_request
+{
+	long app_id;
+	type_ckpt_t type;
+	__u64 user_data;
+} app_userdata_request_t;
 
 #endif

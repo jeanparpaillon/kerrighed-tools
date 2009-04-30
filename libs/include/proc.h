@@ -28,4 +28,8 @@ checkpoint_infos_t application_checkpoint_from_pid(media_t media, pid_t pid);
 /* return the pid of the application root process in case of success */
 int application_restart(media_t media, long app_id, int chkpt_sn, int flags);
 
+int application_set_userdata(__u64 data);
+int application_get_userdata_from_appid(long app_id, __u64 *data);
+int application_get_userdata_from_pid(long app_id, __u64 *data);
+
 #endif // LIBPROC_H

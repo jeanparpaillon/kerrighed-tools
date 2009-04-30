@@ -204,6 +204,41 @@ int application_restart(media_t media, long app_id, int chkpt_sn, int flags)
 	return res;
 }
 
+int application_set_userdata(__u64 data)
+{
+	int r = call_kerrighed_services(KSYS_APP_SET_USERDATA, &data);
+	return r;
+}
+
+int application_get_userdata_from_appid(long app_id, __u64 *data)
+{
+	int res;
+	app_userdata_request_t datareq;
+	datareq.app_id = app_id;
+	datareq.type = FROM_APPID;
+	datareq.user_data = 0;
+
+	res = call_kerrighed_services(KSYS_APP_GET_USERDATA, &datareq);
+	if (!res)
+		*data = datareq.user_data;
+	return res;
+}
+
+int application_get_userdata_from_pid(long app_id, __u64 *data)
+{
+	int res;
+	app_userdata_request_t datareq;
+	datareq.app_id = app_id;
+	datareq.type = FROM_PID;
+	datareq.user_data = 0;
+
+	res = call_kerrighed_services(KSYS_APP_GET_USERDATA, &datareq);
+	if (!res)
+		*data = datareq.user_data;
+
+	return res;
+}
+
 int thread_migrate (pid_t thread_id, int destination_node)
 {
   int res;
