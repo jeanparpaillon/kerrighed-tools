@@ -185,14 +185,23 @@ checkpoint_infos_t application_checkpoint_from_pid(media_t media, pid_t pid)
 
 int application_restart(media_t media, long app_id, int chkpt_sn, int flags)
 {
-  restart_request_t rst_req;
+	int res;
+	restart_request_t rst_req;
 
-  rst_req.app_id = app_id;
-  rst_req.chkpt_sn = chkpt_sn;
-  rst_req.flags = flags;
-  rst_req.media = media;
+	rst_req.app_id = app_id;
+	rst_req.chkpt_sn = chkpt_sn;
+	rst_req.flags = flags;
+	rst_req.media = media;
 
-  return  call_kerrighed_services(KSYS_APP_RESTART, &rst_req);
+	res = call_kerrighed_services(KSYS_APP_RESTART, &rst_req);
+
+	/* in case of success, rst_req.app_id has been replaced by the
+	 * application root process id.
+	 */
+	if (!res)
+		res = rst_req.app_id;
+
+	return res;
 }
 
 int thread_migrate (pid_t thread_id, int destination_node)

@@ -24,6 +24,7 @@ media_t media;
 int flags = 0;
 short foreground = 0;
 short quiet = 0;
+int root_pid = 0;
 
 void show_help()
 {
@@ -89,6 +90,60 @@ err:
 	show_help();
 }
 
+void show_error(int _errno)
+{
+	switch (_errno) {
+	case E_CR_APPBUSY:
+		fprintf(stderr, "restart: an application using appid %ld is "
+			"already running\n", appid);
+		break;
+	case E_CR_PIDBUSY:
+		fprintf(stderr, "restart: one PID (including session id or "
+			"group id) of the application is already in use\n");
+		break;
+	case E_CR_BADDATA:
+		fprintf(stderr, "restart: invalid checkpoint files "
+			"(corrupted or wrong kernel version)\n");
+		break;
+	default:
+		perror("restart");
+	}
+}
+
+void relay_signal(int signum)
+{
+	if (root_pid)
+		kill(root_pid, signum);
+}
+
+void wait_application_exits()
+{
+	int r, exit_status;
+	pid_t child;
+	struct sigaction action;
+
+	action.sa_handler = &relay_signal;
+	r = sigaction(SIGINT, &action, NULL);
+	if (r)
+		perror("sigaction");
+	r = sigaction(SIGTERM, &action, NULL);
+	if (r)
+		perror("sigaction");
+
+	do {
+		child = wait(&exit_status);
+		/* wait may be interrupted to handle a signal
+		 * sent by the user */
+		if (child <= 0 && child != -EINTR) {
+			perror("wait");
+			exit(EXIT_FAILURE);
+		}
+	} while (child == -EINTR);
+
+	if (exit_status)
+		exit(EXIT_FAILURE);
+}
+
 int main(int argc, char *argv[])
 {
 	int r = 0 ;
@@ -106,39 +161,18 @@ int main(int argc, char *argv[])
 		       appid, version);
 
 	r = application_restart (media, appid, version, flags);
-	if (r != 0)
-		r = errno;
-
-	switch (r) {
-	case 0:
-		if (!quiet)
-			printf("Done\n");
-		break;
-	case E_CR_APPBUSY:
-		fprintf(stderr, "restart: an application using appid %ld is already "
-		       "running\n", appid);
-		break;
-	case E_CR_PIDBUSY:
-		fprintf(stderr, "restart: one PID of the application is already in use\n");
-		break;
-	case E_CR_BADDATA:
-		fprintf(stderr, "restart: invalid checkpoint files "
-			"(corrupted or wrong kernel version)\n");
-		break;
-	default:
-		perror("restart");
+	if (r < 0) {
+		show_error(errno);
+		exit(EXIT_FAILURE);
 	}
 
-	if (!r && foreground) {
-		int exit_status;
-		pid_t child = wait(&exit_status);
+	if (!quiet)
+		printf("Done\n");
 
-		if (child <= 0)
-			perror("wait");
-
-		if (exit_status)
-			exit(EXIT_FAILURE);
+	if (foreground) {
+		root_pid = r;
+		wait_application_exits();
 	}
 
-	return r;
+	exit(EXIT_SUCCESS);
 }
