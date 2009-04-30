@@ -40,15 +40,17 @@
 short background = 0;
 short sync_w_pipe = 0;
 short setcap = 1;
+short quiet = 0;
 char filepath[MAX_FILEPATH];
 pid_t pid;
 
 void print_usage(char *cmd)
 {
 	fprintf(stderr,
-		"usage: %s [OPTIONS] program [arg ...]\n"
+		"usage: %s [OPTIONS] -- program [arg ...]\n"
 		"\t -o file: write the session id in a file\n"
 		"\t -b: start the program in background (default: foreground)\n"
+		"\t -q: (quiet) do not show the Application idendifier\n"
 		, cmd);
 
 	/* Option -s and -n are hidden, there exist only for tests */
@@ -82,7 +84,7 @@ void parse_args(int argc, char *argv[])
 	int c;
 
 	while (1) {
-		c = getopt(argc, argv, "hbo:sn");
+		c = getopt(argc, argv, "hbo:qsn");
 		if (c == -1)
 			break;
 		switch (c) {
@@ -95,6 +97,9 @@ void parse_args(int argc, char *argv[])
 		case 'h':
 			print_usage(argv[0]);
 			exit(EXIT_SUCCESS);
+			break;
+		case 'q':
+			quiet = 1;
 			break;
 		case 's':
 			sync_w_pipe = 1;
@@ -158,6 +163,9 @@ int main(int argc, char *argv[])
 	case 0:		/* child */
 		break;
 	default:	/* parent */
+		if (!quiet)
+			printf("Running application %d\n", pid);
+
 		if (!background) {
 			int r, exit_status;
 			struct sigaction action;

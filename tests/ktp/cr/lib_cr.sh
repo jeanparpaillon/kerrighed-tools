@@ -617,7 +617,7 @@ to do that, give --" 1>&2
 	sync="-s"
     fi
 
-    krgcr-run $optcap -b -o $sessionfile $sync -- ${TESTCMD} ${TESTCMD_OPTIONS}
+    krgcr-run $optcap -b -o $sessionfile -q $sync -- ${TESTCMD} ${TESTCMD_OPTIONS}
     r=$?
     if [ $r -ne 0 ]; then
 	tst_brkm TFAIL NULL "Fail to run the application with relevant capabilities"
