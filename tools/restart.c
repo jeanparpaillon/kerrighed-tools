@@ -15,6 +15,7 @@
 #include <getopt.h>
 #include <time.h>
 #include <kerrighed.h>
+#include <libkrgcb.h>
 
 #define CHKPT_DIR "/var/chkpt/"
 
@@ -157,13 +158,16 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	if (!quiet)
+	root_pid = r;
+
+	r = cr_execute_restart_callbacks(appid);
+	if (r)
+		fprintf(stderr, "restart: error during callback execution");
+	else if (!quiet)
 		printf("Done\n");
 
-	if (foreground) {
-		root_pid = r;
+	if (foreground)
 		wait_application_exits();
-	}
 
 	exit(EXIT_SUCCESS);
 }

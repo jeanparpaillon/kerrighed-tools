@@ -14,6 +14,7 @@
 #include <getopt.h>
 #include <time.h>
 #include <kerrighed.h>
+#include <libkrgcb.h>
 
 #define CHKPT_DIR "/var/chkpt"
 
@@ -26,6 +27,7 @@ typedef enum {
 
 short from_appid = 0;
 short quiet = 0;
+short no_callbacks = 0;
 int sig = 0;
 char * description = NULL;
 app_action_t action = ALL;
@@ -34,11 +36,11 @@ void show_help(void)
 {
 	printf("Usage : \n"
 	       "checkpoint [-h]:\t print this help\n"
-	       "checkpoint [(-d|--description) description] [(-k|--kill)[signal]] "
+	       "checkpoint [-b --no-callbacks] [(-d|--description) description] [(-k|--kill)[signal]] "
 	       "<pid> | -a <appid> :"
 	       "\t checkpoint a running application\n"
-	       "checkpoint -f|--freeze <pid>| -a <appid> :\t freeze an application\n"
-	       "checkpoint -u|--unfreeze[=signal] <pid>| -a <appid> :\t unfreeze an application\n"
+	       "checkpoint  [-b --no-callbacks] -f|--freeze <pid>| -a <appid> :\t freeze an application\n"
+	       "checkpoint  [-b --no-callbacks] -u|--unfreeze[=signal] <pid>| -a <appid> :\t unfreeze an application\n"
 	       "checkpoint -c|--ckpt-only [(-d|--description) description] <pid> | -a <appid> :"
 	       "\t checkpoint a frozen application\n"
 	       );
@@ -48,13 +50,14 @@ void parse_args(int argc, char *argv[])
 {
 	char c;
 	int option_index = 0;
-	char * short_options= "hqacd:fu::k::";
+	char * short_options= "hqacd:bfu::k::";
 	static struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
 		{"quiet", no_argument, 0, 'q'},
 		{"from-appid", no_argument, 0, 'a'},
 		{"ckpt-only", no_argument, 0, 'c'},
 		{"description", required_argument, 0, 'd'},
+		{"no-callbacks", no_argument, 0, 'b'},
 		{"freeze", no_argument, 0, 'f'},
 		{"unfreeze", optional_argument, 0, 'u'},
 		{"kill", optional_argument, 0, 'k'},
@@ -78,6 +81,9 @@ void parse_args(int argc, char *argv[])
 			break;
 		case 'c':
 			action = CHECKPOINT;
+			break;
+		case 'b':
+			no_callbacks = 1;
 			break;
 		case 'f':
 			action = FREEZE;
@@ -266,6 +272,16 @@ int checkpoint_app(long pid, short _quiet)
 int freeze_app(long pid, int _quiet)
 {
 	int r;
+
+	if (!no_callbacks) {
+		r = cr_execute_chkpt_callbacks(pid, from_appid);
+		if (r) {
+			fprintf(stderr, "checkpoint: error during callback"
+				" execution\n");
+			goto err;
+		}
+	}
+
 	if (from_appid) {
 		if (!_quiet)
 			printf("Freezing application %ld...\n", pid);
@@ -282,28 +298,45 @@ int freeze_app(long pid, int _quiet)
 	if (r)
 		show_error(errno);
 
+err:
 	return r;
 }
 
 int unfreeze_app(long pid, int signal, short _quiet)
 {
 	int r;
+
 	if (from_appid) {
 		if (!_quiet)
 			printf("Unfreezing application %ld...\n", pid);
 
 		r = application_unfreeze_from_appid(pid, signal);
+		if (r)
+			goto err_show;
 	} else {
 		if (!_quiet)
 			printf("Unfreezing application in which "
 			       "process %d is involved...\n", (pid_t)pid);
 
 		r = application_unfreeze_from_pid((pid_t)pid, signal);
+		if (r)
+			goto err_show;
 	}
 
+	if (!no_callbacks) {
+		r = cr_execute_continue_callbacks(pid, from_appid);
+		if (r) {
+			fprintf(stderr, "checkpoint: error during callback"
+				" execution\n");
+			goto err;
+		}
+	}
+
+err_show:
 	if (r)
 		show_error(errno);
 
+err:
 	return r;
 }
 

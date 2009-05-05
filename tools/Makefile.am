@@ -14,7 +14,7 @@ bin_PROGRAMS += krgcapset
 endif
 
 INCLUDES = -I@top_srcdir@/libs/include
-LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la
+LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la @top_builddir@/libs/libkrgcb/libkrgcb.la
 
 migrate_SOURCES = migrate.c
 checkpoint_SOURCES = checkpoint.c
