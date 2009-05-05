@@ -113,9 +113,10 @@ checkpoint_process()
 {
     local _pid=$1
     local _name=$2
+    local _options=$3
     local r=0
 
-    checkpoint $_pid > /tmp/chkpt_result${_pid}
+    checkpoint $_options $_pid > /tmp/chkpt_result${_pid}
 
     r=$?
     if [ $r -ne 0 ]; then
@@ -187,9 +188,10 @@ checkpoint_process_must_fail()
 {
     local _pid=$1
     local _name=$2
+    local _options=$3
     local r=0
 
-    checkpoint $_pid > /dev/null 2>&1
+    checkpoint $_options $_pid > /dev/null 2>&1
 
     r=$?
     if [ $r -eq 0 ]; then

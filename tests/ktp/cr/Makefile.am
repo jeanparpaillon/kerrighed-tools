@@ -32,6 +32,7 @@ tests_SCRIPTS = \
 	cr-post \
 	cr_abort01 \
 	cr_abort02 \
+	cr_callbacks01 \
 	cr_clone_files01 \
 	cr_clone_fs01 \
 	cr_clone_semundo01 \
