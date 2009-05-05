@@ -1,7 +1,7 @@
 /** Kerrighed Callback-Library Implementation
  *  @file libkrgcb.c
  *
- *  @author Eugen Feller, John Mehnert-Spahn
+ *  @author Eugen Feller, Matthieu Fertré, John Mehnert-Spahn
  */
 
 #include <stdio.h>
@@ -97,6 +97,8 @@ typedef struct cr_cb_info_s {
 } cr_cb_info_t;
 
 cr_cb_info_t *info = NULL;
+int thread_running = 0;
+pthread_t cb_thread;
 enum cr_cb_hook current_hook;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -368,7 +370,7 @@ static void handle_signal(int signum)
 	}
 
 	CR_CB_DEBUG("Waking up worker thread\n");
-	if (pthread_mutex_unlock(&mutex))
+	if (thread_running && pthread_mutex_unlock(&mutex))
 		CR_CB_DEBUG("Error while releasing mutex");
 }
 
@@ -379,7 +381,7 @@ static void* worker_thread(void *arg)
 	if (!info)
 		CR_CB_ABORT("Called without first calling cr_init()\n");
 
-	while (1) {
+	while (thread_running) {
 		CR_CB_DEBUG("Locking worker thread\n");
  		if (pthread_mutex_lock(&mutex))
  			CR_CB_DEBUG("Error while acquire mutex");
@@ -401,17 +403,37 @@ static void* worker_thread(void *arg)
 	return (void *)((long)r);
 }
 
-static void free_info_memory()
+static void free_info_memory(void)
 {
 	if (info) {
 		free(info);
 		info = NULL;
 	}
+
+	thread_running = 0;
+}
+
+static int initialize_cb_thread(void)
+{
+	int r;
+
+	pthread_mutex_lock(&mutex);
+
+	/* Init worker thread for callback handling */
+	r = pthread_create(&cb_thread, NULL, worker_thread, NULL);
+	if (r)
+		goto err;
+
+	thread_running = 1;
+	return r;
+
+err:
+	free_info_memory();
+	return r;
 }
 
 int cr_callback_init(void)
 {
-	pthread_t cb_thread;
 	struct sigaction sa;
 	__u64 udata = 0;
 	int r = 0;
@@ -444,13 +466,7 @@ int cr_callback_init(void)
 		goto err;
 
 	r = sigaction(SIG_CB_RUN_CNT, &sa, NULL);
-	if (r)
-		goto err;
 
-	pthread_mutex_lock(&mutex);
-
-	/* Init worker thread for callback handling */
-	r = pthread_create(&cb_thread, NULL, worker_thread, NULL);
 err:
 	if (r)
 		free_info_memory();
@@ -474,6 +490,14 @@ static int register_callback(enum cr_cb_hook hook, cr_cb_callback_t func,
 
 	if (!info)
 		CR_CB_ABORT("Called without first calling cr_init()\n");
+
+	if (context == THREAD_CONTEXT) {
+		if (!thread_running) {
+			int r = initialize_cb_thread();
+			if (r)
+				return r;
+		}
+	}
 
 	switch (hook) {
 		case CR_CB_CHECKPOINT:
