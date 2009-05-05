@@ -13,17 +13,11 @@ typedef enum {
 	FROM_PID
 } type_ckpt_t;
 
-typedef enum {
-	DISK,
-	MEMORY
-} media_t;
-
 typedef struct checkpoint_info
 {
 	long app_id;
 
 	type_ckpt_t type;
-	media_t media;
 
 	int chkpt_sn;
 	int result;
@@ -38,7 +32,6 @@ typedef struct restart_request
 	long app_id;
 	int chkpt_sn;
 	int flags;
-	media_t media;
 } restart_request_t;
 
 typedef struct app_userdata_request

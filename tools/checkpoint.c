@@ -26,7 +26,6 @@ typedef enum {
 
 short from_appid = 0;
 short quiet = 0;
-media_t media = DISK;
 int sig = 0;
 char * description = NULL;
 app_action_t action = ALL;
@@ -35,12 +34,12 @@ void show_help(void)
 {
 	printf("Usage : \n"
 	       "checkpoint [-h]:\t print this help\n"
-	       "checkpoint [(-m|--media) disk|memory] [(-d|--description) description] [(-k|--kill)[signal]] "
+	       "checkpoint [(-d|--description) description] [(-k|--kill)[signal]] "
 	       "<pid> | -a <appid> :"
 	       "\t checkpoint a running application\n"
 	       "checkpoint -f|--freeze <pid>| -a <appid> :\t freeze an application\n"
 	       "checkpoint -u|--unfreeze[=signal] <pid>| -a <appid> :\t unfreeze an application\n"
-	       "checkpoint -c|--ckpt-only [(-m|--media) disk|memory] [(-d|--description) description] <pid> | -a <appid> :"
+	       "checkpoint -c|--ckpt-only [(-d|--description) description] <pid> | -a <appid> :"
 	       "\t checkpoint a frozen application\n"
 	       );
 }
@@ -49,12 +48,11 @@ void parse_args(int argc, char *argv[])
 {
 	char c;
 	int option_index = 0;
-	char * short_options= "hqam:cd:fu::k::";
+	char * short_options= "hqacd:fu::k::";
 	static struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
 		{"quiet", no_argument, 0, 'q'},
 		{"from-appid", no_argument, 0, 'a'},
-		{"media", required_argument, 0, 'm'},
 		{"ckpt-only", no_argument, 0, 'c'},
 		{"description", required_argument, 0, 'd'},
 		{"freeze", no_argument, 0, 'f'},
@@ -74,13 +72,6 @@ void parse_args(int argc, char *argv[])
 			break;
 		case 'a':
 			from_appid=1;
-			break;
-		case 'm':
-			if (strcmp(optarg, "DISK") == 0)
-				media = DISK;
-			else if (strcmp(optarg, "MEMORY") == 0)
-				media = MEMORY;
-			else printf("Warning: Unknown type of media\n");
 			break;
 		case 'd':
 			description = optarg;
@@ -252,12 +243,12 @@ int checkpoint_app(long pid, short _quiet)
 		if (!_quiet)
 			printf("Checkpointing application %ld...\n", pid);
 
-		infos = application_checkpoint_from_appid(media, pid);
+		infos = application_checkpoint_from_appid(pid);
 	} else {
 		if (!_quiet)
 			printf("Checkpointing application in which "
 			       "process %d is involved...\n", (pid_t)pid);
-		infos = application_checkpoint_from_pid(media, (pid_t)pid);
+		infos = application_checkpoint_from_pid((pid_t)pid);
 	}
 
 	r = infos.result;

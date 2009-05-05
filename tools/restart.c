@@ -20,7 +20,6 @@
 
 long appid ;
 int version ;
-media_t media;
 int flags = 0;
 short foreground = 0;
 short quiet = 0;
@@ -29,7 +28,7 @@ int root_pid = 0;
 void show_help()
 {
 	printf ("Restart an application\nusage: restart [-h]"
-		" [--media DISK|MEMORY] [-f|-t] id version\n");
+		" [-f|-t] id version\n");
 	printf ("  -h : This help\n");
 	exit(1);
 }
@@ -38,14 +37,13 @@ void parse_args(int argc, char *argv[])
 {
 	char c;
 	int option_index = 0;
-	char * short_options= "hm:ftq";
+	char * short_options= "hftq";
 	static struct option long_options[] =
 		{
 			{"help", no_argument, 0, 'h'},
 			{"foreground", no_argument, 0, 'f'},
 			{"replace-tty", no_argument, 0, 't'},
 			{"quiet", no_argument, 0, 'q'},
-			{"media", required_argument, 0, 'm'},
 			{0, 0, 0, 0}
 		};
 
@@ -55,13 +53,6 @@ void parse_args(int argc, char *argv[])
 		{
 		case 'h':
 			goto err;
-			break;
-		case 'm':
-			if (strcmp(optarg, "DISK") == 0)
-				media = DISK;
-			else if (strcmp(optarg, "MEMORY") == 0)
-				media = MEMORY;
-			else printf("Warning: Unknown type of media\n");
 			break;
 		case 'f':
 			foreground = 1;
@@ -160,7 +151,7 @@ int main(int argc, char *argv[])
 		printf("Restarting application %ld (v%d) ...\n",
 		       appid, version);
 
-	r = application_restart (media, appid, version, flags);
+	r = application_restart(appid, version, flags);
 	if (r < 0) {
 		show_error(errno);
 		exit(EXIT_FAILURE);
