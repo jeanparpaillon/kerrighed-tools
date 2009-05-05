@@ -22,5 +22,6 @@ kerrighedinclude_HEADERS = \
 	checkpoint.h \
 	kerrighed_tools.h \
 	hotplug.h \
-	kerrighed/krgnodemask.h
+	kerrighed/krgnodemask.h \
+	libkrgcb.h
 endif

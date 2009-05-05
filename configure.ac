@@ -226,7 +226,7 @@ AC_CONFIG_HEADERS([config.h])
 dnl files to generate with automake
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([patches/Makefile])
-AC_CONFIG_FILES([libs/Makefile libs/include/Makefile libs/libkerrighed/kerrighed.pc libs/libkerrighed/Makefile])
+AC_CONFIG_FILES([libs/Makefile libs/include/Makefile libs/libkerrighed/kerrighed.pc libs/libkerrighed/Makefile libs/libkrgcb/krgcb.pc libs/libkrgcb/Makefile])
 AC_CONFIG_FILES([tools/Makefile])
 AC_CONFIG_FILES([scripts/Makefile])
 AC_CONFIG_FILES([man/Makefile])

@@ -6,4 +6,4 @@
 ### Author:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
-SUBDIRS= include libkerrighed
+SUBDIRS= include libkerrighed libkrgcb
