@@ -54,6 +54,7 @@ bi_thread_LDADD = -lbi -lpthread
 bi_thread_DEPENDENCIES = libbi.la
 
 bi_server_socket_SOURCES = bi-server-socket.c
+bi_server_socket_CFLAGS = -I@top_srcdir@/libs/include
 bi_server_socket_LDADD = @top_builddir@/libs/libkrgcb/libkrgcb.la @top_builddir@/libs/libkerrighed/libkerrighed.la -lbi
 bi_server_socket_DEPENDENCIES = libbi.la
 

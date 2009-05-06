@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <kerrighed/libkrgcb.h>
+#include <libkrgcb.h>
 #include "libbi.h"
 
 int numloops = -1 ;
