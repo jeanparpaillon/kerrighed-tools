@@ -11,6 +11,7 @@
 int numloops = -1 ;
 int quiet = 0;
 int close_stdbuffers = 0;
+int signal = 0;
 int sockfd;
 
 #define DEFAULT_PORT 4242
@@ -20,7 +21,7 @@ void parse_args(int argc, char *argv[])
 	int c;
 
 	while (1){
-		c = getopt(argc, argv, "l:qhc");
+		c = getopt(argc, argv, "l:qhcs");
 		if (c == -1)
 			break;
 		switch (c) {
@@ -34,6 +35,9 @@ void parse_args(int argc, char *argv[])
 			quiet = 1;
 			close_stdbuffers = 1;
 			break;
+		case 's':
+			signal = 1;
+			break;
 		default:
 			printf("** unknown option\n");
 		case 'h':
@@ -43,6 +47,8 @@ void parse_args(int argc, char *argv[])
 			printf(" -q   : quiet\n");
 			printf(" -c   : quiet + close the stdin, stdout, "
 			       "and stderr\n");
+			printf(" -s   : use signal-context C/R callbacks "
+			       "instead of thread-context callbacks");
 			exit(1);
 		}
 	}
@@ -109,19 +115,33 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	r = cr_register_chkpt_thread_callback(&close_server_socket, NULL);
+	if (signal)
+		r = cr_register_chkpt_callback(&close_server_socket, NULL);
+	else
+		r = cr_register_chkpt_thread_callback(&close_server_socket,
+						      NULL);
+
 	if (r) {
 		fprintf(stderr, "Fail to register checkpoint callback\n");
                 exit(EXIT_FAILURE);
 	}
 
-	r = cr_register_continue_thread_callback(&open_server_socket, NULL);
+	if (signal)
+		r = cr_register_continue_callback(&open_server_socket, NULL);
+	else
+		r = cr_register_continue_thread_callback(&open_server_socket,
+							 NULL);
 	if (r) {
 		fprintf(stderr, "Fail to register continue callback\n");
                 exit(EXIT_FAILURE);
 	}
 
-	r = cr_register_restart_thread_callback(&open_server_socket, NULL);
+	if (signal)
+		r = cr_register_restart_callback(&open_server_socket, NULL);
+	else
+		r = cr_register_restart_thread_callback(&open_server_socket,
+							NULL);
+
 	if (r) {
 		fprintf(stderr, "Fail to register restart callback\n");
                 exit(EXIT_FAILURE);

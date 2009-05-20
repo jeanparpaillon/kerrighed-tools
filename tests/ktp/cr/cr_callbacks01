@@ -67,3 +67,7 @@ cr_callbacks01()
 CR_setup $@ || exit $?
 
 cr_callbacks01 || exit $?
+
+# run the same test but with signal-context callbacks
+TESTCMD_OPTIONS="-s -q"
+cr_callbacks01 || exit $?
