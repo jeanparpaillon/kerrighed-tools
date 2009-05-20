@@ -342,6 +342,8 @@ err:
 
 static void handle_signal(int signum)
 {
+	int r;
+
 	if (!info)
 		CR_CB_ABORT("Called without first calling cr_init()\n");
 
@@ -360,13 +362,14 @@ static void handle_signal(int signum)
 			return;
 	}
 
-	if (run_callbacks(SIGNAL_CONTEXT)) {
-		if (current_hook == CR_CB_CHECKPOINT) {
-			if (send_message(CR_CB_ERR))
-				CR_CB_DEBUG("handle_signal - send_message \
-					    error\n");
-		}
-		return;
+	r = run_callbacks(SIGNAL_CONTEXT);
+	if (current_hook == CR_CB_CHECKPOINT) {
+		if (r)
+			r = send_message(CR_CB_ERR);
+		else if (!thread_running)
+			r = send_message(CR_CB_CHKPT_APP);
+
+		CR_CB_DEBUG("handle_signal - send_message ret: %d\n", r);
 	}
 
 	CR_CB_DEBUG("Waking up worker thread\n");
@@ -383,16 +386,16 @@ static void* worker_thread(void *arg)
 
 	while (thread_running) {
 		CR_CB_DEBUG("Locking worker thread\n");
- 		if (pthread_mutex_lock(&mutex))
- 			CR_CB_DEBUG("Error while acquire mutex");
+		if (pthread_mutex_lock(&mutex))
+			CR_CB_DEBUG("Error while acquire mutex");
 
- 		CR_CB_DEBUG("Worker thread executing cb\n");
+		CR_CB_DEBUG("Worker thread executing cb\n");
 		r = run_callbacks(THREAD_CONTEXT);
 
 		if (current_hook == CR_CB_CHECKPOINT) {
 			if (r)
 				r = send_message(CR_CB_ERR);
-	 		else
+			else
 				r = send_message(CR_CB_CHKPT_APP);
 
 			CR_CB_DEBUG("worker_thread - send_message ret: \
