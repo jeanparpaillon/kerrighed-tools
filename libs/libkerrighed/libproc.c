@@ -14,9 +14,7 @@
 
 #include <types.h>
 #include <krgnodemask.h>
-#include <epm/migration_types.h>
-/* #include <proc/krg_fork_types.h> */
-
+#include <migration.h>
 #include <checkpoint.h>
 #include <kerrighed_tools.h>
 
