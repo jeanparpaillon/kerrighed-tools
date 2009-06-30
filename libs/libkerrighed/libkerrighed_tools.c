@@ -12,7 +12,7 @@
 #include <sys/syscall.h>
 #include <errno.h>
 
-#include <kerrighed/types.h>
+#include <types.h>
 
 #include <kerrighed.h>
 

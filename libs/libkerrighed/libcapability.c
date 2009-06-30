@@ -9,10 +9,10 @@
 #include <sys/ioctl.h>
 #include <string.h>
 
-#include <kerrighed/types.h>
-#include <kerrighed/krgnodemask.h>
+#include <types.h>
+#include <krgnodemask.h>
 
-#include <kerrighed/capabilities.h>
+#include <capabilities.h>
 
 #include <kerrighed_tools.h>
 

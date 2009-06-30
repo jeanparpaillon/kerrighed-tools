@@ -14,7 +14,7 @@
 /* for KERRIGHED_MAX_CLUSTERS */
 #include <kerrighed/sys/types.h>
 /* for krgnodemask_t */
-#include <kerrighed/krgnodemask.h>
+#include <krgnodemask.h>
 
 #define KERRIGHED_PROC_MAGIC 0xD1
 

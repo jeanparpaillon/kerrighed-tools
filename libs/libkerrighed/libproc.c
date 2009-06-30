@@ -12,8 +12,8 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include <kerrighed/types.h>
-#include <kerrighed/krgnodemask.h>
+#include <types.h>
+#include <krgnodemask.h>
 #include <epm/migration_types.h>
 /* #include <proc/krg_fork_types.h> */
 
