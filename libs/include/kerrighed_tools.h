@@ -12,7 +12,7 @@
 /* for _IO* macros */
 #include <sys/ioctl.h>
 /* for KERRIGHED_MAX_CLUSTERS */
-#include <kerrighed/sys/types.h>
+#include <types.h>
 /* for krgnodemask_t */
 #include <krgnodemask.h>
 
