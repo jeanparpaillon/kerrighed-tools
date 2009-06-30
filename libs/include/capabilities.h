@@ -1,4 +1,5 @@
-/** Define Kerrighed Capabilities
+/**
+ * Define Kerrighed Capabilities
  * @author David Margery (c) Inria 2004
  */
 
@@ -21,19 +22,18 @@ enum {
 	CAP_SIZE /* keep as last capability */
 };
 
-typedef struct krg_cap_struct krg_cap_t;
-typedef struct krg_cap_pid_desc krg_cap_pid_t;
-
-#ifndef __KERNEL__
-
-struct krg_cap_struct
+typedef struct krg_cap_struct
 {
-  int  krg_cap_effective ; 
-  int  krg_cap_permitted ;
-  int  krg_cap_inheritable_permitted ;
-  int  krg_cap_inheritable_effective ; 
-} ;
+	int krg_cap_effective;
+	int krg_cap_permitted;
+	int krg_cap_inheritable_permitted;
+	int krg_cap_inheritable_effective;
+} krg_cap_t;
 
-#endif /* __KERNEL__ */
+typedef struct krg_cap_pid_desc
+{
+	pid_t pid;
+	krg_cap_t *caps;
+} krg_cap_pid_t;
 
-#endif
+#endif /* _KERRIGHED_CAPABILITIES_H */
