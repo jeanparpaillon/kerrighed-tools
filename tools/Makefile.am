@@ -8,7 +8,7 @@
 ###
 dist_bin_SCRIPTS = krg_legacy_scheduler
 
-bin_PROGRAMS = migrate checkpoint restart krgadm
+bin_PROGRAMS = migrate checkpoint restart krgadm krgcr-run
 if ENABLE_CAPABILITY
 bin_PROGRAMS += krgcapset
 endif
@@ -21,3 +21,4 @@ checkpoint_SOURCES = checkpoint.c
 restart_SOURCES = restart.c
 krgcapset_SOURCES = krgcapset.c
 krgadm_SOURCES = krgadm.c
+krgcr_run_SOURCES = krgcr-run.c

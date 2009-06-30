@@ -591,21 +591,41 @@ to do that, give --" 1>&2
 
     # let the application run in its own session
     local sessionfile="/tmp/sid$$"
+
+    # parse capabilities
     local optcap=""
-    if [ $krg_cap != "--" ]; then
-	optcap="-c $krg_cap"
+    echo $krg_cap | grep -q CHECKPOINTABLE
+    r=$?
+    if [ $r -ne 0 ]; then
+	optcap="-n"
+    fi
+
+    local oldcap=`krgcapset -s|grep "Inheritable Effective Capabilities: "|sed "s/Inheritable Effective Capabilities: //"`
+    local captoset=`echo $krg_cap | sed "s/CHECKPOINTABLE//" | tr -s "," | sed "s/^+,/+/" | sed "s/,$//" | sed "s/^+$//" | sed "s/^--$//"`
+
+    if [ "$captoset" != "" ]; then
+	krgcapset -d $captoset;
+	r=$?
+	if [ $r -ne 0 ]; then
+	    tst_brkm TFAIL NULL "Fail to set relevant capabilities ($captoset)"
+	    return $r
+	fi
     fi
 
     local sync=""
     if [ "$nosync" == "" ]; then
 	sync="-s"
     fi
-    setsid-cr $optcap -o $sessionfile $sync -- ${TESTCMD} ${TESTCMD_OPTIONS}
+
+    krgcr-run $optcap -b -o $sessionfile $sync -- ${TESTCMD} ${TESTCMD_OPTIONS}
     r=$?
     if [ $r -ne 0 ]; then
 	tst_brkm TFAIL NULL "Fail to run the application with relevant capabilities"
 	return $r
     fi
+
+    # give old capabilities
+    krgcapset -d $oldcap
 
     # give time to setsid to create the new session...
     local pid=`cat $sessionfile 2> /dev/null`

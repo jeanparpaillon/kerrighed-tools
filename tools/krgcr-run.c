@@ -32,40 +32,47 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <getopt.h>
+#include <kerrighed.h>
 
-#define MAX_LEN_CAP 256
 #define MAX_FILEPATH 256
 #define MAX_LEN_ARGS 512
 
-short foreground = 0;
+short background = 0;
 short sync_w_pipe = 0;
-char inheritable_capabilities[MAX_LEN_CAP];
+short setcap = 1;
 char filepath[MAX_FILEPATH];
 pid_t pid;
 
 void print_usage(char *cmd)
 {
 	fprintf(stderr,
-		"usage: %s [-c capabilities] [-o file] [-f] "
-		"program [arg ...]\n", cmd);
+		"usage: %s [OPTIONS] program [arg ...]\n"
+		"\t -o file: write the session id in a file\n"
+		"\t -b: start the program in background (default: foreground)\n"
+		, cmd);
 
+	/* Option -s and -n are hidden, there exist only for tests */
 }
 
-void set_capabilities(pid_t pid, char* args)
+void give_checkpointable_capability()
 {
+	krg_cap_t caps;
 	int r;
-	char krgcapsetcmd[256];
 
-	snprintf(krgcapsetcmd, 256, "krgcapset -k %d %s", pid, args);
-
-	r = system(krgcapsetcmd);
-
+	r = krg_capget(&caps);
 	if (r) {
-		int r_kcap;
-		perror("system");
-		r_kcap = WEXITSTATUS(r);
-		fprintf(stderr, "%s exits with status %d\n",
-			krgcapsetcmd, r_kcap);
+		fprintf(stderr,
+			"Fail to get Kerrighed capabilities "
+			"of current process (%d)\n", getpid());
+		exit(EXIT_FAILURE);
+	}
+
+	caps.krg_cap_inheritable_effective |= (1 << CAP_CHECKPOINTABLE);
+
+	r = krg_capset(&caps);
+	if (r) {
+		fprintf(stderr, "Fail to set Kerrighed capabilities "
+			"of current process (%d)\n", getpid());
 		exit(EXIT_FAILURE);
 	}
 }
@@ -74,19 +81,13 @@ void parse_args(int argc, char *argv[])
 {
 	int c;
 
-	while (1){
-		c = getopt(argc, argv, "hfso:c:");
+	while (1) {
+		c = getopt(argc, argv, "hbo:sn");
 		if (c == -1)
 			break;
 		switch (c) {
-		case 'c':
-			snprintf(inheritable_capabilities, MAX_LEN_CAP, optarg);
-			break;
-		case 'f':
-			foreground = 1;
-			break;
-		case 's':
-			sync_w_pipe = 1;
+		case 'b':
+			background = 1;
 			break;
 		case 'o':
 			snprintf(filepath, MAX_FILEPATH, optarg);
@@ -95,6 +96,12 @@ void parse_args(int argc, char *argv[])
 			print_usage(argv[0]);
 			exit(EXIT_SUCCESS);
 			break;
+		case 's':
+			sync_w_pipe = 1;
+			break;
+		case 'n':
+			setcap = 0;
+			break;
 		default:
 			printf("** unknown option\n");
 			print_usage(argv[0]);
@@ -102,7 +109,7 @@ void parse_args(int argc, char *argv[])
 		}
 	}
 
-	if (foreground)
+	if (!background)
 		sync_w_pipe = 0;
 }
 
@@ -121,25 +128,15 @@ int main(int argc, char *argv[])
 		print_usage(argv[0]);
 		exit(EXIT_FAILURE);
 	}
-	inheritable_capabilities[0]='\0';
 	filepath[0]='\0';
 
 	parse_args(argc, argv);
 
 	/*
-	 * set the right Kerrighed capabilities
+	 * set the Kerrighed CHECKPOINT capability
 	 */
-	if (strcmp(inheritable_capabilities, "") != 0) {
-		char capabilities[MAX_LEN_CAP];
-
-		/* quick and dirty... */
-		pid = getpid();
-
-		/* setting the new ones */
-		snprintf(capabilities, MAX_LEN_CAP, "-d %s",
-			 inheritable_capabilities);
-		set_capabilities(pid, capabilities);
-	}
+	if (setcap)
+		give_checkpointable_capability();
 
 	/* open a pipe to synchronize with the child application */
 	if (sync_w_pipe &&
@@ -161,7 +158,7 @@ int main(int argc, char *argv[])
 	case 0:		/* child */
 		break;
 	default:	/* parent */
-		if (foreground) {
+		if (!background) {
 			int r, exit_status;
 			struct sigaction action;
 
