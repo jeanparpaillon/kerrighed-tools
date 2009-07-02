@@ -2,38 +2,109 @@
 # Kerrighed Makefile.am
 #
 # Copyright 2006-2007 INRIA, All rights reserved
+# Copyright 2009, Kerlabs, All rights reserved
 #
-# Author:
+# Authors:
 #   Jean PARPAILLON <jean.parpaillon@kerlabs.com>
 #
-
-# Handle new form of aclocal.m4
 ACLOCAL_AMFLAGS = -I m4
+DISTCHECK_CONFIGURE_FLAGS=--enable-user-install --enable-tests
 
-if ENABLE_SERVICE
-OPTSCRIPTS = scripts
-endif
+# Let '.' in first subdirs to build kernel stuff before others
+SUBDIRS = . patches
 if ENABLE_LIBKERRIGHED
-OPTLIBKERRIGHED = libs tools
+SUBDIRS += libs
+endif
+if ENABLE_TOOLS
+SUBDIRS += tools
+endif
+if ENABLE_SERVICE
+SUBDIRS += scripts
 endif
 if ENABLE_TESTS
-OPTTESTS = tests
+SUBDIRS += tests
 endif
+SUBDIRS += man
+
+EXTRA_DIST = README INSTALL NEWS ChangeLog linux_version.sh
+
+kernel_srcdir = $(abspath @kernel_srcdir@)
+kernel_builddir = $(abspath $(top_builddir)/kernel)
+
+kernel_config = @kernel_config@
+kernel_config_file = @kernel_config_file@
+
+if USER_INSTALL
+kerneldir = ${prefix}/boot
+modulesdir = ${prefix}
+else
+kerneldir = /boot
+modulesdir =
+endif
+
+# out-of-source-build
+oosb = $(if $(filter $(kernel_builddir),$(kernel_srcdir)),n,y)
+
 if ENABLE_KERNEL
-OPTKERNEL = patches
+all-local: kernel
+install-exec-local: kernel-install
+uninstall-local: kernel-uninstall
+clean-local: kernel-clean
+distclean-local: kernel-distclean
 endif
 
-SUBDIRS =  $(OPTLIBKERRIGHED) $(OPTSCRIPTS) man $(OPTTESTS) $(OPTKERNEL)
-EXTRA_DIST = README INSTALL NEWS ChangeLog
+kernel: kernel-config
+	$(MAKE) -C $(kernel_builddir) bzImage
+	$(MAKE) -C $(kernel_builddir) modules
 
-if ENABLE_KERNEL
-all-local: kernel-prepare
-endif
+kernel-prepare: $(kernel_builddir)-$(oosb)
 
-kernel kernel-prepare kernel-config kernel-install: %:
-	$(MAKE) -C patches $@
+$(kernel_builddir)-y: $(kernel_builddir)/Makefile.oosb
 
-install-data-hook: print_notice
+$(kernel_builddir)/Makefile.oosb:
+	$(MAKE) $(AM_MAKEFLAGS) kernel-src
+	mkdir -p $(@D)
+	$(MAKE) -C $(kernel_srcdir) outputmakefile O="$(abspath $(kernel_builddir))"
+	ln -s Makefile $@
+
+$(kernel_builddir)-n: kernel-src
+
+kernel-src:
+	$(MAKE) -C patches $(AM_MAKEFLAGS) kernel-src
+
+kernel-config: $(kernel_builddir)/.config
+
+$(kernel_builddir)/.config: $(kernel_config_file)
+	$(MAKE) $(AM_MAKEFLAGS) kernel-prepare
+	@if test -n "$(kernel_config_file)"; then \
+	  cp $(kernel_config_file) $@; \
+	else \
+	  $(MAKE) -C $(kernel_builddir) $(kernel_config); \
+	fi
+
+kernel-install:
+	mkdir -p $(DESTDIR)$(kerneldir)
+	$(MAKE) -C $(kernel_builddir) install INSTALL_PATH=$(DESTDIR)$(kerneldir)
+	$(MAKE) -C $(kernel_builddir) modules_install INSTALL_MOD_PATH=$(DESTDIR)$(modulesdir)
+
+kernel-uninstall:
+	kernelrelease=$$($(MAKE) --quiet -C $(kernel_builddir) kernelrelease | sed '/^make/d'); \
+	  rm -f $(DESTDIR)$(kerneldir)/vmlinuz-$$kernelrelease; \
+	  rm -f $(DESTDIR)$(kerneldir)/initrd.img-$$kernelrelease; \
+	  rm -f $(DESTDIR)$(kerneldir)/System.map-$$kernelrelease; \
+	  rm -f $(DESTDIR)$(kerneldir)/config-$$kernelrelease; \
+	  rm -rf $(DESTDIR)$(modulesdir)/lib/modules/$$kernelrelease
+
+kernel-clean:
+	$(MAKE) -C kernel clean
+
+kernel-distclean:
+	$(MAKE) -C kernel mrproper
+	rm -rf _kernel
+	if test ! "$(kernel_builddir)" = "$(kernel_srcdir)"; then \
+	  rm -f $(shell find kernel -name asm-offsets.h); \
+	  rm -f kernel/Makefile kernel/Makefile.oosb; \
+	fi
 
 print_notice:
 	@echo -e "****************************************************************"
@@ -45,4 +116,4 @@ print_notice:
 	@echo -e "***"
 	@echo -e "****************************************************************"
 
-.PHONY: kernel kernel-prepare kernel-install kernel-config print_notice
+.PHONY: kernel kernel-prepare kernel-config kernel-install print_notice

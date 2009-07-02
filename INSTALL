@@ -1,4 +1,4 @@
-Kerrighed - Installation notes
+]Kerrighed - Installation notes
 ==============================
 
 This is a brief document about Kerrighed Installation.
@@ -24,7 +24,7 @@ Table of contents
 
 - automake      : version >= 1.9
 - autoconf      : version >= 2.59
-- gcc           : see linux 2.6.29 gcc recommendations (<linux>/Documentation/Changes)
+- gcc           : see linux 2.6.20 gcc recommendations (<linux>/Documentation/Changes)
 - Various tools :
   - libtool
   - pkg-config
@@ -45,9 +45,9 @@ Table of contents
 Type the following in the base directory of the Kerrighed
 distribution:
 
-	  % ./configure
-	  % make
-	  % make install
+	% ./configure
+	% make
+	% make install
 
 3/ Detailed configuration
 =========================
@@ -55,10 +55,10 @@ distribution:
    Kerrighed is made of several parts which can be built and installed
 independently:
 
-- kernel patch
-- kernel module
+- kerrighed kernel (modified Linux kernel)
 - libs
 - tools
+- scripts
 - tests
 
 3.1/ Generic configure options
@@ -122,36 +122,33 @@ operates.
 3.4/ Specific configure options
 =====================================
 
-   Following options can be passed to the toplevel configure script:
+   Following options can be passed to the configure script:
 
-  --disable-linux-check   Check for the Linux sources to be compatible with
-                          Kerrighed (!!! disable at your own risk !!!)
-                          [default=enable]
-  --disable-module        Patch the kernel with Kerrighed and build the module
-                          [default=enable]
-  --disable-libkerrighed  Disable libkerrighed [default=enable]
-  --disable-libkrgthread  Disable libkrgthread [default=enable]
-  --disable-tools         Disable tools [default=enable]
-  --disable-service       Do not install kerrighed service [default: enable if
-                          lsb found]
-  --disable-tests         Disable tests [default=enable]
+   --disable-kernel  	   Disable automatic kernel configuration/build/install
+   			   [default=enable]
+   --disable-libkerrighed  Disable libkerrighed [default=enable]
+   --disable-tools	   Disable tools [default=enable]
+   --disable-service	   Do not install Kerrighed service [default=enable if
+   			   lsb found]
+   --enable-tests	   Globally enable tests [default=disable]
+   --disable-tests-ktp	   Disable 'ktp' tests
+   --disable-tests-apps	   Disable 'apps' tests
+   --disable-tests-proc	   Disable 'proc' tests
+   --disable-tests-benchmark
+			   Disable 'benchmark' tests
 
-  --with-kernel=PATH      Path to kernel source [default=/lib/modules/`uname
-                          -r`/source]
-  --with-kernel-config=PATH
-                          Path to a kernel .config file. Sample files are
-                          provided in 'samples' directory.
-  --disable-service       Do not install kerrighed service [default: enable]
-  --disable-ktp           Disable 'ktp' part [default: enable]
-  --disable-apps          Disable 'apps' part [default: enable]
-  --disable-proc          Disable 'proc' part [default: enable]
-
-  --with-ltp-base	  Path to ltp base dir [default: enable]
+   --with-kernel-mirror	   kernel.org mirror used to get vanilla kernel
+   			   [default=ftp.eu.kernel.org]
+   --with-kernel-config	   config|menuconfig|xconfig|gconfig|defconfig|allmodconfig|allyesconfig|allnoconfig
+			   If you use automatic kernel config/build/install, use one of these target to configure
+			   the kernel.
+                           [default=defconfig]
+   --with-ltp-base	   Path to ltp base dir [default=LIBDIR/debian-test/tests/linux]
 
 3.5/ Build from outside of source tree
 ======================================
 
-   Compilation and installation can be done from outside of source dir.
+ Compilation and installation can be done from outside of source dir.
  Just create a new directory where you want to build and cd into it. Call
  configure script from this dir.
  All make targets can be used as usual.

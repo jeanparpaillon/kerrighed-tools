@@ -2,13 +2,11 @@
 #
 # update-rc.d Register kerrighed service for Debian-like distros
 #
-# Author:	Jean Parpaillon <jean.parpaillon@kerlabs.com>
+# Author:	Jean Parpaillon <jean.parpaillon@kerlab.com>
 #
 # Copyright:    INRIA-IRISA - 2006-2007
-#               Kerlabs 2007-2009
+#               Kerlabs 2007
 #
-set -e
-
 PROGRAM=$(basename ${0})
 SCRIPT=/usr/sbin/update-rc.d
 # Have a look at /etc/rcS.d/README to understand
@@ -31,7 +29,7 @@ i_remove() {
 if test "$(id -u)" != "0"
 then
     echo "Must be run as root"
-    exit 1
+    exit 0
 fi
 
 ARGUMENTS="$(getopt --longoptions install,remove,chroot: --name=${PROGRAM} --options irc: --shell sh -- "${@}")"
@@ -43,7 +41,6 @@ fi
 
 eval set -- "${ARGUMENTS}"
 
-CHROOT_DIR=
 while true
 do
     case "${1}" in
@@ -56,8 +53,7 @@ do
 	    shift
 	    ;;
 	--chroot|-c)
-	    CHROOT_DIR="${2}"
-	    CHROOT="chroot ${CHROOT_DIR}"
+	    CHROOT="chroot ${2}"
 	    shift 2
 	    ;;
 	--)
@@ -71,15 +67,11 @@ do
     esac
 done
 
-if test ! -x ${CHROOT_DIR}${SCRIPT}; then
-    echo "Missing ${CHROOT_DIR}${SCRIPT}, aborting..."
-    exit 0
-fi
-
 if test "${action}" = "install"; then
     i_install
 elif test "${action}" = "remove"; then
     i_remove
 fi
-
+    
+  
 exit 0

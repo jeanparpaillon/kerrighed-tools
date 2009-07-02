@@ -1,15 +1,12 @@
 ### Makefile.am for kerrighed libraries headers
 ###
 ### Copyright 2006-2007 INRIA, All rights reserved
-### Copyright 2009 Kerlabs
+### Copyright 2009 Kerlabs, All rights reserved
 ###
-### Author:
-###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
+### Authors:
+###        Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
 
-#
-# libkerrighed
-#
 if ENABLE_LIBKERRIGHED
 kerrighedincludedir=$(includedir)/kerrighed
 
@@ -19,10 +16,9 @@ kerrighedinclude_HEADERS = \
 	capabilities.h \
 	proc.h \
 	types.h \
-	migration.h \
 	checkpoint.h \
 	kerrighed_tools.h \
 	hotplug.h \
-	krgnodemask.h \
+	kerrighed/krgnodemask.h \
 	libkrgcb.h
 endif

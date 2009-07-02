@@ -1,11 +1,11 @@
-Kerrighed version 2.5.0
-   Build changes:
-	* Replace xmlto with xsltproc to build manpages
-
-Kerrighed version 2.4.0
    Features:
    * Remote vfork()
    * New RPC transmission engine that highly increases performance
+   Build system
+   * Remove sub-configures
+   * Split tools dir into scripts/ man/ and tools/
+   * Create patched kernel source dir in kernel/, no need for --with-kernel option
+   * Check architecture compatibility
 
 Kerrighed version 2.3.1
    Fixes:

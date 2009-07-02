@@ -15,6 +15,7 @@
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>restart</command>
+      <arg choice="opt" ><replaceable>OPTIONS</replaceable></arg>
       <arg choice="plain" ><replaceable>appid</replaceable></arg>
       <arg choice="plain" ><replaceable>version</replaceable></arg>
     </cmdsynopsis>
@@ -27,6 +28,61 @@
       <replaceable>appid</replaceable> from the <option>n</option>th checkpoint
       (with <option>n</option> equals to <replaceable>version</replaceable>).
     </para>
+    <para>
+      See <command>checkpoint</command>(1) for further details.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Options</title>
+    <para>
+      <variablelist>
+
+	<varlistentry>
+	  <term><option>-h</option></term>
+	  <term><option>--help</option></term>
+	  <listitem>
+	    <para>Print help and exit.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term><option>-q</option></term>
+	  <term><option>--quiet</option></term>
+	  <listitem>
+	    <para>Quiet; do not write anything to standard output.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term><option>-t</option></term>
+	  <term><option>--replace-tty</option></term>
+	  <listitem>
+	    <para>Replace application original terminal by the current one. This
+	    option can be used only if stdin, stdout and stderr are associated
+	    to the same terminal (no redirections).</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term><option>-f</option></term>
+	  <term><option>--foreground</option></term>
+	  <listitem>
+	    <para>By default, the application is restarted in a new session in
+	      background and the <command>restart</command> command exits as
+	      soon as the application is restarted.
+	    </para>
+	    <para>This option makes the <command>restart</command> command be
+	      parent of the restarted application and wait for the end of the
+	      application. The terminal can then be used to input data to the
+	      the application (useful for command-line interactive application).
+	      It implies option -t.
+	    </para>
+	  </listitem>
+	</varlistentry>
+
+      </variablelist>
+    </para>
   </refsect1>
 
   <refsect1>
@@ -34,19 +90,23 @@
     <para>
       <variablelist>
 	<varlistentry>
-	  <term><filename>/etc/kerrighed_nodes</filename></term>
-	  <listitem>
-	    <para>
-	      This file contains the list of nodes used in the Kerrighed cluster.
-	      See <command>kerrighed_nodes</command>(5) for further details.
-	    </para>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
 	  <term><filename>/var/chkpt</filename></term>
 	  <listitem>
 	    <para>
 	      This directory is default location for disk checkpoints.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><filename>/var/chkpt/&lt;appid&gt;/v&lt;version&gt;/</filename></term>
+	  <listitem>
+	    <para>
+	      This directory contains the <varname>n</varname>th checkpoint
+	      (with <varname>n</varname> equals to <varname>version</varname>)
+	      of application identified by <varname>appid</varname>.
+	    </para>
+	    <para>
+	      To remove a checkpoint from disk, remove this folder.
 	    </para>
 	  </listitem>
 	</varlistentry>
@@ -66,7 +126,9 @@
     <title>See Also</title>
     <para>
       <ulink url="checkpoint.1.xml" ><command>checkpoint</command>(1)</ulink>,
-      <ulink url="krgcapset" ><command>krgcapset</command>(1)</ulink>
+      <ulink url="krgcr-run.1.xml" ><command>krgcr-run</command>(1)</ulink>,
+      <ulink url="krgcapset" ><command>krgcapset</command>(1)</ulink>,
+      <ulink url="kerrighed_capabilities.7.html" ><command>kerrighed_capabilities</command>(7)</ulink>,
     </para>
   </refsect1>
 </refentry>

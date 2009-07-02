@@ -1,10 +1,9 @@
 ### Makefile.am for kerrighed tests
 ###
 ### Copyright 2007 INRIA, All rights reserved
-### Copyright 2009 Kerlabs, All rights reserved
 ###
-### Author:
-###   Jean Parpaillon <jean.parpaillon@kelrabs.com>
+### Authors:
+###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
 SUBDIRS = cr
 bin_SCRIPTS = krgltp-smp.sh slab-check

@@ -31,6 +31,23 @@
       application, saving the application state on disk, unfreezing the
       application. By default, all three steps are run in sequence.
     </para>
+    <para>
+      To allow an application to be checkpointed, one must set the
+      CHECKPOINTABLE capability. See <command>krgcr-run</command>(1),
+      <command>krgcapset</command>(1)) and <command>kerrighed_capabilities</command>(7)
+      for further details.
+    </para>
+    <para>
+      In general case, an application consists of a tree of processes or
+      threads. The root process of the application must have the CHECKPOINTABLE
+      capability effective and inheritable before creating other processes or
+      threads (See <function>fork</function>(2), <function>clone</function>(2),
+      and <function>pthread_create</function>(3)).
+    </para>
+    <para>
+      If the root application process exits later, all its children processes
+      are still considered as processes of the same application.
+    </para>
   </refsect1>
 
   <refsect1>
@@ -73,7 +90,7 @@
 	  <listitem>
 	    <para>
 	      Unfreeze an application previously frozen without checkpointing
-	      it. Optionnaly, it sends a signal <replaceable>signal</replaceable>
+	      it. Optionally, it sends a signal <replaceable>signal</replaceable>
 	      to all processes of the application just before unfreezing it. The
 	      signal will be handled by each process as soon as the process is
 	      woken up. By default, no signal is sent.
@@ -133,23 +150,66 @@
   </refsect1>
 
   <refsect1>
+    <title>Supported applications and limitations</title>
+
+    <para>Multi-process applications and multithreaded programs are supported.
+      To be able to restart the application, all process identifiers (including
+      process group and session identifier) used by the application must be
+      unused.
+    </para>
+
+    <para>Checkpointing applications with zombie processes is not supported.
+    </para>
+
+    <para>Checkpointing of applications using sockets or pipes is not supported.
+      Therefore, graphic applications are not supported since there are using
+      sockets to communicate with the X server.
+    </para>
+
+    <para>IPC objects are not restored but it is possible to checkpoint an
+      application that is currently waiting on such IPC objects. For instance,
+      you can checkpoint a process waiting to receive a message from a message
+      queue. The process will replay the action after the restart if the IPC
+      objects still exits.
+    </para>
+
+    <para>Files are not checkpointed nor restored. The files are reopened at
+      restart time and file pointers are restored. That means that files must be
+      in consistent states at restart time. Else, you can expect a strange
+      behavior from your application. You can take advantage of the freeze
+      option before the checkpoint to manually backup the files.
+    </para>
+
+    <para>
+      To restart your application, you must run exactly the same kernel as
+      before the checkpoint. Thus, you can not expect to checkpoint an
+      application before upgrading your kernel and restart once the upgrade is
+      done.
+    </para>
+  </refsect1>
+
+  <refsect1>
     <title>Files</title>
     <para>
       <variablelist>
-	<varlistentry>
-	  <term><filename>/etc/kerrighed_nodes</filename></term>
-	  <listitem>
-	    <para>
-	      This file contains the list of nodes used in the Kerrighed cluster.
-	      See <command>kerrighed_nodes</command>(5) for further details.
-	    </para>
-	  </listitem>
-	</varlistentry>
 	<varlistentry>
 	  <term><filename>/var/chkpt</filename></term>
 	  <listitem>
 	    <para>
 	      This directory is default location for disk checkpoints.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><filename>/var/chkpt/&lt;appid&gt;/v&lt;version&gt;/</filename></term>
+	  <listitem>
+	    <para>
+	      This directory contains the <varname>n</varname>th checkpoint
+	      (with <varname>n</varname> equals to <varname>version</varname>)
+	      of application identified by <varname>appid</varname>.
+	    </para>
+	    <para>
+	      To remove a checkpoint from disk, remove this folder.
 	    </para>
 	  </listitem>
 	</varlistentry>
@@ -169,7 +229,9 @@
     <title>See Also</title>
     <para>
       <ulink url="restart.1.html" ><command>restart</command>(1)</ulink>,
-      <ulink url="krgcapset.1.html" ><command>krgcapset</command>(1)</ulink>
+      <ulink url="krgcr-run.1.html" ><command>krgcr-run</command>(1)</ulink>,
+      <ulink url="krgcapset.1.html" ><command>krgcapset</command>(1)</ulink>,
+      <ulink url="kerrighed_capabilities.7.html" ><command>kerrighed_capabilities</command>(7)</ulink>,
     </para>
   </refsect1>
 </refentry>

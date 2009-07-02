@@ -1,0 +1,90 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='krgcr-run.1'>
+  <refmeta>
+    <refentrytitle>krgcr-run</refentrytitle>
+    <manvolnum>1</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>krgcr-run</refname>
+    <refpurpose>Run a program with CHECKPOINTABLE capability.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>krgrun-cr</command>
+      <arg choice="opt" ><replaceable>OPTIONS</replaceable></arg>
+      <arg choice="plain" ><replaceable>program</replaceable></arg>
+      <arg choice="opt" >
+	<replaceable>arg</replaceable>
+	<replaceable>...</replaceable>
+      </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      <command>krgcr-run</command> runs a program in a new session and gives the
+      CHECKPOINTABLE capability (See <command>kerrighed_capabilities</command>(7))
+      to the program. If the program respects current limitations described
+      in <command>checkpoint</command>(1) manual, it can be safely checkpointed.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Options</title>
+    <para>
+      <variablelist>
+
+	<varlistentry>
+	  <term><option>-h</option></term>
+	  <term><option>--help</option></term>
+	  <listitem>
+	    <para>Print help and exit.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term><option>-b</option></term>
+	  <term><option>--background</option></term>
+	  <listitem>
+	    <para>Run the application in background. Default: run the
+	      application in foreground.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term><option>-o</option> <replaceable>file</replaceable></term>
+	  <term><option>--output</option>=<replaceable>file</replaceable></term>
+	  <listitem>
+	    <para>Output application identifier in file. This is useful to
+	      script the checkpoint.
+	    </para>
+	  </listitem>
+	</varlistentry>
+
+      </variablelist>
+    </para>
+  </refsect1>
+
+
+  <refsect1>
+    <title>Author</title>
+    <para>
+      Matthieu Fertré <email>matthieu.fertre@kerlabs.com</email>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>See Also</title>
+    <para>
+      <link url="checkpoint.1.xml" ><command>checkpoint</command>(1)</link>,
+      <ulink url="restart.1.xml" ><command>restart</command>(1)</ulink>,
+      <ulink url="krgcapset.1.xml" ><command>krgcapset</command>(1)</ulink>,
+      <ulink url="kerrighed_capabilies.7.xml" ><command>kerrighed_capabilities</command>(7)</ulink>
+    </para>
+  </refsect1>
+</refentry>

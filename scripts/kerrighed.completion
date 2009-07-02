@@ -1,0 +1,99 @@
+#
+# Completion of Kerrighed tools
+#
+have krgcapset &&
+_krgcapset()
+{
+    local cur=$2 prev=$3
+    local options='--help -h --show -s --force -f --pid -k
+      --effective -e --permitted -p --inheritable-effective -d
+      --inheritable-permitted -i'
+    local caps='+CHANGE_KERRIGHED_CAP +CAN_MIGRATE +DISTANT_FORK +USE_REMOTE_MEMORY
+      +CHECKPOINTABLE +SEE_LOCAL_PROC_STAT -CHANGE_KERRIGHED_CAP -CAN_MIGRATE -DISTANT_FORK
+      -USE_REMOTE_MEMORY -CHECKPOINTABLE -SEE_LOCAL_PROC_STAT'
+
+    COMPREPLY=()
+
+    case "${prev}" in
+	-@(-effective|e|-permitted|p|-inheritable-effective|d|-inheritable-permitted|i))
+	# previous option asks for a capability
+            COMPREPLY=( $(compgen -W "${caps}" -- ${cur}) )
+	    return 0
+	    ;;
+	-@(-pid|k))
+	# previous option asks for a pid
+	    _pids
+	    return 0
+	    ;;
+    esac
+
+    # return one of the possible options
+    COMPREPLY=( $(compgen -W "${options}" -- ${cur}) )
+
+    return 0
+}
+[ -n "${have:-}" ] && complete -F _krgcapset krgcapset
+
+_krgnodes()
+{
+    [ -d "/proc/nodes" ] && echo $(command ls -1d /proc/nodes/node* | sed 's#^\(.*/\)##')
+}
+
+have krgadm &&
+_krgadm()
+{
+    local cur=$2 prev=$3
+
+    local modes='cluster nodes'
+    local cluster_actions='status start wait_start poweroff reboot'
+    local cluster_opts='-s --subsessions -n --nodes'
+    local nodes_actions='status add del poweroff reboot fail swap ban unban'
+    local nodes_opts='-s --subsessions -n --nodes'
+    local options='--help -h'
+
+    COMPREPLY=()
+
+    case "${prev}" in
+	cluster)
+            COMPREPLY=( $(compgen -W "${cluster_actions}" -- ${cur}) )
+	    return 0
+	    ;;
+	nodes)
+            COMPREPLY=( $(compgen -W "${nodes_actions}" -- ${cur}) )
+	    return 0
+	    ;;
+	-@(n|-nodes))
+            last_item_in_list="${cur##*,}"
+	    list_before_item="${cur%${last_item_in_list}}"
+            COMPREPLY=(
+		$(
+		    compgen -S "," -P "${list_before_item}" -W "$(_krgnodes)"
+		    )
+		)
+            return 0
+	    ;;
+
+	*)
+	    case "${COMP_WORDS[1]}" in
+		cluster)
+		    COMPREPLY=( $(compgen -W "${cluster_opts}" -- ${cur}) )
+		    return 0
+		    ;;
+		nodes)
+		    COMPREPLY=( $(compgen -W "${nodes_opts}" -- ${cur}) )
+		    return 0
+		    ;;
+	    esac
+    esac
+
+    if [[ "${cur}" == -* ]]; then
+	# return one of the possible options
+	COMPREPLY=( $(compgen -W "${options}" -- ${cur} ) )
+    else
+        # return one of the possible modes
+	COMPREPLY=( $(compgen -W "${modes}" -- ${cur}) )
+    fi
+
+    return 0
+}
+[ -n "${have:-}" ] && complete -F _krgadm krgadm

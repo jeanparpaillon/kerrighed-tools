@@ -8,10 +8,7 @@
 ###
 dist_bin_SCRIPTS = krg_legacy_scheduler
 
-bin_PROGRAMS = migrate checkpoint restart krgadm krgcr-run
-if ENABLE_CAPABILITY
-bin_PROGRAMS += krgcapset
-endif
+bin_PROGRAMS = migrate checkpoint restart krgadm krgcapset krgcr-run
 
 INCLUDES = -I@top_srcdir@/libs/include
 LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la @top_builddir@/libs/libkrgcb/libkrgcb.la
