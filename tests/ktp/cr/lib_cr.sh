@@ -444,7 +444,17 @@ get_cpu_hosting_process()
 cpu2node()
 {
     local cpu=$1
-    local NRCPUS=8 # WARNING: it depends on the kernel configuration :'(
+    local NRCPUS=0
+
+    if [ -e /sys/devices/system/cpu/kernel_max ]; then
+	local cpu_max_id=`cat /sys/devices/system/cpu/kernel_max`
+	NRCPUS=$[$cpu_max_id+1]
+    else
+        # WARNING: it depends on the kernel configuration :'(
+	echo "WARNING: Fail to detect the number of CPUS (file /sys/devices/system/cpu/kernel_max does not exist)" >&2
+	NRCPUS=8
+    fi
+
     local node=$[$cpu/$NRCPUS]
     echo "$node"
 }
