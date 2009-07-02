@@ -229,7 +229,6 @@
     <title>See Also</title>
     <para>
       <ulink url="restart.1.html" ><command>restart</command>(1)</ulink>,
-      <ulink url="krgcr-run.1.html" ><command>krgcr-run</command>(1)</ulink>,
       <ulink url="krgcapset.1.html" ><command>krgcapset</command>(1)</ulink>,
       <ulink url="kerrighed_capabilities.7.html" ><command>kerrighed_capabilities</command>(7)</ulink>,
     </para>

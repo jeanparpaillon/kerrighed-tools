@@ -94,7 +94,7 @@ d_trigger_krg_legacy_scheduler_start () {
     self=$(readlink -f /proc/nodes/self)
     first_ascii=$(ls -1d /proc/nodes/node*|sort|head -1)
 
-    if [ $self = $first_ascii ]; then
+    if [ "$self" = "$first_ascii" ]; then
 	krg_legacy_scheduler
     fi
 }

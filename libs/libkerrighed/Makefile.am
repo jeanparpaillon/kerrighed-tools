@@ -12,16 +12,15 @@ DISTCLEANFILES = kerrighed.pc
 
 INCLUDES = \
 	-I$(srcdir)/../include \
-	-I@kernel_srcdir@/include \
-	-I$(top_srcdir)/modules
+	-I@kernel_srcdir@/include
 
 lib_LTLIBRARIES = libkerrighed.la
 
 libkerrighed_la_SOURCES = \
 	libkerrighed_tools.c \
 	libproc.c \
-	libcapability.c \
-	libhotplug.c
+	libhotplug.c \
+	libcapability.c
 
 libkerrighed_la_LDFLAGS = -version-info 1:0:0
 

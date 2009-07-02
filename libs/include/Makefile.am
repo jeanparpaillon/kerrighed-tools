@@ -16,9 +16,10 @@ kerrighedinclude_HEADERS = \
 	capabilities.h \
 	proc.h \
 	types.h \
+	migration.h \
 	checkpoint.h \
 	kerrighed_tools.h \
 	hotplug.h \
-	kerrighed/krgnodemask.h \
+	krgnodemask.h \
 	libkrgcb.h
 endif

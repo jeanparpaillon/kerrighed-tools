@@ -6,6 +6,8 @@
 ### Authors:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
+AM_CFLAGS = -Wall -Werror
+
 bin_PROGRAMS = bi bi-cr bi-cr-static bi-file bi-signal bi-double bi-clone-files bi-clone-fs bi-clone-semundo bi-thread bi-server-socket ipcshm-tool
 lib_LTLIBRARIES = libbi.la
 include_HEADERS = libbi.h

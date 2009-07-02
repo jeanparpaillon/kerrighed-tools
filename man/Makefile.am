@@ -31,7 +31,7 @@ html: $(html_MANS)
 $(man_MANS): %: %.xml manual-man.xsl
 	xsltproc --nonet --param man.endnotes.are.numbered 0 $(srcdir)/manual-man.xsl $<
 
-$(html_MANS): %.html: %.xml manual-xhtml.xsl $<
+$(html_MANS): %.html: %.xml manual-xhtml.xsl
 	xsltproc --nonet --output $@ $(srcdir)/manual-xhtml.xsl $<
 
 .PHONY: html

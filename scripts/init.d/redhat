@@ -61,9 +61,7 @@ d_start() {
 
     case "x$LEGACY_SCHED" in
 	xtrue)
-	    krg_legacy_scheduler
-	    RETVAL="$?"
-	    [ $RETVAL != 0 ] && log_failure_msg "Could not enable legacy scheduler"
+	    d_trigger_krg_legacy_scheduler_start &
 	    ;;
 	xfalse)
 	    ;;
@@ -72,6 +70,25 @@ d_start() {
 	    log_warning_msg "Value of LEGACY_SCHED in $CFG must be either 'true' or 'false';"
 	    ;;
     esac
+}
+
+#
+# Function that puts a trigger in place so that the krg_legacy_scheduler
+# gets automatically started when the cluster is started.
+#
+d_trigger_krg_legacy_scheduler_start () {
+    # Wait for the cluster to be started.
+    krgadm cluster wait_start >/dev/null 2>&1
+
+    # Only run the scheduler on a single node. Arbitrarily, the first
+    # node (beware, the sort can't be numerical even if -n is passed,
+    # because of the non-numerical prefix, so it's ASCII).
+    self=$(readlink -f /proc/nodes/self)
+    first_ascii=$(ls -1d /proc/nodes/node*|sort|head -1)
+
+    if [ "$self" = "$first_ascii" ]; then
+	krg_legacy_scheduler
+    fi
 }
 
 #
