@@ -1,4 +1,4 @@
-]Kerrighed - Installation notes
+Kerrighed - Installation notes
 ==============================
 
 This is a brief document about Kerrighed Installation.
@@ -24,7 +24,7 @@ Table of contents
 
 - automake      : version >= 1.9
 - autoconf      : version >= 2.59
-- gcc           : see linux 2.6.20 gcc recommendations (<linux>/Documentation/Changes)
+- gcc           : see linux 2.6.30 gcc recommendations (<linux>/Documentation/Changes)
 - Various tools :
   - libtool
   - pkg-config
