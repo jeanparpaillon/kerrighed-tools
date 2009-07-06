@@ -422,12 +422,13 @@ static int initialize_cb_thread(void)
 
 	pthread_mutex_lock(&mutex);
 
+	thread_running = 1;
+
 	/* Init worker thread for callback handling */
 	r = pthread_create(&cb_thread, NULL, worker_thread, NULL);
 	if (r)
 		goto err;
 
-	thread_running = 1;
 	return r;
 
 err:
