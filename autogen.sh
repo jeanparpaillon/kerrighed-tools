@@ -25,11 +25,11 @@ find_tools() {
         elif test "$major" -eq 1 -a "$minor" -ge 10; then
             TOOL=$tool
         else
-            echo "Required: $tool version >= 1.10"
-            exit 1;
+            echo "Required: $tool version >= 1.10" >&2
+            exit 1
         fi
     else
-        echo "Required: $tool version >= 1.10"
+        echo "Required: $tool version >= 1.10" >&2
         exit 1
     fi
 
