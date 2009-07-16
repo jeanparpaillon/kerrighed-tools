@@ -15,9 +15,9 @@ $(dirname $0)/clean.sh
 find_tools() {
     tool=$1
 
-    if `which $tool-1.10 > /dev/null 2>&1`; then
+    if [ -s "$(which $tool-1.10)" ]; then
         TOOL=$tool-1.10
-    elif `which $tool > /dev/null 2>&1`; then
+    elif [ -s "$(which $tool)" ]; then
         major=`$tool --version | grep $tool | awk {'print \$4'} | awk -F '.' {'print \$1'}`
         minor=`$tool --version | grep $tool | awk {'print \$4'} | awk -F '.' {'print \$2'}`
         if test "$major" -gt 1; then
@@ -39,7 +39,7 @@ find_tools() {
 # Find required tools:
 ACLOCAL=$(find_tools aclocal)
 AUTOMAKE=$(find_tools automake)
-if [ `which libtool >/dev/null 2>&1` ]; then
+if [ -z "$(which libtool)" ]; then
     echo "Required: libtool"
     exit 1
 fi
@@ -58,7 +58,7 @@ if test -f $(dirname $0)/configure.ac; then
 fi
 
 # Optional:
-if [ -z $(which xsltproc >/dev/null 2>&1) ]; then
+if [ -z "$(which xsltproc)" ]; then
     echo '(Optional) Not found: xsltproc'
     echo 'It is needed if the manpages are to be built, along with stylesheets'
     echo 'usually shipped in a package named like docbook-xsl.'
