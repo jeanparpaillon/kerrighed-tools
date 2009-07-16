@@ -36,9 +36,15 @@ find_tools() {
     echo "$TOOL"
 }
 
+# Find required tools:
 ACLOCAL=$(find_tools aclocal)
 AUTOMAKE=$(find_tools automake)
+if [ `which libtool >/dev/null 2>&1` ]; then
+    echo "Required: libtool"
+    exit 1
+fi
 
+# Run the actual process:
 if test -f $(dirname $0)/configure.ac; then
     (
         cd $(dirname $0)
