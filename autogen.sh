@@ -56,3 +56,10 @@ if test -f $(dirname $0)/configure.ac; then
         autoconf
         )
 fi
+
+# Optional:
+if [ -z $(which xsltproc >/dev/null 2>&1) ]; then
+    echo '(Optional) Not found: xsltproc'
+    echo 'It is needed if the manpages are to be built, along with stylesheets'
+    echo 'usually shipped in a package named like docbook-xsl.'
+fi
