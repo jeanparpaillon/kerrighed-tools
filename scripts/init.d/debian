@@ -6,7 +6,7 @@
 #               Cyril Brulebois <cyril.brulebois@kerlabs.com>
 #
 # Copyright:    INRIA-IRISA - 2006-2007
-#               Kerlabs - 2008
+#               Kerlabs - 2008-2009
 #
 
 ### BEGIN INIT INFO
@@ -65,8 +65,6 @@ d_check_for_no_start() {
 # Function that starts the daemon/service.
 #
 d_start() {
-    /sbin/modprobe -q $KRG_MODULE $ARGS
-
     case "x$LEGACY_SCHED" in
 	xtrue)
 	    d_trigger_krg_legacy_scheduler_start &
