@@ -17,7 +17,7 @@ find_tools() {
 
     if `which $tool-1.10 > /dev/null 2>&1`; then
         TOOL=$tool-1.10
-    else
+    elif `which $tool > /dev/null 2>&1`; then
         major=`$tool --version | grep $tool | awk {'print \$4'} | awk -F '.' {'print \$1'}`
         minor=`$tool --version | grep $tool | awk {'print \$4'} | awk -F '.' {'print \$2'}`
         if test "$major" -gt 1; then
@@ -28,6 +28,9 @@ find_tools() {
             echo "Required: $tool version >= 1.10"
             exit 1;
         fi
+    else
+        echo "Required: $tool version >= 1.10"
+        exit 1
     fi
 
     echo "$TOOL"
