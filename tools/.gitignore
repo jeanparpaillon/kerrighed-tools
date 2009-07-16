@@ -6,3 +6,5 @@ checkpoint
 restart
 migrate
 krgadm
+krgcapset
+krgcr-run
