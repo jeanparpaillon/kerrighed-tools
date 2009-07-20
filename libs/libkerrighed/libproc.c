@@ -103,12 +103,12 @@ int migrate_self (int destination_node)
 int application_freeze_from_appid(long app_id)
 {
 	int r;
-	checkpoint_infos_t ckpt_infos;
+	struct checkpoint_info ckpt_info;
 
-	ckpt_infos.app_id = app_id;
-	ckpt_infos.type = FROM_APPID;
-	ckpt_infos.signal = 0;
-	r = call_kerrighed_services(KSYS_APP_FREEZE, &ckpt_infos);
+	ckpt_info.app_id = app_id;
+	ckpt_info.type = FROM_APPID;
+	ckpt_info.signal = 0;
+	r = call_kerrighed_services(KSYS_APP_FREEZE, &ckpt_info);
 
 	return r;
 }
@@ -116,12 +116,12 @@ int application_freeze_from_appid(long app_id)
 int application_freeze_from_pid(pid_t pid)
 {
 	int r;
-	checkpoint_infos_t ckpt_infos;
+	struct checkpoint_info ckpt_info;
 
-	ckpt_infos.app_id = pid;
-	ckpt_infos.type = FROM_PID;
-	ckpt_infos.signal = 0;
-	r = call_kerrighed_services(KSYS_APP_FREEZE, &ckpt_infos);
+	ckpt_info.app_id = pid;
+	ckpt_info.type = FROM_PID;
+	ckpt_info.signal = 0;
+	r = call_kerrighed_services(KSYS_APP_FREEZE, &ckpt_info);
 
 	return r;
 }
@@ -129,12 +129,12 @@ int application_freeze_from_pid(pid_t pid)
 int application_unfreeze_from_appid(long app_id, int signal)
 {
 	int r;
-	checkpoint_infos_t ckpt_infos;
+	struct checkpoint_info ckpt_info;
 
-	ckpt_infos.app_id = app_id;
-	ckpt_infos.type = FROM_APPID;
-	ckpt_infos.signal = signal;
-	r = call_kerrighed_services(KSYS_APP_UNFREEZE, &ckpt_infos);
+	ckpt_info.app_id = app_id;
+	ckpt_info.type = FROM_APPID;
+	ckpt_info.signal = signal;
+	r = call_kerrighed_services(KSYS_APP_UNFREEZE, &ckpt_info);
 
 	return r;
 }
@@ -142,48 +142,48 @@ int application_unfreeze_from_appid(long app_id, int signal)
 int application_unfreeze_from_pid(pid_t pid, int signal)
 {
 	int r;
-	checkpoint_infos_t ckpt_infos;
+	struct checkpoint_info ckpt_info;
 
-	ckpt_infos.app_id = pid;
-	ckpt_infos.type = FROM_PID;
-	ckpt_infos.signal = signal;
-	r = call_kerrighed_services(KSYS_APP_UNFREEZE, &ckpt_infos);
+	ckpt_info.app_id = pid;
+	ckpt_info.type = FROM_PID;
+	ckpt_info.signal = signal;
+	r = call_kerrighed_services(KSYS_APP_UNFREEZE, &ckpt_info);
 
 	return r;
 }
 
-checkpoint_infos_t application_checkpoint_from_appid(long app_id)
+struct checkpoint_info application_checkpoint_from_appid(long app_id)
 {
-	checkpoint_infos_t ckpt_infos;
+	struct checkpoint_info ckpt_info;
 
-	ckpt_infos.app_id = app_id;
-	ckpt_infos.chkpt_sn = 0;
-	ckpt_infos.type = FROM_APPID;
-	ckpt_infos.signal = 0;
-	ckpt_infos.result = call_kerrighed_services(KSYS_APP_CHKPT,
-						    &ckpt_infos);
+	ckpt_info.app_id = app_id;
+	ckpt_info.chkpt_sn = 0;
+	ckpt_info.type = FROM_APPID;
+	ckpt_info.signal = 0;
+	ckpt_info.result = call_kerrighed_services(KSYS_APP_CHKPT,
+						    &ckpt_info);
 
-	return ckpt_infos;
+	return ckpt_info;
 }
 
-checkpoint_infos_t application_checkpoint_from_pid(pid_t pid)
+struct checkpoint_info application_checkpoint_from_pid(pid_t pid)
 {
-	checkpoint_infos_t ckpt_infos;
+	struct checkpoint_info ckpt_info;
 
-	ckpt_infos.app_id = pid;
-	ckpt_infos.chkpt_sn = 0;
-	ckpt_infos.type = FROM_PID;
-	ckpt_infos.signal = 0;
-	ckpt_infos.result = call_kerrighed_services(KSYS_APP_CHKPT,
-						    &ckpt_infos);
+	ckpt_info.app_id = pid;
+	ckpt_info.chkpt_sn = 0;
+	ckpt_info.type = FROM_PID;
+	ckpt_info.signal = 0;
+	ckpt_info.result = call_kerrighed_services(KSYS_APP_CHKPT,
+						    &ckpt_info);
 
-	return ckpt_infos;
+	return ckpt_info;
 }
 
 int application_restart(long app_id, int chkpt_sn, int flags)
 {
 	int res;
-	restart_request_t rst_req;
+	struct restart_request rst_req;
 
 	rst_req.app_id = app_id;
 	rst_req.chkpt_sn = chkpt_sn;
@@ -209,7 +209,7 @@ int application_set_userdata(__u64 data)
 int application_get_userdata_from_appid(long app_id, __u64 *data)
 {
 	int res;
-	app_userdata_request_t datareq;
+	struct app_userdata_request datareq;
 	datareq.app_id = app_id;
 	datareq.type = FROM_APPID;
 	datareq.user_data = 0;
@@ -223,7 +223,7 @@ int application_get_userdata_from_appid(long app_id, __u64 *data)
 int application_get_userdata_from_pid(long app_id, __u64 *data)
 {
 	int res;
-	app_userdata_request_t datareq;
+	struct app_userdata_request datareq;
 	datareq.app_id = app_id;
 	datareq.type = FROM_PID;
 	datareq.user_data = 0;

@@ -22,8 +22,8 @@ int application_freeze_from_pid(long app_id);
 int application_unfreeze_from_appid(long app_id, int signal);
 int application_unfreeze_from_pid(long app_id, int signal);
 
-checkpoint_infos_t application_checkpoint_from_appid(long app_id);
-checkpoint_infos_t application_checkpoint_from_pid(pid_t pid);
+struct checkpoint_info application_checkpoint_from_appid(long app_id);
+struct checkpoint_info application_checkpoint_from_pid(pid_t pid);
 
 /* return the pid of the application root process in case of success */
 int application_restart(long app_id, int chkpt_sn, int flags);

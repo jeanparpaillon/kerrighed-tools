@@ -129,7 +129,7 @@ void check_environment(void)
 }
 
 int write_description(char *description,
-		      checkpoint_infos_t *infos)
+		      struct checkpoint_info *info)
 {
 	FILE* fd;
 	char path[256];
@@ -142,14 +142,14 @@ int write_description(char *description,
 	       "Version: %d\n"
 	       "Description: %s\n"
 	       "Date: %s\n",
-	       infos->app_id,
-	       infos->chkpt_sn,
+	       info->app_id,
+	       info->chkpt_sn,
 	       description,
 	       ctime(&date));
 
 	// need to write it in a file
 	sprintf(path, "%s/%ld/v%d/description.txt", CHKPT_DIR,
-		infos->app_id, infos->chkpt_sn);
+		info->app_id, info->chkpt_sn);
 
 	fd = fopen(path, "a");
 	if (!fd) {
@@ -162,8 +162,8 @@ int write_description(char *description,
 		"Version: %d\n"
 		"Description: %s\n"
 		"Date: %ld\n",
-		infos->app_id,
-		infos->chkpt_sn,
+		info->app_id,
+		info->chkpt_sn,
 		description,
 		date);
 	fclose(fd);
@@ -183,14 +183,14 @@ void show_error(int _errno)
 	}
 }
 
-void clean_checkpoint_dir(checkpoint_infos_t *infos)
+void clean_checkpoint_dir(struct checkpoint_info *info)
 {
 	DIR *dir;
 	struct dirent *ent;
 	char path[256];
 	int r;
 
-	if (!infos->chkpt_sn)
+	if (!info->chkpt_sn)
 		return;
 
 	/* to refresh NFS cache... */
@@ -201,7 +201,7 @@ void clean_checkpoint_dir(checkpoint_infos_t *infos)
 	}
 	closedir(dir);
 
-	sprintf(path, "%s/%ld/", CHKPT_DIR, infos->app_id);
+	sprintf(path, "%s/%ld/", CHKPT_DIR, info->app_id);
 	dir = opendir(path);
 	if (!dir) {
 		perror("opendir");
@@ -210,7 +210,7 @@ void clean_checkpoint_dir(checkpoint_infos_t *infos)
 	closedir(dir);
 
 	sprintf(path, "%s/%ld/v%d/", CHKPT_DIR,
-		infos->app_id, infos->chkpt_sn);
+		info->app_id, info->chkpt_sn);
 
 	/* remove the file and directory */
 	dir = opendir(path);
@@ -222,7 +222,7 @@ void clean_checkpoint_dir(checkpoint_infos_t *infos)
 	while ((ent = readdir(dir)) != NULL) {
 		if (ent->d_type == DT_REG) {
 			sprintf(path, "%s/%ld/v%d/%s", CHKPT_DIR,
-				infos->app_id, infos->chkpt_sn, ent->d_name);
+				info->app_id, info->chkpt_sn, ent->d_name);
 			r = remove(path);
 			if (r)
 				perror("remove");
@@ -231,12 +231,12 @@ void clean_checkpoint_dir(checkpoint_infos_t *infos)
 	closedir(dir);
 
 	sprintf(path, "%s/%ld/v%d/", CHKPT_DIR,
-		infos->app_id, infos->chkpt_sn);
+		info->app_id, info->chkpt_sn);
 	r = remove(path);
 	if (r)
 		perror("remove");
 
-	sprintf(path, "%s/%ld/", CHKPT_DIR, infos->app_id);
+	sprintf(path, "%s/%ld/", CHKPT_DIR, info->app_id);
 	remove(path);
 }
 
@@ -244,26 +244,26 @@ int checkpoint_app(long pid, short _quiet)
 {
 	int r;
 
-	checkpoint_infos_t infos;
+	struct checkpoint_info info;
 	if (from_appid) {
 		if (!_quiet)
 			printf("Checkpointing application %ld...\n", pid);
 
-		infos = application_checkpoint_from_appid(pid);
+		info = application_checkpoint_from_appid(pid);
 	} else {
 		if (!_quiet)
 			printf("Checkpointing application in which "
 			       "process %d is involved...\n", (pid_t)pid);
-		infos = application_checkpoint_from_pid((pid_t)pid);
+		info = application_checkpoint_from_pid((pid_t)pid);
 	}
 
-	r = infos.result;
+	r = info.result;
 
 	if (!r)
-		write_description(description, &infos);
+		write_description(description, &info);
 	else {
 		show_error(errno);
-		clean_checkpoint_dir(&infos);
+		clean_checkpoint_dir(&info);
 	}
 
 	return r;
