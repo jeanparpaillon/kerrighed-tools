@@ -1,0 +1,328 @@
+#!/bin/bash
+
+# Default values for arguments
+
+#onetest=sendfile01
+let nr_ps=16
+let nr_run=1
+
+BASETEST=@ltpbase@/testcases/bin
+PATH=${PATH}:@ltpbase@/tools:$BASETEST
+
+
+###############################
+############################### FUNCTIONS DEFINITION
+###############################
+
+
+# Tell which loop of all tests is currently running
+function print_progress(){
+	local run_nr
+
+	nr_arg=
+	if [ -z "$onetest" ]; then
+		let run_nr=nr+1
+		nr_arg="run $run_nr/$nr_run "
+	fi
+	echo
+	echo -n "$nr_arg"
+}
+
+# Start all concurrent instances of a given test command in separate
+# working directories
+# The pids of the commands are stored in the pid[] array.
+function start_all_instances() {
+	local i
+
+	# Load any background pipe in its own pgrp
+	set -m
+	for i in `seq 1 $nr_ps`; do
+		$BASETEST/$@ &
+		pid[$i]=$!
+	done
+	# Restore default behavior in non-interactive shell
+	set +m
+}
+
+# run one cmd
+# runtest cmd cmdopt1 cmdopt2 ...
+function runtest(){
+	local i
+
+	print_progress
+	echo "*** $@ ***"
+	start_all_instances $@
+	for i in `seq 1 $nr_ps`; do
+		wait ${pid[$i]} || exit 0
+	done
+	let nbpassed=nbpassed+1
+}
+
+#run a set of cmd (cmd01, cmd02, ...) using the same options
+# runtests valmin valmax cmd cmdopt1 cmdopt2 ...
+function runtests(){
+	local i
+
+	for i in `seq -f "%02g" $1 $2`; do
+		runtest $3$i `echo $@ | cut -d' ' -f4-`
+	done
+}
+
+# Run a test and accept a warning. This is mainly used for tests which warn
+# on a .nfs### file. This comes from the behavior of NFS in the presence of
+# a file removed since still being opened. Some tests do that...
+function rwarn(){
+	local i
+
+	print_progress
+	echo "*** $@ *** expecting WARN due to NFS"
+	start_all_instances $@
+	for i in `seq 1 $nr_ps`; do
+		wait ${pid[$i]}
+		res=$?
+		if [ "$res" -ne 4 ] && [ "$res" -ne 0 ]; then
+		    exit 0
+		fi
+	done
+
+	let nbpassed=nbpassed+1
+}
+
+#failing test: test known to fail
+function rfail(){
+	local i
+
+	print_progress
+	echo "*** $@ *** expecting FAIL"
+	start_all_instances $@
+	for i in `seq 1 $nr_ps`; do
+		wait ${pid[$i]}
+	done
+	let nbfailed=nbfailed+1
+}
+
+# Test only running if launched alone.
+function rsingle(){
+	echo "*** $@ *** SINGLE run"
+
+	# Load any background pipe in its own pgrp
+	set -m
+	$BASETEST/$@ || exit 0
+	# Restore default behavior in non-interactive shell
+	set +m
+	let nbpassed=nbpassed+1
+}
+
+#crashing test: test known to crash
+function rcrash(){
+	print_progress
+	echo "*** $@ *** expecting CRASH ! Test not executed"
+	let nbcrash=nbcrash+1
+}
+
+#running test: test supposed to be ok
+function r(){
+	runtest $@
+}
+
+# Cleanup some directory not correctly removed by LTP
+function cleanup_dirs () {
+	for pat in dlinkattestdir drenameattestdir faccessattestdir fchmodattestdir fchownattestdir fstatattestdir futimesattestdir linkattestdir open10.testdir. openattestdir readlinkattestdir symlinkattestdir testdir. unlinkattestdir waitpid14.; do
+		rm -rf $pat*
+	done
+}
+
+function usage(){
+	name=`basename $0`
+	echo "usage: $name [-t] [-l] [-n <nr_loops>] [-p <nr_process>]]"
+	echo "           Run all tests <nr_loops> times (default $nr_run), each test being run with <nr_process> concurrent instances (default $nr_ps)."
+	echo
+	echo "       $name -s <testname>"
+	echo "           Run test <testname>"
+	echo
+	echo "       $name -b <testname>"
+	echo "           Run test <testname> in an infinite loop"
+	echo
+	echo "       $name -l [other options]<testname>"
+	echo "           Run test <testname> *WITHOUT* distant fork"
+	echo
+	echo "       $name -t"
+	echo "           Run test with no distant action to mesure basic execution time"
+	echo
+	echo "       $name -h"
+	echo "           Show this help message"
+
+}
+
+############################### MAIN TEST FUNCTION
+
+# Run all the tests
+# main <nr_run>
+function main()
+{
+let nr=0
+while [ "$nr" -lt "$1" ]; do
+
+echo "KRGLTP: run #$nr" >> /tmp/krgltp-slabinfo.dat
+cat /proc/slabinfo >> /tmp/krgltp-slabinfo.dat
+
+cleanup_dirs
+
+let nbpassed=0
+let nbfailed=0
+let nbcrash=0
+
+############################
+# tests created for Kerrighed
+############################
+
+############################ Checkpoint/Restart
+
+rsingle cr-pre # fake test to prepare C/R tests
+r cr01
+#rsingle cr02 #NFS...
+#r cr03 # scenario included in cr06
+r cr04
+#r cr05 # scenario included in cr10
+r cr06
+#r cr07 # scenario included in cr09 and cr10
+runtests 8 10 cr
+######## following tests are running single mode currently
+#rsingle cr11 # scenario included in cr14 and cr15
+#rsingle cr12 # scenario included in cr16
+rsingle cr13
+rsingle cr14
+rsingle cr15
+rsingle cr16
+#rsingle cr17 # scenario included in cr23
+rsingle cr18
+#rsingle cr19 # scenario included in cr21
+#rsingle cr20 # scenario included in cr22
+rsingle cr21
+rsingle cr22
+rsingle cr23
+rsingle cr24
+r cr_abort01
+r cr_abort02
+r cr_tree01
+rsingle cr_tree02
+r cr_signal01
+r cr_clone_files01
+r cr_clone_fs01
+r cr_clone_semundo01
+r cr_thread01
+r cr_thread_java01
+rsingle cr_callbacks01
+########
+
+rsingle cr-post # fake test to clean results of C/R tests
+
+let nr=nr+1
+done
+
+echo "KRGLTP: run #$nr_run" >> /tmp/krgltp-slabinfo.dat
+cat /proc/slabinfo >> /tmp/krgltp-slabinfo.dat
+
+cleanup_dirs
+}
+
+# Run all the tests and display a report
+# run_tests <nr_run>
+function run_tests(){
+	time main $1
+
+	let total=nbpassed+nbfailed+nbcrash
+
+	echo "*** krgcapset options: none"
+	echo "*** nr loops: $nr"
+	echo "*** "
+	echo "*** Execution report"
+	echo "***     - passed: $nbpassed"
+	echo "***     - failed: $nbfailed"
+	echo "***     - crash:  $nbcrash"
+	echo "***     - total:  $total"
+}
+
+###############################
+############################### SCRIPT CORE
+###############################
+
+
+# Parse args
+while getopts 'b:lts:n:p:ch' name; do
+	case "$name" in
+	b)	onetest="$OPTARG"
+		infiniteloop="yes"
+		;;
+	l)	localonly="yes"
+		;;
+	t)
+		basictime="yes"
+		;;
+	s)
+		onetest="$OPTARG"
+		;;
+	n)
+		nr_run=$OPTARG
+		;;
+	p)
+		nr_ps=$OPTARG
+		;;
+	c)
+		echo "Only cleaning directory..."
+		cleanup_dirs
+		echo "Done!"
+		exit 0
+		;;
+	h)
+		usage; exit 0
+		;;
+	*)
+		usage; exit 1
+		;;
+	esac
+done
+
+let nr_shift=$OPTIND-1
+shift $nr_shift
+
+export KTP_NR_PS=$nr_ps
+
+# Fix broken installs
+chmod u+s $BASETEST/change_owner
+chmod u+s $BASETEST/create_link
+
+rm -f /tmp/krgltp-slabinfo.dat
+echo "KRGLTP: nbrun=$nr_run" > /tmp/krgltp-slabinfo.dat
+
+TIMEFORMAT=$'\n\n*** Total execution time: %lR (%R seconds)'
+
+# Check if we want to mesure basic execution time
+if [ -n "$basictime" ]; then
+	run_tests 1
+	exit 0
+fi
+
+slab-check
+
+# Use the distant fork feature
+if [ -z "$localonly" ]; then
+    krgcapset -d +DISTANT_FORK || exit 0
+fi
+
+# Check if we just want a single test
+if [ ! -z "$onetest" ]; then
+	if [ -z "$infiniteloop" ]; then
+		r $onetest $@
+		exit 0
+	else
+		while /bin/true; do
+			r $onetest $@
+		done
+	fi
+else
+	run_tests $nr_run
+	echo "***"
+	echo "*** Memory leak checking"
+	slab-check
+fi
