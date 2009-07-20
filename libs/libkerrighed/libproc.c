@@ -106,7 +106,7 @@ int application_freeze_from_appid(long app_id)
 	struct checkpoint_info ckpt_info;
 
 	ckpt_info.app_id = app_id;
-	ckpt_info.type = FROM_APPID;
+	ckpt_info.flags = 0;
 	ckpt_info.signal = 0;
 	r = call_kerrighed_services(KSYS_APP_FREEZE, &ckpt_info);
 
@@ -119,7 +119,7 @@ int application_freeze_from_pid(pid_t pid)
 	struct checkpoint_info ckpt_info;
 
 	ckpt_info.app_id = pid;
-	ckpt_info.type = FROM_PID;
+	ckpt_info.flags = APP_FROM_PID;
 	ckpt_info.signal = 0;
 	r = call_kerrighed_services(KSYS_APP_FREEZE, &ckpt_info);
 
@@ -132,7 +132,7 @@ int application_unfreeze_from_appid(long app_id, int signal)
 	struct checkpoint_info ckpt_info;
 
 	ckpt_info.app_id = app_id;
-	ckpt_info.type = FROM_APPID;
+	ckpt_info.flags = 0;
 	ckpt_info.signal = signal;
 	r = call_kerrighed_services(KSYS_APP_UNFREEZE, &ckpt_info);
 
@@ -145,20 +145,20 @@ int application_unfreeze_from_pid(pid_t pid, int signal)
 	struct checkpoint_info ckpt_info;
 
 	ckpt_info.app_id = pid;
-	ckpt_info.type = FROM_PID;
+	ckpt_info.flags = APP_FROM_PID;
 	ckpt_info.signal = signal;
 	r = call_kerrighed_services(KSYS_APP_UNFREEZE, &ckpt_info);
 
 	return r;
 }
 
-struct checkpoint_info application_checkpoint_from_appid(long app_id)
+struct checkpoint_info application_checkpoint_from_appid(long app_id, int flags)
 {
 	struct checkpoint_info ckpt_info;
 
 	ckpt_info.app_id = app_id;
 	ckpt_info.chkpt_sn = 0;
-	ckpt_info.type = FROM_APPID;
+	ckpt_info.flags = flags;
 	ckpt_info.signal = 0;
 	ckpt_info.result = call_kerrighed_services(KSYS_APP_CHKPT,
 						    &ckpt_info);
@@ -166,13 +166,13 @@ struct checkpoint_info application_checkpoint_from_appid(long app_id)
 	return ckpt_info;
 }
 
-struct checkpoint_info application_checkpoint_from_pid(pid_t pid)
+struct checkpoint_info application_checkpoint_from_pid(pid_t pid, int flags)
 {
 	struct checkpoint_info ckpt_info;
 
 	ckpt_info.app_id = pid;
 	ckpt_info.chkpt_sn = 0;
-	ckpt_info.type = FROM_PID;
+	ckpt_info.flags = flags | APP_FROM_PID;
 	ckpt_info.signal = 0;
 	ckpt_info.result = call_kerrighed_services(KSYS_APP_CHKPT,
 						    &ckpt_info);
@@ -211,7 +211,7 @@ int application_get_userdata_from_appid(long app_id, __u64 *data)
 	int res;
 	struct app_userdata_request datareq;
 	datareq.app_id = app_id;
-	datareq.type = FROM_APPID;
+	datareq.flags = 0;
 	datareq.user_data = 0;
 
 	res = call_kerrighed_services(KSYS_APP_GET_USERDATA, &datareq);
@@ -225,7 +225,7 @@ int application_get_userdata_from_pid(long app_id, __u64 *data)
 	int res;
 	struct app_userdata_request datareq;
 	datareq.app_id = app_id;
-	datareq.type = FROM_PID;
+	datareq.flags = APP_FROM_PID;
 	datareq.user_data = 0;
 
 	res = call_kerrighed_services(KSYS_APP_GET_USERDATA, &datareq);
