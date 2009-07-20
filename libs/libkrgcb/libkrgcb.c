@@ -33,9 +33,6 @@
 #define CR_CB_DEBUG(f, a...) do {} while(0)
 #endif
 
-#define CHKPT_DIR "/var/chkpt/"
-#define MQ_SUFFIX "_mq"
-
 /* Signals */
 #define SIG_CB_RUN_CHKPT 37
 #define SIG_CB_RUN_RST 38
@@ -146,23 +143,16 @@ static int cb_count_write(enum cr_cb_hook hook, int value,
 
 static int send_message(int msg)
 {
-	char path[CHKPT_PATH_SIZE];
 	key_t key;
 	cr_cb_msgbuf_t buf;
 	int msqid;
 	int r = 0;
 
-	sprintf(path, "%s%ld%s", CHKPT_DIR, (long)getpid(), MQ_SUFFIX);
-
-	key = ftok(path, getpid());
-	if (key == -1) {
-		CR_CB_DEBUG("ftop failed\n");
-		r = -1;
-		goto err;
-	}
+	key = getpid();
 
 	msqid = msgget(key, 0644);
 	if (msqid < 0) {
+		perror("libkrgcb.c::send_message::msgget");
 		CR_CB_DEBUG("msgget failed\n");
 		r = -1;
 		goto err;
@@ -171,6 +161,7 @@ static int send_message(int msg)
 	buf.mtype = msg;
 
 	if (msgsnd(msqid, (cr_cb_msgbuf_t *)&buf, sizeof(buf), 0)) {
+		perror("libkrgcb.c::send_message::msgsnd");
 		CR_CB_DEBUG("msgsnd failed\n");
 		r = -1;
 	}
@@ -199,8 +190,6 @@ err:
 
 int cr_execute_chkpt_callbacks(long pid, short from_appid)
 {
-	char path[CHKPT_PATH_SIZE];
-	FILE *file;
 	cr_cb_msgbuf_t buf;
 	key_t key;
 	int msqid;
@@ -209,20 +198,7 @@ int cr_execute_chkpt_callbacks(long pid, short from_appid)
 	if (cr_detect_callbacks(pid, from_appid))
 		goto err;
 
-	memset(path, 0x0, sizeof(path));
-	sprintf(path, "%s%ld_mq", CHKPT_DIR, pid);
-
-	file = fopen(path, "w");
-	if (!file) {
-		r = -1;
-		goto err;
-	}
-
-	key = ftok(path, pid);
-	if (key == -1) {
-		r = -1;
-		goto err;
-	}
+	key = pid;
 
 	msqid = msgget(key, 0644 | IPC_CREAT);
 	if (msqid < 0) {
@@ -247,7 +223,6 @@ int cr_execute_chkpt_callbacks(long pid, short from_appid)
 	if (buf.mtype == CR_CB_ERR)
 		r = -1;
 err:
-	remove(path);
 	return r;
 }
 
@@ -402,6 +377,8 @@ static void* worker_thread(void *arg)
 				    %d\n", r);
 		}
 	}
+
+	CR_CB_DEBUG("End of worker thread\n");
 
 	return (void *)((long)r);
 }
