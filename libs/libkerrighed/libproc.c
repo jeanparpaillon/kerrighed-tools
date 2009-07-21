@@ -17,7 +17,7 @@
 #include <migration.h>
 #include <checkpoint.h>
 #include <kerrighed_tools.h>
-
+#include <proc.h>
 
 #define KRG_SERVICES_PATH "/proc/kerrighed/services"
 
@@ -220,11 +220,11 @@ int application_get_userdata_from_appid(long app_id, __u64 *data)
 	return res;
 }
 
-int application_get_userdata_from_pid(long app_id, __u64 *data)
+int application_get_userdata_from_pid(pid_t pid, __u64 *data)
 {
 	int res;
 	struct app_userdata_request datareq;
-	datareq.app_id = app_id;
+	datareq.app_id = pid;
 	datareq.flags = APP_FROM_PID;
 	datareq.user_data = 0;
 

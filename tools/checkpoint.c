@@ -29,6 +29,7 @@ short from_appid = 0;
 short quiet = 0;
 short no_callbacks = 0;
 int sig = 0;
+int flags = 0;
 char * description = NULL;
 app_action_t action = ALL;
 
@@ -50,7 +51,7 @@ void parse_args(int argc, char *argv[])
 {
 	char c;
 	int option_index = 0;
-	char * short_options= "hqacd:bfu::k::";
+	char * short_options= "hqacd:bfu::k::i";
 	static struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
 		{"quiet", no_argument, 0, 'q'},
@@ -61,6 +62,7 @@ void parse_args(int argc, char *argv[])
 		{"freeze", no_argument, 0, 'f'},
 		{"unfreeze", optional_argument, 0, 'u'},
 		{"kill", optional_argument, 0, 'k'},
+		{"ignore-unsupported-files", no_argument, 0, 'i'},
 		{0, 0, 0, 0}
 	};
 
@@ -98,6 +100,9 @@ void parse_args(int argc, char *argv[])
 				sig = atoi(optarg);
 			else
 				sig = 15;
+			break;
+		case 'i':
+			flags |= CKPT_W_UNSUPPORTED_FILE;
 			break;
 		default:
 			printf("Warning: Option %c "
@@ -240,7 +245,7 @@ void clean_checkpoint_dir(struct checkpoint_info *info)
 	remove(path);
 }
 
-int checkpoint_app(long pid, short _quiet)
+int checkpoint_app(long pid, int flags, short _quiet)
 {
 	int r;
 
@@ -249,12 +254,12 @@ int checkpoint_app(long pid, short _quiet)
 		if (!_quiet)
 			printf("Checkpointing application %ld...\n", pid);
 
-		info = application_checkpoint_from_appid(pid);
+		info = application_checkpoint_from_appid(pid, flags);
 	} else {
 		if (!_quiet)
 			printf("Checkpointing application in which "
 			       "process %d is involved...\n", (pid_t)pid);
-		info = application_checkpoint_from_pid((pid_t)pid);
+		info = application_checkpoint_from_pid((pid_t)pid, flags);
 	}
 
 	r = info.result;
@@ -340,14 +345,14 @@ err:
 	return r;
 }
 
-int freeze_checkpoint_unfreeze(long pid, int signal, short _quiet)
+int freeze_checkpoint_unfreeze(long pid, int flags, int signal, short _quiet)
 {
 	int r;
 
 	r = freeze_app(pid, _quiet);
 	if (r)
 		goto err_freeze;
-	r = checkpoint_app(pid, _quiet);
+	r = checkpoint_app(pid, flags, _quiet);
 	if (r)
 		goto err_chkpt;
 	r = unfreeze_app(pid, signal, _quiet);
@@ -385,7 +390,7 @@ int main(int argc, char *argv[])
 
 	switch (action) {
 	case CHECKPOINT:
-		r = checkpoint_app(pid, quiet);
+		r = checkpoint_app(pid, flags, quiet);
 		break;
 	case FREEZE:
 		r = freeze_app(pid, quiet);
@@ -394,7 +399,7 @@ int main(int argc, char *argv[])
 		r = unfreeze_app(pid, sig, quiet);
 		break;
 	case ALL:
-		r = freeze_checkpoint_unfreeze(pid, sig, quiet);
+		r = freeze_checkpoint_unfreeze(pid, flags, sig, quiet);
 		break;
 	}
 
