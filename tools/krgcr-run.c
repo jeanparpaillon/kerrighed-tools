@@ -92,7 +92,7 @@ void parse_args(int argc, char *argv[])
 			background = 1;
 			break;
 		case 'o':
-			snprintf(filepath, MAX_FILEPATH, optarg);
+			snprintf(filepath, MAX_FILEPATH, "%s", optarg);
 			break;
 		case 'h':
 			print_usage(argv[0]);
