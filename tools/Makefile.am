@@ -8,7 +8,7 @@
 ###
 dist_bin_SCRIPTS = krg_legacy_scheduler krgboot_helper krginit_helper
 
-bin_PROGRAMS = migrate checkpoint restart krgadm krgcapset krgcr-run krgboot krginit
+bin_PROGRAMS = migrate checkpoint restart krgadm krgcapset krgcr-run krgboot krginit ipccheckpoint ipcrestart
 
 INCLUDES = -I@top_srcdir@/libs/include
 LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la @top_builddir@/libs/libkrgcb/libkrgcb.la
@@ -21,6 +21,8 @@ krgadm_SOURCES = krgadm.c
 krgcr_run_SOURCES = krgcr-run.c
 krgboot_SOURCES = krgboot.c
 krginit_SOURCES = krginit.c
+ipccheckpoint_SOURCES = ipccheckpoint.c
+ipcrestart_SOURCES = ipcrestart.c
 
 EXTRA_DIST = krginit_helper.conf
 
