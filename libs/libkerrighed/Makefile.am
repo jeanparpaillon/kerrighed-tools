@@ -20,7 +20,8 @@ libkerrighed_la_SOURCES = \
 	libkerrighed_tools.c \
 	libproc.c \
 	libhotplug.c \
-	libcapability.c
+	libcapability.c \
+	libipc.c
 
 libkerrighed_la_LDFLAGS = -version-info 1:0:0
 

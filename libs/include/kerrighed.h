@@ -10,5 +10,6 @@
 #include "capability.h"
 #include "proc.h"
 #include "hotplug.h"
+#include "ipc.h"
 
 #endif
