@@ -53,7 +53,8 @@ void parse_args(int argc, char *argv[])
 		switch (c)
 		{
 		case 'h':
-			goto err;
+			show_help();
+			exit(EXIT_SUCCESS);
 			break;
 		case 'f':
 			foreground = 1;
@@ -66,20 +67,19 @@ void parse_args(int argc, char *argv[])
 			quiet = 1;
 			break;
 		default:
-			fprintf(stderr, "** unknown option\n");
+			show_help();
+			exit(EXIT_FAILURE);
+			break;
 		}
 	}
 
-	if (argc - optind < 2)
-		goto err;
+	if (argc - optind != 2) {
+		show_help();
+		exit(EXIT_FAILURE);
+	}
 
-	appid = atol(argv[argc-2]);
-	version = atoi(argv[argc-1]);
-
-	return ;
-
-err:
-	show_help();
+	appid = atol(argv[optind]);
+	version = atoi(argv[optind+1]);
 }
 
 void show_error(int _errno)

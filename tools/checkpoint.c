@@ -71,7 +71,8 @@ void parse_args(int argc, char *argv[])
 		switch (c) {
 		case 'h':
 			show_help();
-			return;
+			exit(EXIT_SUCCESS);
+			break;
 		case 'q':
 			quiet=1;
 			break;
@@ -105,8 +106,8 @@ void parse_args(int argc, char *argv[])
 			flags |= CKPT_W_UNSUPPORTED_FILE;
 			break;
 		default:
-			printf("Warning: Option %c "
-			       "not implemented\n", c);
+			show_help();
+			exit(EXIT_FAILURE);
 			break;
 		}
 	}
@@ -375,14 +376,15 @@ int main(int argc, char *argv[])
 	check_environment();
 
 	/* Manage options with getopt */
-	if (argc == 1) {
-		show_help();
-		return 0;
-	}
 	parse_args(argc, argv);
 
+	if (argc - optind != 1) {
+		show_help();
+		exit(EXIT_FAILURE);
+	}
+
 	/* get the pid */
-	pid = atol( argv[argc-1] );
+	pid = atol( argv[optind] );
 	if (pid < 2) {
 		r = -EINVAL;
 		goto exit;
