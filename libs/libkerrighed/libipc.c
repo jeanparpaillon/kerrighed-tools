@@ -36,3 +36,17 @@ int ipc_sem_restart(int fd)
 {
 	return call_kerrighed_services(KSYS_IPC_SEM_RESTART, &fd);
 }
+
+int ipc_shm_checkpoint(int shmid, int fd)
+{
+	int args[2];
+	args[0] = shmid;
+	args[1] = fd;
+
+	return call_kerrighed_services(KSYS_IPC_SHM_CHKPT, args);
+}
+
+int ipc_shm_restart(int fd)
+{
+	return call_kerrighed_services(KSYS_IPC_SHM_RESTART, &fd);
+}

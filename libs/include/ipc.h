@@ -9,4 +9,8 @@ int ipc_sem_checkpoint(int semid, int fd);
 
 int ipc_sem_restart(int fd);
 
+int ipc_shm_checkpoint(int shmid, int fd);
+
+int ipc_shm_restart(int fd);
+
 #endif
