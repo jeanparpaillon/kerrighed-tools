@@ -1,7 +1,7 @@
 #!/bin/sh
 
 is_configfs_dir() {
-    [ "`/usr/bin/stat -f -c %t $1`" == 62656570 ]
+    [ "`/usr/bin/stat -f -c %t $1`" = 62656570 ]
 }
 
 # Make sure configfs is mounted on /config.
