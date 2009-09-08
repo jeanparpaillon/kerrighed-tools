@@ -42,7 +42,13 @@ tests_SCRIPTS = \
 	cr_signal01 \
 	cr_thread01 \
 	cr_thread_java01 \
-	lib_cr.sh
+	cr_ipc_shm01 \
+	cr_ipc_shm02 \
+	cr_ipc_msg01 \
+	cr_ipc_sem01 \
+	cr_ipc_sem02 \
+	lib_cr.sh \
+	lib_cr_ipc.sh
 
 testsdir = @ltpbase@/testcases/bin
 

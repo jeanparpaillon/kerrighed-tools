@@ -1,0 +1,99 @@
+#!/bin/bash
+###############################################################################
+##
+## Copyright (c) Kerlabs, 2009
+##
+## This program is free software;  you can redistribute it and#or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+## or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+## for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program;  if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+##
+###############################################################################
+#
+# Description:  Test program for Kerrighed checkpoint/restart of SYSV IPC SEM
+#
+# Author:       Matthieu Fertré, matthieu.fertre@kerlabs.com
+#
+
+source `dirname $0`/lib_cr.sh
+source `dirname $0`/lib_cr_ipc.sh
+
+description="Checkpoint/Restart of SYSV IPC SEM object (no C/R of processus)"
+
+cr_ipc_sem01()
+{
+    TCID="$FUNCNAME"               # Identifier of this testcase.
+    TST_COUNT=$[$TST_COUNT+1]      # Test case number.
+
+    SYNCFILE="/tmp/${FUNCNAME}_sync"
+
+    local sempath=`mktemp -d`
+    local semvalue="-1"
+
+    # create the sem and get its identifier
+    create_sem $sempath 3 || return $?
+
+    wait_other_instances $SYNCFILE 'ipcs -s|grep "^0x"|wc -l' || return $?
+
+    save_sem_value $SEMID $sempath || return $?
+    semvalue=$SEMVALUE
+
+    # dump it
+    dump_sem $SEMID $sempath $sempath/sem_v1.bin || return $?
+
+    # check the value is still ok
+    check_sem_value $SEMID $sempath "$semvalue" || return $?
+
+    # update the value
+    unlock_sem $SEMID $sempath 2 || return $?
+
+    # delete it
+    delete_sem $SEMID $sempath || return $?
+
+    # restore it
+    restore_sem $SEMID $sempath $sempath/sem_v1.bin || return $?
+
+    check_sem_value $SEMID $sempath "$semvalue" || return $?
+
+    unlock_sem $SEMID $sempath 1 || return $?
+
+    save_sem_value $SEMID $sempath || return $?
+    semvalue=$SEMVALUE
+
+    check_sem_value $SEMID $sempath "$semvalue" || return $?
+
+    dump_sem $SEMID $sempath $sempath/sem_v2.bin || return $?
+
+    check_sem_value $SEMID $sempath "$semvalue" || return $?
+
+    dump_sem $SEMID $sempath $sempath/sem_v3.bin || return $?
+
+    delete_sem $SEMID $sempath || return $?
+
+    restore_sem $SEMID $sempath $sempath/sem_v3.bin || return $?
+
+    check_sem_value $SEMID $sempath "$semvalue" || return $?
+
+    delete_sem $SEMID $sempath || return $?
+
+    ret=$?
+
+    # thanks to NFS, even rm -rf may fail
+    rm -rf $sempath 2> /dev/null
+
+    print_success $ret
+    return $ret
+}
+
+CR_setup $@ || exit $?
+
+cr_ipc_sem01 || exit $?
