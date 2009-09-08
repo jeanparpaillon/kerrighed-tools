@@ -161,9 +161,19 @@ int main(int argc, char *argv[])
 	root_pid = r;
 
 	r = cr_execute_restart_callbacks(appid);
-	if (r)
-		fprintf(stderr, "restart: error during callback execution");
-	else if (!quiet)
+	if (r) {
+		fprintf(stderr, "restart: error during callback execution\n");
+		exit(EXIT_FAILURE);
+	}
+
+	r = application_unfreeze_from_appid(appid, 0);
+	if (r) {
+		perror("restart");
+		fprintf(stderr, "restart: fail to unfreeze the application\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if (!quiet)
 		printf("Done\n");
 
 	if (foreground)
