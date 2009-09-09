@@ -550,7 +550,10 @@ runtests 1 3 getuid
 ############################ Ioctl
 
 r ioctl01 -D /dev/tty0  # NFS .something file remaning in the dir to remove
-r ioctl02 -D /dev/tty0
+# 2.6.20
+#r ioctl02 -D /dev/tty0 # Fixed in later version of LTP
+# 2.6.30
+rfail ioctl02 -D /dev/tty0
 
 ############################ Inotify
 
@@ -1045,7 +1048,11 @@ runtests 1 4 setuid
 
 ############################ Shmat
 
-runtests 1 3 shmat
+# Linux 2.6.20
+#runtests 1 3 shmat
+# Linux 2.6.30
+rfail shmat01	# LTP bug?
+runtests 2 3 shmat
 
 ############################ Shmctl
 
