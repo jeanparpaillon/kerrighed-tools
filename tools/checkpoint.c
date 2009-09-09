@@ -311,6 +311,15 @@ int unfreeze_app(long pid, int signal, short _quiet)
 {
 	int r;
 
+	if (!no_callbacks) {
+		r = cr_execute_continue_callbacks(pid, from_appid);
+		if (r) {
+			fprintf(stderr, "checkpoint: error during callback"
+				" execution\n");
+			goto err;
+		}
+	}
+
 	if (from_appid) {
 		if (!_quiet)
 			printf("Unfreezing application %ld...\n", pid);
@@ -326,15 +335,6 @@ int unfreeze_app(long pid, int signal, short _quiet)
 		r = application_unfreeze_from_pid((pid_t)pid, signal);
 		if (r)
 			goto err_show;
-	}
-
-	if (!no_callbacks) {
-		r = cr_execute_continue_callbacks(pid, from_appid);
-		if (r) {
-			fprintf(stderr, "checkpoint: error during callback"
-				" execution\n");
-			goto err;
-		}
 	}
 
 err_show:
