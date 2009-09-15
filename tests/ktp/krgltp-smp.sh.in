@@ -151,7 +151,7 @@ function cleanup_dirs () {
 
 function usage(){
 	name=`basename $0`
-	echo "usage: $name [-t] [-n <nr_loops>] [-p <nr_process>]]"
+	echo "usage: $name [-t] [-l] [-n <nr_loops>] [-p <nr_process>]]"
 	echo "           Run all tests <nr_loops> times (default $nr_run), each test being run with <nr_process> concurrent instances (default $nr_ps)."
 	echo
 	echo "       $name [-n <nr_loops>] -s <testname>"
@@ -159,6 +159,9 @@ function usage(){
 	echo
 	echo "       $name -b <testname>"
 	echo "           Run test <testname> in an infinite loop"
+	echo
+	echo "       $name -l [other options]<testname>"
+	echo "           Run test <testname> *WITHOUT* distant fork"
 	echo
 	echo "       $name -t"
 	echo "           Run test with no distant action to mesure basic execution time"
@@ -1345,10 +1348,13 @@ function run_tests(){
 
 
 # Parse args
-while getopts 'b:ts:n:p:h' name; do
+while getopts 'b:lts:n:p:h' name; do
 	case "$name" in
 	b)	onetest="$OPTARG"
 		infiniteloop="yes"
+		;;
+	l)
+		localonly="yes"
 		;;
 	t)
 		basictime="yes"
@@ -1392,7 +1398,9 @@ fi
 slab-check
 
 # Use the distant fork feature
-krgcapset -d +DISTANT_FORK || exit 0
+if [ -z "$localonly" ]; then
+	krgcapset -d +DISTANT_FORK || exit 1
+fi
 
 export KTP_NR_PS=$nr_ps
 
