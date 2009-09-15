@@ -185,6 +185,11 @@ cat /proc/slabinfo >> /tmp/krgltp-slabinfo.dat
 
 cleanup_dirs
 
+oldpwd=`pwd`
+dir=`mktemp -d ktpXXXXX`
+chmod 755 $dir
+cd $dir || exit 1
+
 let nbpassed=0
 let nbfailed=0
 let nbcrash=0
@@ -1322,6 +1327,9 @@ echo "KRGLTP: run #$nr_run" >> /tmp/krgltp-slabinfo.dat
 cat /proc/slabinfo >> /tmp/krgltp-slabinfo.dat
 
 cleanup_dirs
+
+cd $oldpwd
+rm -rf $dir
 }
 
 # Run all the tests and display a report
