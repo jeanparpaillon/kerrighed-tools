@@ -1399,6 +1399,8 @@ slab-check
 
 # Use the distant fork feature
 if [ -z "$localonly" ]; then
+	echo "* Waiting for the cluster to start"
+	krgadm cluster wait_start
 	krgcapset -d +DISTANT_FORK || exit 1
 fi
 
