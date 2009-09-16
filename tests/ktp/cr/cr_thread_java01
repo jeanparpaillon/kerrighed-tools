@@ -39,7 +39,23 @@ cr_thread_java01()
     TCID="$FUNCNAME"               # Identifier of this testcase.
     TST_COUNT=$[$TST_COUNT+1]      # Test case number.
 
+    # look for Java
+    which java > /dev/null
+    if [ $? -ne 0 ]; then
+	tst_resm TWARN "Can not run this test if Java is not installed"
+	return 0 # to not stop krgltp
+    fi
+
+    # does Bi.class exist ?
+    if  [ ! -e "$CLASSPATH/Bi.class" ]; then
+	tst_resm TWARN "Can not run this test if $CLASSPATH/Bi.class is not installed"
+	return 0 # to not stop krgltp
+    fi
+
     runcommand +CHECKPOINTABLE 1 nosync || return $?
+
+    # let the process really begin
+    sleep 5
 
     freeze_process $PID $TESTCMD || return $?
 

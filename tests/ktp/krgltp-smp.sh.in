@@ -1316,6 +1316,7 @@ r cr_clone_files01
 r cr_clone_fs01
 r cr_clone_semundo01
 r cr_thread01
+r cr_thread_java01
 ########
 
 rsingle cr-post # fake test to clean results of C/R tests
