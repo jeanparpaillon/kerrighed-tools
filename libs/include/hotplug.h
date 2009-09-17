@@ -1,7 +1,7 @@
 #ifndef __LIB_HOTPLUG__
 #define __LIB_HOTPLUG__
 
-#include <string.h>
+#include <stdio.h>
 
 struct krg_nodes {
 	char* nodes;
