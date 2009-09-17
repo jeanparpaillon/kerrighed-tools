@@ -6,7 +6,7 @@
 ### Author:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
-dist_bin_SCRIPTS = krg_legacy_scheduler
+dist_bin_SCRIPTS = krg_legacy_scheduler krginit_helper
 
 bin_PROGRAMS = migrate checkpoint restart krgadm krgcapset krgcr-run krgboot krginit
 
@@ -21,3 +21,17 @@ krgadm_SOURCES = krgadm.c
 krgcr_run_SOURCES = krgcr-run.c
 krgboot_SOURCES = krgboot.c
 krginit_SOURCES = krginit.c
+
+EXTRA_DIST = krginit_helper.conf
+
+if USER_INSTALL
+local_sysconfdir = $(sysconfdir)
+else
+local_sysconfdir = /etc
+endif
+
+install-data-local:
+	$(install_sh_SCRIPT) $(srcdir)/krginit_helper.conf $(DESTDIR)$(local_sysconfdir)/kerrighed/krginit_helper.conf
+
+uninstall-local:
+	rm -f $(DESTDIR)$(local_sysconfdir)/kerrighed/krginit_helper.conf
