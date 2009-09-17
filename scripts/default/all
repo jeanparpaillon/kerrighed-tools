@@ -7,6 +7,34 @@
 ENABLE=true
 #ENABLE=false
 
+# Local namespaces to isolate Kerrighed from
+# Leaving unset won't change kernel's current settings
+
+# UTSname namespace
+ISOLATE_UTS=true
+#ISOLATE_UTS=false
+#ISOLATE_UTS=
+
+# Mount namespace
+ISOLATE_MNT=true
+#ISOLATE_MNT=false
+#ISOLATE_MNT=
+
+# Net namespace
+#ISOLATE_NET=true
+ISOLATE_NET=false
+#ISOLATE_NET=
+
+# User namespace
+#ISOLATE_USER=true
+ISOLATE_USER=false
+#ISOLATE_USER=
+
+# Userspace application to use as local init process in the Kerrighed container
+# Something else may be used on the node starting the cluster.
+# krginit_helper has his configuration in /etc/kerrighed/krginit_helper.conf
+CLUSTER_INIT_HELPER=/usr/local/bin/krginit_helper
+
 # Enable/Disable legacy scheduler behaviour
 LEGACY_SCHED=true
 #LEGACY_SCHED=false

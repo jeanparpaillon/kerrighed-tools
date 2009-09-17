@@ -62,6 +62,12 @@ d_check_for_no_start() {
 # Function that starts the daemon/service.
 #
 d_start() {
+    d_set_isolate_ns "$ISOLATE_UTS" isolate_uts || log_end_msg 1
+    d_set_isolate_ns "$ISOLATE_MNT" isolate_mnt || log_end_msg 1
+    d_set_isolate_ns "$ISOLATE_NET" isolate_net || log_end_msg 1
+    d_set_isolate_ns "$ISOLATE_USER" isolate_user || log_end_msg 1
+    echo -n $CLUSTER_INIT_HELPER > /sys/kerrighed/hotplug/cluster_init_helper || log_end_msg 1
+
     case "x$LEGACY_SCHED" in
 	xtrue)
 	    d_trigger_krg_legacy_scheduler_start &
@@ -72,6 +78,22 @@ d_start() {
 	    log_end_msg 1
 	    log_warning_msg "Value of LEGACY_SCHED in $CFG must be either 'true' or 'false';"
 	    ;;
+    esac
+}
+
+d_set_isolate_ns() {
+    case "x$1" in
+        xtrue)
+            echo 1 > /sys/kerrighed/hotplug/$2
+            ;;
+        xfalse)
+            echo 0 > /sys/kerrighed/hotplug/$2
+            ;;
+        x)
+            ;;
+        *)
+            log_warning_msg "Value of ISOLATE_xxx in $CFG must be either 'true' or 'false';"
+            ;;
     esac
 }
 
