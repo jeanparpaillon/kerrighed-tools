@@ -43,6 +43,7 @@ struct krg_clusters* krg_cluster_status(void);
 int krg_set_cluster_creator(int enable);
 int krg_cluster_start(struct krg_node_set *krg_node_set);
 int krg_cluster_wait_for_start(void);
+int krg_node_ready(int setup_ok);
 int krg_cluster_shutdown(int subclusterid);
 int krg_cluster_reboot(int subclusterid);
 

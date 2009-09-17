@@ -198,6 +198,12 @@ int krg_cluster_wait_for_start(void)
 	return call_kerrighed_services(KSYS_HOTPLUG_WAIT_FOR_START, NULL);
 }
 
+int krg_node_ready(int setup_ok)
+{
+	return call_kerrighed_services(KSYS_HOTPLUG_READY,
+				       setup_ok ? NULL : (void *)1);
+}
+
 int krg_cluster_shutdown(int subclusterid){
 	int r;
 
