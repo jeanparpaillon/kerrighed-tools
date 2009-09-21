@@ -8,7 +8,7 @@
 ###
 dist_bin_SCRIPTS = krg_legacy_scheduler
 
-bin_PROGRAMS = migrate checkpoint restart krgadm krgcapset krgcr-run
+bin_PROGRAMS = migrate checkpoint restart krgadm krgcapset krgcr-run krgboot
 
 INCLUDES = -I@top_srcdir@/libs/include
 LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la @top_builddir@/libs/libkrgcb/libkrgcb.la
@@ -19,3 +19,4 @@ restart_SOURCES = restart.c
 krgcapset_SOURCES = krgcapset.c
 krgadm_SOURCES = krgadm.c
 krgcr_run_SOURCES = krgcr-run.c
+krgboot_SOURCES = krgboot.c
