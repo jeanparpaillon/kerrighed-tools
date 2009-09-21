@@ -166,6 +166,12 @@ struct krg_clusters* krg_cluster_status(void){
 	return krg_clusters;
 };
 
+int krg_set_cluster_creator(int enable)
+{
+	return call_kerrighed_services(KSYS_HOTPLUG_SET_CREATOR,
+				       enable ? (void *)1 : NULL);
+}
+
 int krg_cluster_start(struct krg_node_set *krg_node_set){
 	struct hotplug_node_set node_set;
 	int i, r;
