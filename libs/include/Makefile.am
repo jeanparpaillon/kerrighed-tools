@@ -14,6 +14,7 @@ kerrighedinclude_HEADERS = \
 	kerrighed.h \
 	capability.h \
 	capabilities.h \
+	ipc.h \
 	proc.h \
 	types.h \
 	migration.h \
