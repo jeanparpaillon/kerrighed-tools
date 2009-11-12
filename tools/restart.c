@@ -2,6 +2,7 @@
  *  Copyright (C) 2001-2006, INRIA, Universite de Rennes 1, EDF.
  */
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -17,10 +18,6 @@
 #include <kerrighed.h>
 #include <libkrgcb.h>
 
-#define CHKPT_DIR "/var/chkpt/"
-
-long appid ;
-int version ;
 int flags = 0;
 short foreground = 0;
 short quiet = 0;
@@ -29,9 +26,8 @@ int root_pid = 0;
 void show_help()
 {
 	printf ("Restart an application\nusage: restart [-h]"
-		" [-f|-t] id version\n");
+		" [-f|-t] directory\n");
 	printf ("  -h : This help\n");
-	exit(1);
 }
 
 void parse_args(int argc, char *argv[])
@@ -72,17 +68,19 @@ void parse_args(int argc, char *argv[])
 			break;
 		}
 	}
-
-	if (argc - optind != 2) {
-		show_help();
-		exit(EXIT_FAILURE);
-	}
-
-	appid = atol(argv[optind]);
-	version = atoi(argv[optind+1]);
 }
 
-void show_error(int _errno)
+void check_environment(void)
+{
+	/* is Kerrighed launched ? */
+	if (get_nr_nodes() == -1)
+	{
+		fprintf(stderr, "no kerrighed nodes found\n");
+		exit(-EPERM);
+	}
+}
+
+void show_error(long appid, int _errno)
 {
 	switch (_errno) {
 	case E_CR_APPBUSY:
@@ -98,7 +96,8 @@ void show_error(int _errno)
 			"(corrupted or wrong kernel version)\n");
 		break;
 	default:
-		perror("restart");
+		fprintf(stderr, "restart: %s\n", strerror(_errno));
+		break;
 	}
 }
 
@@ -138,24 +137,36 @@ void wait_application_exits()
 
 int main(int argc, char *argv[])
 {
-	int r = 0 ;
+	long appid;
+	int r = 0;
+	char *checkpoint_dir;
 
-	if (get_nr_nodes() == -1)
-	{
-		fprintf (stderr, "%s: no kerrighed nodes found\n", argv[0]);
-		exit(-1);
-	}
+	/* Check environment */
+	check_environment();
 
+	/* Manage options with getopt */
 	parse_args(argc, argv);
 
-	if (!quiet)
-		printf("Restarting application %ld (v%d) ...\n",
-		       appid, version);
+	if (argc - optind != 1) {
+		show_help();
+		goto exit;
+ 	}
 
-	r = application_restart(appid, version, flags);
+	checkpoint_dir = canonicalize_file_name(argv[optind]);
+	if (!checkpoint_dir) {
+		r = errno;
+		perror(argv[optind]);
+		goto exit_failure;
+	}
+
+	if (!quiet)
+		printf("Restarting application from %s...\n",
+			checkpoint_dir);
+
+	r = application_restart(&appid, checkpoint_dir, flags);
 	if (r < 0) {
-		show_error(errno);
-		exit(EXIT_FAILURE);
+		show_error(appid, errno);
+		goto exit_failure;
 	}
 
 	root_pid = r;
@@ -163,21 +174,29 @@ int main(int argc, char *argv[])
 	r = cr_execute_restart_callbacks(appid);
 	if (r) {
 		fprintf(stderr, "restart: error during callback execution\n");
-		exit(EXIT_FAILURE);
+		goto exit_failure;
 	}
 
 	r = application_unfreeze_from_appid(appid, 0);
 	if (r) {
 		perror("restart");
 		fprintf(stderr, "restart: fail to unfreeze the application\n");
-		exit(EXIT_FAILURE);
+		goto exit_failure;
 	}
 
 	if (!quiet)
-		printf("Done\n");
+		printf("Application %ld has been successfully restarted\n",
+		       appid);
 
 	if (foreground)
 		wait_application_exits();
 
+	free(checkpoint_dir);
+
 	exit(EXIT_SUCCESS);
+
+exit_failure:
+	free(checkpoint_dir);
+exit:
+	exit(EXIT_FAILURE);
 }
