@@ -33,13 +33,13 @@ int application_freeze_from_pid(pid_t pid);
 int application_unfreeze_from_appid(long app_id, int signal);
 int application_unfreeze_from_pid(pid_t pid, int signal);
 
-struct checkpoint_info application_checkpoint_from_appid(long app_id,
-							 int flags);
-struct checkpoint_info application_checkpoint_from_pid(pid_t pid,
-						       int flags);
+struct checkpoint_info application_checkpoint_from_appid(long app_id, int flags,
+							 const char *checkpoint_dir);
+struct checkpoint_info application_checkpoint_from_pid(pid_t pid, int flags,
+						       const char *checkpoint_dir);
 
 /* return the pid of the application root process in case of success */
-int application_restart(long app_id, int chkpt_sn, int flags,
+int application_restart(long app_id, const char *checkpoint_dir, int flags,
 			struct cr_subst_files_array *substitution);
 
 int application_set_userdata(__u64 data);

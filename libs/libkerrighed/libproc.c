@@ -143,53 +143,86 @@ int application_unfreeze_from_pid(pid_t pid, int signal)
 	return r;
 }
 
-struct checkpoint_info application_checkpoint_from_appid(long app_id, int flags)
+struct checkpoint_info application_checkpoint_from_appid(long app_id, int flags,
+							 const char *storage_dir)
 {
-	struct checkpoint_info ckpt_info;
+	struct checkpoint_info *ckpt_info, info;
+	size_t len;
 
-	ckpt_info.app_id = app_id;
-	ckpt_info.chkpt_sn = 0;
-	ckpt_info.flags = flags;
-	ckpt_info.signal = 0;
-	ckpt_info.result = call_kerrighed_services(KSYS_APP_CHKPT,
-						    &ckpt_info);
+	len = strlen(storage_dir) + 1;
 
-	return ckpt_info;
+	ckpt_info = malloc(sizeof(struct checkpoint_info) + len * sizeof(char));
+
+	ckpt_info->app_id = app_id;
+	ckpt_info->chkpt_sn = 0;
+	ckpt_info->flags = flags;
+	ckpt_info->signal = 0;
+	ckpt_info->storage_dir_len = len;
+	ckpt_info->storage_dir = (char*)(&ckpt_info[1]);
+	strcpy(ckpt_info->storage_dir, storage_dir);
+
+	ckpt_info->result = call_kerrighed_services(KSYS_APP_CHKPT,
+						    ckpt_info);
+
+	info = *ckpt_info;
+	free(ckpt_info);
+
+	return info;
 }
 
-struct checkpoint_info application_checkpoint_from_pid(pid_t pid, int flags)
+struct checkpoint_info application_checkpoint_from_pid(pid_t pid, int flags,
+						       const char *storage_dir)
 {
-	struct checkpoint_info ckpt_info;
+	struct checkpoint_info *ckpt_info, info;
+	size_t len;
 
-	ckpt_info.app_id = pid;
-	ckpt_info.chkpt_sn = 0;
-	ckpt_info.flags = flags | APP_FROM_PID;
-	ckpt_info.signal = 0;
-	ckpt_info.result = call_kerrighed_services(KSYS_APP_CHKPT,
-						    &ckpt_info);
+	len = strlen(storage_dir) + 1;
 
-	return ckpt_info;
+	ckpt_info = malloc(sizeof(struct checkpoint_info) + len * sizeof(char));
+
+	ckpt_info->app_id = pid;
+	ckpt_info->chkpt_sn = 0;
+	ckpt_info->flags = flags | APP_FROM_PID;
+	ckpt_info->signal = 0;
+	ckpt_info->storage_dir_len = len;
+	ckpt_info->storage_dir = (char*)(&ckpt_info[1]);
+	strcpy(ckpt_info->storage_dir, storage_dir);
+
+	ckpt_info->result = call_kerrighed_services(KSYS_APP_CHKPT,
+						    ckpt_info);
+
+	info = *ckpt_info;
+	free(ckpt_info);
+
+	return info;
 }
 
-int application_restart(long app_id, int chkpt_sn, int flags,
+int application_restart(long *app_id, const char *checkpoint_dir, int flags,
 			struct cr_subst_files_array *substitution)
 {
 	int res, i;
-	struct restart_request rst_req;
+	struct restart_request *rst_req;
 	size_t subst_str_len;
+	size_t len;
 
-	rst_req.app_id = app_id;
-	rst_req.chkpt_sn = chkpt_sn;
-	rst_req.flags = flags;
+	len = strlen(checkpoint_dir) + 1;
 
-	rst_req.substitution = *substitution;
+	rst_req = malloc(sizeof(struct restart_request) + len);
 
-	if (rst_req.substitution.nr) {
+	rst_req->app_id = 0;
+	rst_req->flags = flags;
+	rst_req->storage_dir_len = len;
+	rst_req->storage_dir = (char*)(&rst_req[1]);
+	strcpy(rst_req->storage_dir, checkpoint_dir);
+
+	rst_req->substitution = *substitution;
+
+	if (rst_req->substitution.nr) {
 
 		subst_str_len = sizeof(kerrighed_node_t)*2 +
 			sizeof(unsigned long)*2;
 
-		for (i = 0; i < rst_req.substitution.nr; i++) {
+		for (i = 0; i < rst_req->substitution.nr; i++) {
 
 			if (strlen(substitution->files[i].file_id)
 			    != subst_str_len)
@@ -202,9 +235,14 @@ int application_restart(long app_id, int chkpt_sn, int flags,
 	} else if (rst_req.substitution.files)
 		goto err_inval;
 
-	res = call_kerrighed_services(KSYS_APP_RESTART, &rst_req);
-	if (!res)
-		res = rst_req.root_pid;
+	res = call_kerrighed_services(KSYS_APP_RESTART, rst_req);
+
+	if (!res) {
+		res = rst_req->root_pid;
+		*app_id = rst_req->app_id;
+	}
+
+	free(rst_req);
 
 error:
 	return res;

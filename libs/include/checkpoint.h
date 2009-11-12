@@ -16,13 +16,15 @@
 struct checkpoint_info
 {
 	long app_id;
-
 	int flags;
 
 	int chkpt_sn;
 	int result;
 
 	int signal;
+
+	size_t storage_dir_len;
+	char *storage_dir;
 };
 
 struct cr_subst_file
@@ -40,11 +42,13 @@ struct cr_subst_files_array
 struct restart_request
 {
 	long app_id;
-	int chkpt_sn;
 	int flags;
 	pid_t root_pid;
 
 	struct cr_subst_files_array substitution;
+
+	size_t storage_dir_len;
+	char *storage_dir;
 };
 
 struct app_userdata_request

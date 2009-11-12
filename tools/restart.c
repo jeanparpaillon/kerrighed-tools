@@ -19,10 +19,6 @@
 #include <kerrighed.h>
 #include <libkrgcb.h>
 
-#include <config.h>
-
-long appid;
-int version;
 int flags = 0;
 pid_t root_pid = 0;
 int options = 0;
@@ -50,7 +46,9 @@ warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 
 void show_help(char * program_name)
 {
-	printf ("Usage: %s [options] appid version\n"
+	printf ("Usage: %s [options] DIRECTORY\n"
+		"\n"
+		"Restart application from checkpoint stored in directory DIRECTORY\n"
 		"\n"
 		"Options:\n"
 		"  -h|--help                Display this information and exit\n"
@@ -266,7 +264,7 @@ out:
 	return r;
 }
 
-int parse_args(int argc, char *argv[])
+void parse_args(int argc, char *argv[])
 {
 	char *checkpoint_dir;
 	char c;
@@ -332,25 +330,9 @@ int parse_args(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 		}
 	}
-
-	if (argc - optind != 2) {
-		show_help(argv[0]);
-		exit(EXIT_FAILURE);
-	}
-
-	appid = atol(argv[optind]);
-	version = atoi(argv[optind+1]);
-	asprintf(&checkpoint_dir, CHKPT_DIR "/%ld/v%d/", appid, version);
-
-	if (options & STDIN_OUT_ERR)
-		r = replace_stdin_stdout_stderr(checkpoint_dir);
-
-	free(checkpoint_dir);
-
-	return r;
 }
 
-void show_error(int _errno)
+void show_error(long appid, int _errno)
 {
 	switch (_errno) {
 	case E_CR_APPBUSY:
@@ -366,7 +348,8 @@ void show_error(int _errno)
 			"(corrupted or wrong kernel version)\n");
 		break;
 	default:
-		perror("restart");
+		fprintf(stderr, "restart: %s\n", strerror(_errno));
+		break;
 	}
 }
 
@@ -406,44 +389,53 @@ void wait_application_exits()
 
 void check_environment(void)
 {
-	struct stat buffer;
-	int ret;
-
 	/* is Kerrighed launched ? */
 	ret = krg_check_hotplug();
 	if (ret) {
 		perror("Kerrighed is not started");
 		exit(EXIT_FAILURE);
 	}
-
-	/* Does /var/chkpt exist ? */
-	ret = stat(CHKPT_DIR, &buffer);
-	if (ret) {
-		perror(CHKPT_DIR);
-		exit(EXIT_FAILURE);
-	}
 }
 
 int main(int argc, char *argv[])
 {
+	long appid;
 	int r = 0;
-
-	/* Manage options with getopt */
-	r = parse_args(argc, argv);
-	if (r)
-		goto exit;
+	char *checkpoint_dir = NULL;
 
 	/* Check environment */
 	check_environment();
 
-	if (!(options & QUIET))
-		printf("Restarting application %ld (v%d) ...\n",
-		       appid, version);
+	/* Manage options with getopt */
+	parse_args(argc, argv);
 
-	r = application_restart(appid, version, flags, &substitution);
-	if (r < 0) {
-		show_error(errno);
+	if (argc - optind != 1) {
+		show_help();
+		r = -1;
 		goto exit;
+	}
+
+	checkpoint_dir = canonicalize_file_name(argv[optind]);
+	if (!checkpoint_dir) {
+		r = errno;
+		perror(argv[optind]);
+		goto exit;
+	}
+
+	if (options & STDIN_OUT_ERR) {
+		r = replace_stdin_stdout_stderr(checkpoint_dir);
+		if (r)
+			goto exit_failure;
+	}
+
+	if (!(options & quiet))
+		printf("Restarting application from %s...\n",
+		       checkpoint_dir);
+
+	r = application_restart(&appid, checkpoint_dir, flags, &substitution);
+	if (r < 0) {
+		show_error(appid, errno);
+		goto exit_failure;
 	}
 
 	root_pid = r;
@@ -479,6 +471,9 @@ int main(int argc, char *argv[])
 
 exit:
 	clean_file_substitution(&substitution);
+
+	if (checkpoint_dir)
+		free(checkpoint_dir);
 
 	if (r)
 		exit(EXIT_FAILURE);
