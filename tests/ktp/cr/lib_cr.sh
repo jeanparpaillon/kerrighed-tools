@@ -32,6 +32,8 @@ TESTCMD="bi-cr"
 TESTCMD_OPTIONS="-q"
 TEST_STEP=0
 
+CHKPTDIR=/var/chkpt
+
 LTP_print_info()
 {
     if [ "$DEBUG" != "" ]; then
@@ -67,8 +69,8 @@ move_task_file_to_make_restart_fail()
     local _pid=$1
     local r=0
 
-    local version=`awk '$1=="Version:" {print $2}' /tmp/chkpt_result${_pid}`
-    local filechkpt=/var/chkpt/${_pid}/v${version}/task_${_pid}.bin
+    local version=$((CKPT_VERSION-1))
+    local filechkpt=${CHKPTDIR}/${_pid}/v${version}/task_${_pid}.bin
 
     mv $filechkpt $filechkpt.old
     r=$?
@@ -81,8 +83,8 @@ move_task_back_file_to_make_restart_ok()
     local _pid=$1
     local r=0
 
-    local version=`awk '$1=="Version:" {print $2}' /tmp/chkpt_result${_pid}`
-    local filechkpt=/var/chkpt/${_pid}/v${version}/task_${_pid}.bin
+    local version=$((CKPT_VERSION-1))
+    local filechkpt=${CHKPTDIR}/${_pid}/v${version}/task_${_pid}.bin
 
     mv $filechkpt.old $filechkpt
     r=$?
@@ -98,7 +100,7 @@ check_written_files()
     # check if checkpoint is really written on disk
     # TODO: factorize(1)
     local version=`awk '$1=="Version:" {print $2}' /tmp/chkpt_result${_pid}`
-    local filechkpt=/var/chkpt/${_pid}/v${version}/task_${_pid}.bin
+    local filechkpt=${CHKPTDIR}/${_pid}/v${version}/task_${_pid}.bin
     stat $filechkpt > /dev/null 2>&1
 
     r=$?
@@ -109,6 +111,20 @@ check_written_files()
     return $r
 }
 
+create_checkpoint_dir()
+{
+    local _pid=$1
+
+    local dir=${CHKPTDIR}/${_pid}/v${CKPT_VERSION}/
+
+    while [ -d $dir ]; do
+	CKPT_VERSION=$(($CKPT_VERSION+1))
+	dir=${CHKPTDIR}/${_pid}/v${CKPT_VERSION}/
+    done
+
+    mkdir -p $dir
+}
+
 checkpoint_process()
 {
     local _pid=$1
@@ -116,7 +132,9 @@ checkpoint_process()
     local _options=$3
     local r=0
 
-    checkpoint $_options $_pid > /tmp/chkpt_result${_pid}
+    create_checkpoint_dir $_pid
+
+    checkpoint $_options $_pid ${CHKPTDIR}/${_pid}/v${CKPT_VERSION}/ > /tmp/chkpt_result${_pid}
 
     r=$?
     if [ $r -ne 0 ]; then
@@ -133,7 +151,9 @@ checkpoint_process()
 	return $r
     fi
 
-    #rm -rf /tmp/chkpt_result${_pid}
+    CKPT_VERSION=$(($CKPT_VERSION+1))
+
+    rm -rf /tmp/chkpt_result${_pid} 2> /dev/null
 
     return $r
 }
@@ -153,7 +173,9 @@ checkpoint_process_w_signal()
 	return $r
     fi
 
-    checkpoint -c $_pid > /tmp/chkpt_result${_pid}
+    create_checkpoint_dir $_pid
+
+    checkpoint -c $_pid  ${CHKPTDIR}/${_pid}/v${CKPT_VERSION}/ > /tmp/chkpt_result${_pid}
     r=$?
     if [ $r -ne 0 ]; then
 	tst_brkm TFAIL NULL \
@@ -179,7 +201,9 @@ checkpoint_process_w_signal()
 	return $r
     fi
 
-    rm -rf /tmp/chkpt_result${_pid}
+    CKPT_VERSION=$(($CKPT_VERSION+1))
+
+    rm -rf /tmp/chkpt_result${_pid} 2> /dev/null
 
     return $r
 }
@@ -191,7 +215,7 @@ checkpoint_process_must_fail()
     local _options=$3
     local r=0
 
-    checkpoint $_options $_pid > /dev/null 2>&1
+    checkpoint $_options $_pid  ${CHKPTDIR}/${_pid}/v${CKPT_VERSION}/ > /dev/null 2>&1
 
     r=$?
     if [ $r -eq 0 ]; then
@@ -234,7 +258,9 @@ checkpoint_frozen_process()
     local _name=$2
     local r=0
 
-    checkpoint -c $_pid > /tmp/chkpt_result${_pid}
+    create_checkpoint_dir $_pid
+
+    checkpoint -c $_pid ${CHKPTDIR}/${_pid}/v${CKPT_VERSION}/ > /tmp/chkpt_result${_pid}
 
     r=$?
     if [ $r -ne 0 ]; then
@@ -380,12 +406,12 @@ restart_process()
     local r=0
 
     # Restart process
-    restart -q -t $_pid $_version
+    restart -q -t ${CHKPTDIR}/${_pid}/v${_version}
 
     r=$?
     if [ $r -ne 0 ]; then
 	tst_brkm TFAIL NULL \
-	    "restart: failed to restart $_pid $version"
+	    "restart: failed to restart $_pid $_version"
 	return $r
     fi
 
@@ -399,6 +425,8 @@ restart_process()
 	tst_brkm TFAIL NULL "ps: $_pid ($_name) is not visible with command ps"
 	return $r
     fi
+
+    CKPT_VERSION=$(($_version+1))
 
     LTP_print_step_info \
 	"restart $_pid $_name: $r"
@@ -414,19 +442,19 @@ restart_process_must_fail()
     local r=0
 
     # Restart process
-    restart $_pid $version > /dev/null 2>&1
+    restart ${CHKPTDIR}/${_pid}/v${_version} > /dev/null 2>&1
 
     r=$?
     if [ $r -eq 0 ]; then
 	tst_brkm TFAIL NULL \
-	"restart_must_fail: restart $_pid $version should have failed"
+	"restart_must_fail: restart $_pid $_version should have failed"
 	r=1
 	return $r
     fi
     r=0
 
     LTP_print_step_info \
-	"restart_must_fail: $r - PID: $_pid $version"
+	"restart_must_fail: $r - PID: $_pid $_version"
 
     return $r
 }
@@ -666,6 +694,7 @@ to do that, give --" 1>&2
     rm -rf "$sessionfile"
 
     PID=$pid
+    CKPT_VERSION=1
 
     # Check the exec has been done
     local cmd=`expr substr $TESTCMD 1 15`
@@ -705,10 +734,10 @@ CR_init_check()
 	check_if_command_exists $cmd || return $?
     done
 
-    # Check if directory /var/chkpt exists
-    mkdir -p /var/chkpt
-    chmod 777 /var/chkpt
-    chmod u+t /var/chkpt
+    # Check if directory ${CHKPTDIR} exists
+    mkdir -p ${CHKPTDIR}
+    chmod 777 ${CHKPTDIR}
+    chmod u+t ${CHKPTDIR}
 
     return 0
 }
@@ -769,7 +798,7 @@ CR_internal_cleanup()
 CR_cleanup()
 {
     killall `echo "$TESTCMD" | cut -f1 -d" "` > /dev/null 2>&1
-    rm -rf /var/chkpt/* > /dev/null 2>&1
+    rm -rf ${CHKPTDIR}/* > /dev/null 2>&1
 
     return 0
 }
