@@ -684,7 +684,7 @@ CR_init_check()
     check_if_command_exists $TESTCMD || return $?
 
     # Check if standard unix command exists
-    local unix_tools="ps pgrep kill killall pkill grep rm mv cut wc awk"
+    local unix_tools="ps pgrep kill killall pkill grep rm mv cut wc awk sed"
     for cmd in $unix_tools; do
 	check_if_command_exists $cmd || return $?
     done
