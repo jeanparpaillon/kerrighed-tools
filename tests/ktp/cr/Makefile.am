@@ -47,6 +47,7 @@ tests_SCRIPTS = \
 	cr_ipc_msg01 \
 	cr_ipc_sem01 \
 	cr_ipc_sem02 \
+	cr_pipe01 \
 	lib_cr.sh \
 	lib_cr_ipc.sh
 

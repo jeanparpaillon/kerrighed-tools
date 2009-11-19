@@ -1,0 +1,75 @@
+#!/bin/bash
+###############################################################################
+##
+## Copyright (c) Kerlabs, 2009
+##
+## This program is free software;  you can redistribute it and#or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+## or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+## for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program;  if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+##
+###############################################################################
+#
+# Description:  Test program for Kerrighed checkpoint/restart of an application
+#               that is using pipe.
+#
+# Author:       Matthieu Fertré, matthieu.fertre@kerlabs.com
+#
+
+source `dirname $0`/lib_cr.sh
+
+description="Run (pipe), C, K, R, C, K, R, R (EBUSY), K, R"
+
+TESTCMD="bi-pipe"
+TESTCMD_OPTIONS="-q"
+
+# Run, C, K, R, C, K, R, R (EBUSY), K, R
+cr_pipe01()
+{
+    TCID="$FUNCNAME"               # Identifier of this testcase.
+    TST_COUNT=$[$TST_COUNT+1]      # Test case number.
+
+    local oldcap=`krgcapset -s - | grep "Inheritable Effective" | cut -d: -f2`
+
+    krgcapset -d -DISTANT_FORK
+
+    runcommand +CHECKPOINTABLE 2 || return $?
+
+    krgcapset -d $oldcap
+
+    checkpoint_process $PID $TESTCMD || return $?
+
+    kill_group $PID $TESTCMD || return $?
+
+    restart_process $PID 1 $TESTCMD || return $?
+
+    checkpoint_process $PID $TESTCMD || return $?
+
+    kill_group $PID $TESTCMD || return $?
+
+    restart_process $PID 2 $TESTCMD || return $?
+
+    restart_process_must_fail $PID 1 $TESTCMD || return $?
+
+    kill_group $PID $TESTCMD || return $?
+
+    restart_process $PID 2 $TESTCMD || return $?
+
+    kill_group $PID $TESTCMD || return $?
+
+    print_success $?
+    return $?
+}
+
+CR_setup $@ || exit $?
+
+cr_pipe01 || exit $?
