@@ -16,17 +16,15 @@
     <cmdsynopsis>
       <command>restart</command>
       <arg choice="opt" ><replaceable>OPTIONS</replaceable></arg>
-      <arg choice="plain" ><replaceable>appid</replaceable></arg>
-      <arg choice="plain" ><replaceable>version</replaceable></arg>
+      <arg choice="plain" ><replaceable>directory</replaceable></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
   <refsect1>
     <title>Description</title>
     <para>
-      <command>restart</command> restarts the application given by
-      <replaceable>appid</replaceable> from the <option>n</option>th checkpoint
-      (with <option>n</option> equals to <replaceable>version</replaceable>).
+      <command>restart</command> restarts the application from the checkpoint
+      previously taken in directory <replaceable>directory</replaceable>.
     </para>
     <para>
       See <command>checkpoint</command>(1) for further details.
