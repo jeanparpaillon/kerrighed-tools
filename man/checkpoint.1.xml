@@ -176,9 +176,14 @@
     <para>Checkpointing applications with zombie processes is not supported.
     </para>
 
-    <para>Checkpointing of applications using sockets or pipes is not supported.
-      Therefore, graphic applications are not supported since there are using
-      sockets to communicate with the X server.
+    <para>Checkpointing of applications using socket(s) or named pipe(s) (fifo) is
+      not supported. Therefore, graphic applications are not supported since
+      there are using sockets to communicate with the X server.
+    </para>
+
+    <para>Checkpointing of application using anonymous pipe(s) may work
+      depending on where the processes are running. Else, it fails with 'Function
+      not implemented'.
     </para>
 
     <para>System V IPC objects are not restored but it is possible to checkpoint
