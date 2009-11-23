@@ -68,11 +68,13 @@ cr_abort02()
 
     kill_group $PID $TESTCMD || return $?
 
-    print_success $?
+    local r=$?
 
-    rm -rf $workdir
+    print_success $r
 
-    return $?
+    rm -rf $workdir > /dev/null 2>&1
+
+    return $r
 }
 
 CR_setup $@ || exit $?
