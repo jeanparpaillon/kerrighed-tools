@@ -17,6 +17,7 @@
       <command>checkpoint</command>
       <arg choice="opt" ><replaceable>OPTIONS</replaceable></arg>
       <arg choice="plain" ><replaceable>pid</replaceable></arg>
+      <arg choice="plain" ><replaceable>directory</replaceable></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -24,7 +25,8 @@
     <title>Description</title>
     <para>
       <command>checkpoint</command> checkpoints a running application identified
-      by one of its processes given by <varname>pid</varname>.
+      by one of its processes given by <varname>pid</varname>. The checkpoint is
+      saved in directory <varname>directory</varname>.
     </para>
     <para>
       Checkpoint/Restart basically consists of storing a snapshot of the current
