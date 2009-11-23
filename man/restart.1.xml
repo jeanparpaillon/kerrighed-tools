@@ -126,6 +126,8 @@
     <title>See Also</title>
     <para>
       <ulink url="checkpoint.1.xml" ><command>checkpoint</command>(1)</ulink>,
+      <ulink url="ipccheckpoint.1.html" ><command>ipccheckpoint</command>(1)</ulink>,
+      <ulink url="ipcrestart.1.html" ><command>ipcrestart</command>(1)</ulink>,
       <ulink url="krgcr-run.1.xml" ><command>krgcr-run</command>(1)</ulink>,
       <ulink url="krgcapset" ><command>krgcapset</command>(1)</ulink>,
       <ulink url="kerrighed_capabilities.7.html" ><command>kerrighed_capabilities</command>(7)</ulink>,

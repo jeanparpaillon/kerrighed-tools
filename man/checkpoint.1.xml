@@ -181,11 +181,13 @@
       sockets to communicate with the X server.
     </para>
 
-    <para>IPC objects are not restored but it is possible to checkpoint an
-      application that is currently waiting on such IPC objects. For instance,
+    <para>System V IPC objects are not restored but it is possible to checkpoint
+      an application that is currently waiting on such IPC objects. For instance,
       you can checkpoint a process waiting to receive a message from a message
       queue. The process will replay the action after the restart if the IPC
-      objects still exits.
+      objects still exits. State of System V IPC objects can be saved and
+      restored using respectfully <command>ipccheckpoint</command>(1) and
+      <command>ipcrestart</command>(1).
     </para>
 
     <para>Files are not checkpointed nor restored. The files are reopened at
@@ -244,6 +246,8 @@
     <title>See Also</title>
     <para>
       <ulink url="restart.1.html" ><command>restart</command>(1)</ulink>,
+      <ulink url="ipccheckpoint.1.html" ><command>ipccheckpoint</command>(1)</ulink>,
+      <ulink url="ipcrestart.1.html" ><command>ipcrestart</command>(1)</ulink>,
       <ulink url="krgcr-run.1.html" ><command>krgcr-run</command>(1)</ulink>,
       <ulink url="krgcapset.1.html" ><command>krgcapset</command>(1)</ulink>,
       <ulink url="kerrighed_capabilities.7.html" ><command>kerrighed_capabilities</command>(7)</ulink>,
