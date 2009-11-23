@@ -1311,6 +1311,9 @@ r cr_abort01
 r cr_abort02
 r cr_tree01
 rsingle cr_tree02
+r cr_pipe01
+r cr_pipe02
+# rsingle cr_callbacks01 #still failing because of NFS
 r cr_signal01
 r cr_clone_files01
 r cr_clone_fs01
