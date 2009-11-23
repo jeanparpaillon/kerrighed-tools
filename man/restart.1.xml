@@ -104,35 +104,6 @@
   </refsect1>
 
   <refsect1>
-    <title>Files</title>
-    <para>
-      <variablelist>
-	<varlistentry>
-	  <term><filename>/var/chkpt</filename></term>
-	  <listitem>
-	    <para>
-	      This directory is default location for disk checkpoints.
-	    </para>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term><filename>/var/chkpt/&lt;appid&gt;/v&lt;version&gt;/</filename></term>
-	  <listitem>
-	    <para>
-	      This directory contains the <varname>n</varname>th checkpoint
-	      (with <varname>n</varname> equals to <varname>version</varname>)
-	      of application identified by <varname>appid</varname>.
-	    </para>
-	    <para>
-	      To remove a checkpoint from disk, remove this folder.
-	    </para>
-	  </listitem>
-	</varlistentry>
-      </variablelist>
-    </para>
-  </refsect1>
-
-  <refsect1>
     <title>Authors</title>
     <para>
       Matthieu Fertré <email>matthieu.fertre@kerlabs.com</email>,
