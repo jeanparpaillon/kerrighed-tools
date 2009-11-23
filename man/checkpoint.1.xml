@@ -126,6 +126,19 @@
 	</varlistentry>
 
 	<varlistentry>
+	  <term><option>-i</option></term>
+	  <term><option>--ignore-unsupported-files</option></term>
+	  <listitem>
+	    <para>Allow to checkpoint an application even if the application is
+	      using some files, which type is not supported by checkpoint/restart
+	      mechanisms (such as socket). At restart time, file descriptor appear
+	      to be closed. Without this option, if there is some unsupported files,
+	      <command>checkpoint</command> fails with 'Function not implemented'.
+	    </para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
 	  <term><option>-d <replaceable>description</replaceable></option></term>
 	  <term><option>--description=<replaceable>description</replaceable></option></term>
 	  <listitem>
@@ -135,9 +148,6 @@
 	      <filename>description.txt</filename> in the
 	      checkpoint folder (see FILES below).
 	    </para>
-	    <para>
-	      This option makes sense only when really checkpointing the application.
-	    </para>
 	  </listitem>
 	</varlistentry>
       </variablelist>
@@ -146,6 +156,11 @@
     <para>
       Options <option>-f</option>, <option>-c</option>, <option>-u</option>,
       <option>-k</option> are mutually exclusive.
+    </para>
+
+    <para>
+      Options <option>-d</option> and <option>-i</option> make sense only when
+      really checkpointing the application.
     </para>
   </refsect1>
 
