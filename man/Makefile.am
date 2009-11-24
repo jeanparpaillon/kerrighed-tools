@@ -18,7 +18,10 @@ man_MANS = \
 	migrate_self.2 \
 	restart.1 \
 	checkpoint.1 \
-	krgcr-run.1
+	krgcr-run.1 \
+	ipccheckpoint.1 \
+	ipcrestart.1
+
 html_MANS = $(patsubst %,%.html,$(man_MANS))
 man_sources = $(patsubst %,%.xml,$(man_MANS))
 

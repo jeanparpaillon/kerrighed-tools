@@ -1,0 +1,81 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='ipccheckpoint.1'>
+  <refmeta>
+    <refentrytitle>ipccheckpoint</refentrytitle>
+    <manvolnum>1</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>ipccheckpoint</refname>
+    <refpurpose>Checkpoint a System V IPC object to a file.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>ipccheckpoint</command>
+      <group choice="req" >
+	<arg choice="plain" ><replaceable>-q</replaceable></arg>
+	<arg choice="plain" ><replaceable>-m</replaceable></arg>
+	<arg choice="plain" ><replaceable>-s</replaceable></arg>
+      </group>
+      <arg choice="plain" ><replaceable>IPCID</replaceable></arg>
+      <arg choice="plain" ><replaceable>file</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+    <para>
+      <command>ipccheckpoint</command> checkpoints an IPC object and
+      save the result into the file <replaceable>file</replaceable>.
+    </para>
+  </refsect1>
+
+  <para>
+    <variablelist>
+
+      <varlistentry>
+	<term><option>-q</option></term>
+	<listitem>
+	  <para>Use this to checkpoint a message queue.</para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+	<term><option>-m</option></term>
+	<listitem>
+	  <para>Use this to checkpoint a shared memory segment.</para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+	<term><option>-s</option></term>
+	<listitem>
+	  <para>Use this to checkpoint a semaphore array.</para>
+	</listitem>
+      </varlistentry>
+
+    </variablelist>
+  </para>
+
+  <refsect1>
+    <title>Author</title>
+    <para>
+      Matthieu Fertré <email>matthieu.fertre@kerlabs.com</email>,
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>See Also</title>
+    <para>
+      <ulink url="ipcrestart.1.html" ><command>ipcrestart</command>(1)</ulink>,
+      <ulink url="checkpoint.1.xml" ><command>checkpoint</command>(1)</ulink>,
+      <ulink url="restart.1.xml" ><command>restart</command>(1)</ulink>,
+      <ulink url="krgcr-run.1.xml" ><command>krgcr-run</command>(1)</ulink>,
+      <ulink url="krgcapset" ><command>krgcapset</command>(1)</ulink>,
+      <ulink url="kerrighed_capabilities.7.html" ><command>kerrighed_capabilities</command>(7)</ulink>,
+    </para>
+  </refsect1>
+</refentry>
