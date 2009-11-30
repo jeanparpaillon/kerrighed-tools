@@ -1,14 +1,17 @@
 #!/bin/bash
 
+# Related LTP version: 20091031
+
+DEVICE=/dev/null
+DEVICE_FS_TYPE=tmpfs
+
 # Default values for arguments
 
 #onetest=sendfile01
 let nr_ps=16
 let nr_run=1
 
-BASETEST=@ltpbase@/testcases/bin
-PATH=${PATH}:@ltpbase@/tools:$BASETEST
-
+BASETEST=/opt/ltp/testcases/bin/
 
 ###############################
 ############################### FUNCTIONS DEFINITION
@@ -196,6 +199,7 @@ let nbcrash=0
 
 # flat list of test
 
+
 ############################ Abort
 
 ulimit -c 1024; r abort01
@@ -203,6 +207,7 @@ ulimit -c 1024; r abort01
 ############################ Accept
 
 r accept01
+rfail accept4_01       # Address already in use... Concurency issue ?
 
 ############################ Access
 
@@ -210,8 +215,12 @@ runtests 1 5 access
 
 ############################ Acct
 
-rwarn acct01
-r acct02
+runtests 1 2 acct
+
+############################ Add_key
+
+rfail add_key01   # Kerrighed does not support CONFIG_KEYS
+rfail add_key02   # Kerrighed does not support CONFIG_KEYS
 
 ############################ Adjtimex
 
@@ -230,6 +239,10 @@ r asyncio02
 
 runtests 1 2 bind
 
+############################ Bdflush
+
+rfail bdflush01    # Not supported on x86_64 arch
+
 ############################ Brk
 
 r brk01
@@ -242,6 +255,10 @@ runtests 1 2 capget
 
 runtests 1 2 capset
 
+############################ Cacheflush
+
+rfail cacheflush01      # Not supported on x86_64 arch
+
 ############################ Chdir
 
 r chdir01
@@ -250,22 +267,31 @@ runtests 2 4 chdir
 
 ############################ Chmod
 
-runtests 1 4 chmod
-cp -p $BASETEST/change_owner $PWD; r chmod05
-cp -p $BASETEST/change_owner $PWD; r chmod06
-r chmod07
+runtests 1 7 chmod
 r symlink01 -T chmod01
 
 ############################ Chown
 
-runtests 1 2 chown
-export change_owner=$BASETEST/change_owner ; r chown03
-cp -p $BASETEST/change_owner $PWD; r chown04
-r chown05
+runtests 1 5 chown
+
+r chown01_16
+r chown02_16
+r chown03_16
+r chown04_16
+r chown05_16
 
 ############################ Chroot
 
 runtests 1 4 chroot
+
+############################ Clock_getres
+
+r clock_getres01
+
+############################ Clock_nanosleep
+
+rfail clock_nanosleep01
+r clock_nanosleep2_01
 
 ############################ Clone
 
@@ -300,6 +326,25 @@ runtests 1 7 dup
 
 runtests 1 5 dup2
 
+############################ Dup3
+
+r dup3_01
+
+############################ Epoll
+
+r epoll_create1_01
+r epoll-ltp                # Very long test...
+
+############################ Eventfd
+
+r eventfd01
+
+############################ Eventfd2
+
+r eventfd2_01
+r eventfd2_02
+r eventfd2_03
+
 ############################ Exec
 
 r execl01
@@ -310,16 +355,18 @@ r execv01
 r execve01
 r execve02 -F $BASETEST/test3
 r execve03
-cp -f $BASETEST/test3 $PWD; rwarn execve04 -F test3  # Unknown problem.
-rfail execve05 -F $BASETEST/test3                    # NFS problem
-                          # Don't know remotely that a file is open on write
-r execve06 20 $BASETEST/execve06 $BASETEST/execve06 4
+rfail execve04 -F $BASETEST/test3  # Unknown problem.
+r execve05 20 $BASETEST/execve05 $BASETEST/execve05 4
 
 r execvp01
 
 ############################ Exit
 
 runtests 1 2 exit
+
+############################ Exit_group
+
+r exit_group01
 
 ############################ Faccessat
 
@@ -335,9 +382,9 @@ r posix_fadvise04_64
 
 ############################ Fallocate
 
-rfail fallocate01                # Need kernel >= 2.6.23
-rfail fallocate02                # Need kernel >= 2.6.23
-rfail fallocate03                # Need kernel >= 2.6.23
+rfail fallocate01                # Need HAVE_SYSCALL_WRAPPERS...
+rfail fallocate02                # Need HAVE_SYSCALL_WRAPPERS...
+rfail fallocate03                # Need HAVE_SYSCALL_WRAPPERS...
 
 ############################ Fchdir
 
@@ -345,10 +392,7 @@ runtests 1 3 fchdir
 
 ############################ Fchmod
 
-runtests 1 4 fchmod
-cp -p $BASETEST/change_owner $PWD; r fchmod05
-cp -p $BASETEST/change_owner $PWD; r fchmod06
-r fchmod07
+runtests 1 7 fchmod
 
 ############################ Fchmodat
 
@@ -356,10 +400,13 @@ r fchmodat01
 
 ############################ Fchown
 
-runtests 1 2 fchown
-cp -p $BASETEST/change_owner $PWD; r fchown03
-export change_owner=$BASETEST/change_owner; r fchown04
-r fchown05
+runtests 1 5 fchown
+
+r fchown01_16
+r fchown02_16
+r fchown03_16
+r fchown04_16
+r fchown05_16
 
 ############################ Fchownat
 
@@ -369,12 +416,11 @@ r fchownat01
 
 runtests 1 10 fcntl
 rfail fcntl11          # NFS locking problem.
-r fcntl12
-r fcntl13
+runtests 12 13 fcntl
 rfail fcntl14          # NFS locking problem.
 rfail fcntl15          # NFS locking problem.
 
-# BUG(LTP) r fcntl16
+rfail fcntl16          # NFS problem
 rfail fcntl17          # NFS locking problem.
 r fcntl18
 rfail fcntl19          # NFS locking problem.
@@ -385,8 +431,38 @@ r fcntl23
 rfail fcntl24          # NFS locking problem.
 rfail fcntl25          # NFS locking problem.
 rfail fcntl26          # NFS locking problem.
-# runtests 27 28 fcntl	Disabled by ltp
+runtests 27 28 fcntl
 r fcntl07B
+
+r fcntl01_64
+r fcntl02_64
+r fcntl03_64
+r fcntl04_64
+r fcntl05_64
+r fcntl06_64
+r fcntl07_64
+r fcntl07B_64
+r fcntl08_64
+r fcntl09_64
+r fcntl10_64
+rfail fcntl11_64       # NFS locking problem.
+r fcntl12_64
+r fcntl13_64
+rfail fcntl14_64       # Test not supported on NFS.
+rfail fcntl15_64       # NFS locking problem.
+rfail fcntl16_64       # NFS locking problem.
+rfail fcntl17_64       # NFS locking problem.
+r fcntl18_64
+rfail fcntl19_64       # NFS locking problem.
+rfail fcntl20_64       # NFS locking problem.
+rfail fcntl21_64       # NFS locking problem.
+rfail fcntl22_64       # NFS locking problem.
+r fcntl23_64
+rfail fcntl24_64       # NFS locking problem.
+rfail fcntl25_64       # NFS locking problem.
+rfail fcntl26_64       # NFS locking problem.
+r fcntl27_64
+r fcntl28_64
 
 ############################ Fdatasync
 
@@ -416,14 +492,22 @@ r fpathconf01
 ############################ Fstat
 
 runtests 1 5 fstat
+r fstat01_64
+r fstat02_64
+r fstat03_64
+r fstat04_64
+r fstat05_64
 
 ############################ Fstatat
 
 r fstatat01
+r fstatat01_64
 
 ############################ Fstatfs
 
 runtests 1 2 fstatfs
+r fstatfs01_64
+r fstatfs02_64
 
 ############################ Fsync
 
@@ -434,6 +518,11 @@ runtests 1 3 fsync
 runtests 1 3 ftruncate
 rfail ftruncate04         # Cannot be run over NFS
 
+r ftruncate01_64
+r ftruncate02_64
+r ftruncate03_64
+rfail ftruncate04_64      # Cannot be run over NFS
+
 ############################ Futimesat
 
 r futimesat01
@@ -442,6 +531,10 @@ r futimesat01
 
 r getcontext01
 
+############################ Getcpu
+
+r getcpu01
+
 ############################ Getcwd
 
 runtests 1 3 getcwd
@@ -449,6 +542,11 @@ runtests 1 3 getcwd
 ############################ Getdents
 
 runtests 1 4 getdents
+
+r getdents01_64
+r getdents02_64
+r getdents03_64
+r getdents04_64
 
 ############################ Getdomainname
 
@@ -460,19 +558,33 @@ r getdtablesize01
 
 ############################ Getegid
 
-r getegid01
+runtests 1 2 getegid
+
+r getegid01_16
+r getegid02_16
 
 ############################ Geteuid
 
 r geteuid01
 
+r geteuid01_16
+
 ############################ Getgid
 
-runtests 1 3 getgid
+r getgid01
+r getgid03
+
+r getgid01_16
+r getgid03_16
 
 ############################ Getgroups
 
 runtests 1 4 getgroups
+
+r getgroups01_16
+r getgroups02_16
+r getgroups03_16
+r getgroups04_16
 
 ############################ Gethostid
 
@@ -526,6 +638,14 @@ runtests 1 3 getresuid
 
 runtests 1 2 getrlimit
 
+############################ Get_mempolicy
+
+r get_mempolicy01
+
+############################ Get_robust_list
+
+r get_robust_list01
+
 ############################ Getrusage
 
 runtests 1 2 getrusage
@@ -554,19 +674,25 @@ r gettid01
 
 runtests 1 3 getuid
 
+r getuid01_16
+r getuid02_16
+r getuid03_16
 
 ############################ Ioctl
 
-r ioctl01 -D /dev/tty0  # NFS .something file remaning in the dir to remove
-# 2.6.20
-#r ioctl02 -D /dev/tty0 # Fixed in later version of LTP
-# 2.6.30
-rfail ioctl02 -D /dev/tty0
+r ioctl01 -D /dev/tty0
+r ioctl02 -D /dev/tty0
+r ioctl03
+
+r test_ioctl
 
 ############################ Inotify
 
-r inotify01
-rfail inotify02         # Broken in LTP
+r inotify_init1_01
+r inotify_init1_02
+
+runtests 1 2 inotify
+r inotify03 inotify03 -D $DEVICE -T $DEVICE_FS_TYPE
 
 ############################ Ioperm
 
@@ -576,9 +702,21 @@ runtests 1 2 ioperm
 
 runtests 1 2 iopl
 
+############################ Io_*
+
+r io_cancel01
+r io_destroy01
+r io_getevents01
+r io_setup01
+r io_submit01
+
 ############################ IPC
 
 # Check sub-directories
+
+############################ Keyctl
+
+rfail keyctl01      # Kerrighed does not support CONFIG_KEYS
 
 ############################ Kill
 
@@ -590,7 +728,12 @@ r kill12
 ############################ Lchown
 
 r lchown01
-cp -p $BASETEST/create_link $PWD; chmod u+s $PWD/create_link; r lchown02
+cp -p $BASETEST/create_link $PWD; rfail lchown02 # We have issues with finding
+#                                 the create_link. And probaly issue with
+#                                 concurrency.
+
+r lchown01_16
+cp -p $BASETEST/create_link $PWD; rfail lchown02_16 # Same issue as above.
 
 ############################ Link
 
@@ -599,7 +742,7 @@ runtests 2 7 link
 
 ############################ Linkat
 
-rfail linkat01            # Unknown problem.
+r linkat01
 
 ############################ Listen
 
@@ -618,13 +761,22 @@ runtests 1 10 lseek
 r symlink01 -T lstat01
 runtests 1 3 lstat
 
+r symlink01 -T lstat01_64
+r lstat01_64
+r lstat02_64
+r lstat03_64
+
 ############################ madvise
 
-runtests 1 2 madvise
+runtests 1 3 madvise
 
 ############################ Mallopt
 
 r mallopt01
+
+############################ Mbind
+
+rfail mbind01        # Does not detect NUMA support... ???
 
 ############################ Memcmp
 
@@ -680,25 +832,38 @@ runtests 1 2 modify_ldt
 
 ############################ Mount
 
-# Check more
+r mount01 -D $DEVICE -T $DEVICE_FS_TYPE
+rfail mount02 -D $DEVICE -T $DEVICE_FS_TYPE  # Unknown issue
+rfail mount03 -D $DEVICE -T $DEVICE_FS_TYPE  # Unknown issue
+r mount04 -D $DEVICE -T $DEVICE_FS_TYPE
 
 ############################ Move_pages
 
-rfail move_pages.sh 01          # Need NUMA support in the kernel
-rfail move_pages.sh 02          # Need NUMA support in the kernel
-rfail move_pages.sh 03          # Need NUMA support in the kernel
-rfail move_pages.sh 04          # Need NUMA support in the kernel
-rfail move_pages.sh 05          # Need NUMA support in the kernel
-rfail move_pages.sh 06          # Need NUMA support in the kernel
-rfail move_pages.sh 07          # Need NUMA support in the kernel
-rfail move_pages.sh 08          # Need NUMA support in the kernel
-rfail move_pages.sh 09          # Need NUMA support in the kernel
-rfail move_pages.sh 10          # Need NUMA support in the kernel
-rfail move_pages.sh 11          # Need NUMA support in the kernel
+rfail move_pages.sh 01          # Issue with NUMA support detection ?
+rfail move_pages.sh 02          # Issue with NUMA support detection ?
+rfail cd $BASETEST && chown root move_pages03 && chmod 04755 && move_pages.sh
+rfail move_pages.sh 03          # Issue with NUMA support detection ?
+rfail move_pages.sh 04          # Issue with NUMA support detection ?
+rfail move_pages.sh 05          # Issue with NUMA support detection ?
+rfail move_pages.sh 06          # Issue with NUMA support detection ?
+rfail move_pages.sh 07          # Issue with NUMA support detection ?
+rfail move_pages.sh 08          # Issue with NUMA support detection ?
+rfail move_pages.sh 09          # Issue with NUMA support detection ?
+rfail move_pages.sh 10          # Issue with NUMA support detection ?
+rfail cd $BASETEST && chown root move_pages11 && chmod 04755 && move_pages.sh
+rfail move_pages.sh 11          # Issue with NUMA support detection ?
 
 ############################ Mprotect
 
 runtests 1 3 mprotect
+
+############################ Mq_*
+
+rfail mq_notify01               # Unknown issue
+rfail mq_open01                 # Unknown issue
+rfail mq_timedreceive01         # Unknown issue
+rfail mq_timedsend01            # Unknown issue
+rfail mq_unlink01               # Unknown issue
 
 ############################ Mremap
 
@@ -707,12 +872,12 @@ runtests 1 4 mremap
 ############################ Msgctl
 
 runtests 1 2 msgctl
-rfail msgctl03       # Kerrighed issue.
-r msgctl04
-rfail msgctl05       # caused by usage of current
-runtests 6 7 msgctl
+rfail msgctl03       # Minor issue. EIDRM returned instead of EINVAL.
+runtests 4 7 msgctl
 rsingle msgctl08     # This test is already a SMP stress test
 rsingle msgctl09     # This test is already a SMP stress test
+# rsingle msgctl10   # This test is already a SMP stress test RECHECK
+# rfail msgctl11     # Disabled because of really too long execution time
 
 ############################ Msgget
 
@@ -739,7 +904,7 @@ runtests 1 2 munlock
 ############################ Munlockall
 
 r munlockall01
-# CHECK r munlockall02
+rfail munlockall02     # Unknown issue
 
 ############################ Munmap
 
@@ -789,13 +954,21 @@ runtests 1 2 personality
 ############################ Pipe, etc
 
 runtests 1 6 pipe
-rfail pipe07      # Kerrighed issue.
-                  # Fails because /proc/<pid>/fd in not filled on remote nodes.
+rfail pipe07          # Concurrency issue ?
 runtests 8 11 pipe
+
+############################ Pipe2
+
+r pipe2_01
+r pipe2_02
 
 ############################ Poll
 
 r poll01
+
+############################ Ppoll
+
+rfail ppoll01       # Unknown error
 
 ############################ Prctl
 
@@ -805,6 +978,10 @@ runtests 1 2 prctl
 
 runtests 1 3 pread
 
+r pread01_64
+r pread02_64
+r pread03_64
+
 ############################ Profil
 
 r profil01
@@ -812,16 +989,23 @@ r profil01
 ############################ Pselect
 
 r pselect01
+r pselect01_64
 
 ############################ Ptrace
 
 rfail ptrace01  # Kerrighed issue. Does not support ptrace.
 rfail ptrace02  # Kerrighed issue. Does not support ptrace.
 rfail ptrace03  # Kerrighed issue. Does not support ptrace.
+rfail ptrace04  # Not supported on x86 arch.
+rfail ptrace05  # 2.6.30 regression ? Was running on 2.6.20.
 
 ############################ Pwrite
 
 runtests 1 4 pwrite
+
+############################ Quotaclt
+
+rfail quotactl01     # Fails on a non Kerrighed kernel
 
 ############################ Read
 
@@ -851,11 +1035,11 @@ runtests 1 2 reboot
 
 ############################ Recv
 
-rfail recv01         # Unknown problem...
+r recv01
 
 ############################ Recvfrom
 
-rfail recvfrom01     # Unknown problem...
+r recvfrom01
 
 ############################ Recvmsg
 
@@ -881,6 +1065,14 @@ r renameat01
 runtests 1 2 rmdir
 r symlink01 -T rmdir03
 runtests 3 5 rmdir
+
+############################ Rt_sig*
+
+rfail rt_sigaction01        # User level segfault on Kerrighed
+rfail rt_sigprocmask01      # Segfault on regular kernel...
+r rt_sigprocmask02
+r rt_sigqueueinfo01
+rfail rt_sigsuspend01       # Segfault on regular kernel...
 
 ############################ Sbrk
 
@@ -918,14 +1110,17 @@ runtests 1 2 sched_setscheduler
 
 r sched_yield01
 
+############################ Sched_getaffinity
+
+rfail sched_getaffinity01     # Unknown issue
+
 ############################ Select
 
 runtests 1 3 select
 
 ############################ Semctl
 
-rfail semctl01
-runtests 2 7 semctl
+runtests 1 7 semctl
 
 ############################ Semget
 
@@ -985,18 +1180,32 @@ r setegid01
 ############################ Setfsgid
 
 runtests 1 3 setfsgid
+r setfsgid01_16
+r setfsgid02_16
+r setfsgid03_16
 
 ############################ Setfsuid
 
 runtests 1 4 setfsuid
+r setfsuid01_16
+r setfsuid02_16
+r setfsuid03_16
+r setfsuid04_16
 
 ############################ Setgid
 
 runtests 1 3 setgid
+r setgid01_16
+r setgid02_16
+r setgid03_16
 
 ############################ Setgroups
 
 runtests 1 4 setgroups
+r setgroups01_16
+r setgroups02_16
+r setgroups03_16
+r setgroups04_16
 
 ############################ Sethostname
 
@@ -1021,22 +1230,53 @@ runtests 1 5 setpriority
 ############################ Setregid
 
 runtests 1 4 setregid
+r setregid01_16
+r setregid02_16
+r setregid03_16
+r setregid04_16
 
 ############################ Setresgid
 
 runtests 1 3 setresgid
+r setresgid01_16
+r setresgid02_16
+r setresgid03_16
 
 ############################ Setresuid
 
 runtests 1 4 setresuid
+r setresuid01_16
+r setresuid02_16
+r setresuid03_16
+r setresuid04_16
 
 ############################ Setreuid
 
 runtests 1 7 setreuid
+r setreuid01_16
+r setreuid02_16
+r setreuid03_16
+r setreuid04_16
+r setreuid05_16
+r setreuid06_16
+r setreuid07_16
 
 ############################ Setrlimit
 
 runtests 1 3 setrlimit
+
+############################ Set_robust_list
+
+r set_robust_list01
+
+############################ Set_thread_area
+
+rfail set_thread_area01     # Bad detection of ldt.h support ?
+rfail set_thread_area02     # Bad detection of ldt.h support ?
+
+############################ Set_tid_address
+
+r set_tid_address01
 
 ############################ Setsid
 
@@ -1053,14 +1293,14 @@ runtests 1 2 settimeofday
 ############################ Setuid
 
 runtests 1 4 setuid
+r setuid01_16
+r setuid02_16
+r setuid03_16
+r setuid04_16
 
 ############################ Shmat
 
-# Linux 2.6.20
-#runtests 1 3 shmat
-# Linux 2.6.30
-rfail shmat01	# LTP bug?
-runtests 2 3 shmat
+runtests 1 3 shmat
 
 ############################ Shmctl
 
@@ -1094,6 +1334,13 @@ r sighold02
 
 runtests 1 5 signal
 
+############################ Signalfd
+
+r signalfd01
+
+r signalfd4_01
+r signalfd4_02
+
 ############################ Sigpending
 
 r sigpending02
@@ -1112,7 +1359,7 @@ r sigsuspend01
 
 ############################ Socket
 
-r socket01
+runtests 1 3 socket
 
 ############################ Socketcall
 
@@ -1120,7 +1367,7 @@ runtests 1 4 socketcall
 
 ############################ Socketpair
 
-r socketpair01
+runtests 1 2 socketpair
 
 ############################ Sockioctl
 
@@ -1128,14 +1375,27 @@ r sockioctl01
 
 ############################ Splice
 
-rfail splice01        # Unknown problem.
-rfail tee01           # Unknown problem.
+rfail splice01        # Cannot be run over NFS
+seq 1 10000000 | r splice02 splice02-temp    # Unknown issue + script problem
+                                             # with the pipe.
+rfail tee01           # Cannot be run over NFS
+
+############################ Ssetmask
+
+rfail ssetmask01      # Not supported on x86_64
 
 ############################ Stat
 
 runtests 1 3 stat
 r symlink01 -T stat04
 runtests 5 6 stat
+
+r stat01_64
+r stat02_64
+r stat03_64
+r symlink01 -T stat04_64
+r stat05_64
+r stat06_64
 
 ############################ Statfs
 
@@ -1144,6 +1404,10 @@ runtests 1 3 statfs
 ############################ Statvfs
 
 r statvfs01
+
+############################ Stime
+
+runtests 1 2 stime
 
 ############################ String
 
@@ -1170,6 +1434,7 @@ r symlinkat01
 ############################ Sync
 
 runtests 1 2 sync
+r sync_file_range01
 
 ############################ Syscall
 
@@ -1190,30 +1455,51 @@ runtests 1 2 sysinfo
 
 ############################ Syslog
 
-rfail syslog01
-rfail syslog02
-rfail syslog03
-rfail syslog04
-rfail syslog05
-rfail syslog06
-rfail syslog07
-rfail syslog08
-rfail syslog09
-rfail syslog10
+# rfail syslog01  # Very long and possible user level dead-lock
+# rfail syslog02  # Very long and possible user level dead-lock
+# rfail syslog03  # Very long and possible user level dead-lock
+# rfail syslog04  # Very long and possible user level dead-lock
+# rfail syslog05
+# rfail syslog06
+# rfail syslog07
+# rfail syslog08
+# rfail syslog09
+# rfail syslog10
 runtests 11 12 syslog
+
+############################ Time
+
+r time01
+r time02
 
 ############################ Timerfd
 
-rfail timerfd01            # Need kernel >= 2.6.25
+runtests 1 3 timerfd
+
+r timer_getoverrun01
+r timer_gettime01
 
 ############################ Times
 
 r times01
 r times03
 
+############################ Tkill
+
+r tkill01
+r tkill02
+
 ############################ Truncate
 
 runtests 1 4 truncate
+truncate01_64
+truncate02_64
+truncate03_64
+truncate04_64
+
+############################ Ulimit
+
+r ulimit01
 
 ############################ Umask
 
@@ -1223,6 +1509,8 @@ runtests 1 3 umask
 
 runtests 1 3 uname
 
+r newuname01
+
 ############################ Unlink
 
 r symlink01 -T unlink01
@@ -1231,6 +1519,17 @@ runtests 5 8 unlink
 ############################ Unlinkat
 
 r unlinkat01
+
+############################ Unshare
+
+r unshare01
+r unshare02
+
+############################ Umount
+
+r umount01 -D $DEVICE -T $DEVICE_FS_TYPE
+r umount02 -D $DEVICE -T $DEVICE_FS_TYPE
+rfail umount03 -D $DEVICE -T $DEVICE_FS_TYPE # Problem due to mount of /dev/null ?
 
 ############################ Ustat
 
@@ -1242,9 +1541,9 @@ r symlink01 -T utime01
 # BUG runtests 1 3 utime	NFS
 runtests 4 6 utime
 
-############################ Utimenstat
+############################ Utimes
 
-rfail utimenstat_tests.sh        # Need kernel >= 2.6.22
+rwarn utimes01
 
 ############################ Vfork
 
@@ -1256,7 +1555,7 @@ runtests 1 2 vhangup
 
 ############################ Vmsplice
 
-rfail vmsplice01   # NFS problem.
+rfail vmsplice01   # Cannot be run over NFS
 
 ############################ Wait
 
@@ -1264,10 +1563,17 @@ r wait02
 
 runtests 1 2 wait4
 
+############################ Waitpid
+
 runtests 1 9 waitpid
 r waitpid10 5
 runtests 11 12 waitpid
 rcrash waitpid13              # User level dead-lock
+
+############################ Waitid
+
+r waitid01
+rfail waitid02                # Unknown issue.
 
 ############################ Write
 

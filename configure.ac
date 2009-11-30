@@ -237,9 +237,9 @@ AM_CONDITIONAL([ENABLE_BENCHMARK], [test "$enable_tests_benchmark" = "yes" -a "x
 
 AC_ARG_WITH([ltp-base],
             [AS_HELP_STRING([--with-ltp-base=PATH],
-                            [Path to ltp base dir @<:@default=LIBDIR/debian-test/tests/linux@:>@])],
+                            [Path to ltp base dir @<:@default=/opt/ltp/@:>@])],
             [ltpbase="$withval"],
-            [ltpbase="\${libdir}/debian-test/tests/linux"])
+            [ltpbase="/opt/ltp"])
 AC_SUBST([ltpbase])
 ###
 ### END TESTS CHECK
