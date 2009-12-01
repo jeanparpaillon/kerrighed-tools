@@ -141,7 +141,7 @@ checkpoint_process()
 	return $r
     fi
 
-    LTP_print_step_info "checkpoint: $r"
+    LTP_print_step_info "checkpoint $_pid ($_name): $r"
 
     check_written_files ${_pid}
     r=$?
@@ -190,7 +190,7 @@ checkpoint_process_w_signal()
     fi
 
 
-    LTP_print_step_info "checkpoint: $r"
+    LTP_print_step_info "checkpoint $_pid ($_name): $r"
 
     check_written_files ${_pid}
 
@@ -245,7 +245,7 @@ freeze_process()
 	return $r
     fi
 
-    LTP_print_step_info "freeze: $r"
+    LTP_print_step_info "freeze $_pid ($_name): $r"
 
     return $r
 }
@@ -267,7 +267,7 @@ checkpoint_frozen_process()
 	return $r
     fi
 
-    LTP_print_step_info "checkpoint: $r"
+    LTP_print_step_info "checkpoint $_pid ($_name): $r"
 
     check_written_files ${_pid}
     r=$?
@@ -296,7 +296,7 @@ unfreeze_process()
 	return $r
     fi
 
-    LTP_print_step_info "unfreeze: $r"
+    LTP_print_step_info "unfreeze $_pid ($_name): $r"
 
     return $r
 }
