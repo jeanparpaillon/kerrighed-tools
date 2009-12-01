@@ -179,8 +179,9 @@ int main(int argc, char *argv[])
 
 	r = application_unfreeze_from_appid(appid, 0);
 	if (r) {
-		perror("restart");
-		fprintf(stderr, "restart: fail to unfreeze the application\n");
+		fprintf(stderr,
+			"restart: fail to unfreeze the application %ld: %s\n",
+			appid, strerror(errno));
 		goto exit_failure;
 	}
 
