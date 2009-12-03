@@ -333,7 +333,6 @@ r dup3_01
 ############################ Epoll
 
 r epoll_create1_01
-r epoll-ltp                # Very long test...
 
 ############################ Eventfd
 
@@ -418,7 +417,6 @@ runtests 1 10 fcntl
 rfail fcntl11          # NFS locking problem.
 runtests 12 13 fcntl
 rfail fcntl14          # NFS locking problem.
-rfail fcntl15          # NFS locking problem.
 
 rfail fcntl16          # NFS problem
 rfail fcntl17          # NFS locking problem.
@@ -449,7 +447,6 @@ rfail fcntl11_64       # NFS locking problem.
 r fcntl12_64
 r fcntl13_64
 rfail fcntl14_64       # Test not supported on NFS.
-rfail fcntl15_64       # NFS locking problem.
 rfail fcntl16_64       # NFS locking problem.
 rfail fcntl17_64       # NFS locking problem.
 r fcntl18_64
@@ -1634,6 +1631,15 @@ r cr_ipc_shm02
 ########
 
 rsingle cr-post # fake test to clean results of C/R tests
+
+
+## Now, finish with the long running LTP tests.
+
+
+rfail fcntl15          # NFS locking problem.
+rfail fcntl15_64       # NFS locking problem.
+r epoll-ltp
+
 
 let nr=nr+1
 done
