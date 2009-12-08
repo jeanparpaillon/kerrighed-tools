@@ -30,7 +30,17 @@ struct checkpoint_info
 	struct cstr storage_dir;
 };
 
-#define GET_RESTART_CMD_PTS 1
+struct cr_subst_file
+{
+	int fd;
+	char *file_id;
+};
+
+struct cr_subst_files_array
+{
+	unsigned int nr;
+	struct cr_subst_file *files;
+};
 
 struct restart_request
 {
@@ -39,6 +49,8 @@ struct restart_request
 	int flags;
 
 	struct cstr storage_dir;
+
+	struct cr_subst_files_array substitution;
 };
 
 struct app_userdata_request
