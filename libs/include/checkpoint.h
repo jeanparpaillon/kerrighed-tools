@@ -13,6 +13,12 @@
 
 #define APP_REPLACE_PGRP_SID	1
 
+struct cstr
+{
+	size_t len; /* including the final \0 */
+	const char *path;
+};
+
 struct checkpoint_info
 {
 	long app_id;
@@ -23,8 +29,7 @@ struct checkpoint_info
 
 	int signal;
 
-	size_t storage_dir_len;
-	char *storage_dir;
+	struct cstr storage_dir;
 };
 
 struct cr_subst_file
@@ -47,8 +52,7 @@ struct restart_request
 
 	struct cr_subst_files_array substitution;
 
-	size_t storage_dir_len;
-	char *storage_dir;
+	struct cstr storage_dir;
 };
 
 struct app_userdata_request
