@@ -264,12 +264,69 @@ out:
 	return r;
 }
 
+int inc_substitution_array_size(struct cr_subst_files_array *subst_array,
+				int array_size)
+{
+	struct cr_subst_file *files;
+
+	if (subst_array->nr + 1 > array_size) {
+		array_size = array_size + ARRAY_SIZE_INC;
+
+		files = realloc(subst_array->files,
+				array_size * sizeof(struct cr_subst_file));
+
+		if (!files) {
+			perror("realloc");
+			return -ENOMEM;
+		}
+
+		subst_array->files = files;
+	}
+
+	subst_array->nr++;
+
+	return array_size;
+}
+
+int parse_file_substitution(char *fileinfo_str)
+{
+	int i, r, fd;
+
+	i = substitution.nr;
+
+	r = inc_substitution_array_size(&substitution, array_size);
+	if (r < 0)
+		goto error;
+
+	array_size = r;
+
+	r = sscanf(fileinfo_str, "%a[0-9A-F],%d",
+		   &substitution.files[i].file_id, &fd);
+	if (r == 2) {
+		substitution.files[i].fd = fd;
+		r = 0;
+	} else
+		r = -EINVAL;
+
+error:
+	return r;
+}
+
+void clean_file_substitution(struct cr_subst_files_array *subst_array)
+{
+	unsigned int i;
+
+	for (i = 0; i < subst_array->nr; i++)
+		free(subst_array->files[i].file_id);
+}
+
 void parse_args(int argc, char *argv[])
 {
 	char *checkpoint_dir;
 	char c;
 	int r, option_index = 0;
 	char * short_options= "hvftps:Uqd";
+
 	static struct option long_options[] =
 		{
 			{"help", no_argument, 0, 'h'},
@@ -425,7 +482,7 @@ int main(int argc, char *argv[])
 	if (options & STDIN_OUT_ERR) {
 		r = replace_stdin_stdout_stderr(checkpoint_dir);
 		if (r)
-			goto exit_failure;
+			goto exit;
 	}
 
 	if (!(options & quiet))
@@ -435,7 +492,7 @@ int main(int argc, char *argv[])
 	r = application_restart(&appid, checkpoint_dir, flags, &substitution);
 	if (r < 0) {
 		show_error(appid, errno);
-		goto exit_failure;
+		goto exit;
 	}
 
 	root_pid = r;

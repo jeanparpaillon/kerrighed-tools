@@ -181,9 +181,9 @@ int application_restart(long *app_id, const char *checkpoint_dir, int flags,
 			struct cr_subst_files_array *substitution)
 {
 	int res, i;
+	struct restart_request rst_req;
 	size_t subst_str_len;
 	size_t len;
-	struct restart_request rst_req;
 
 	rst_req.app_id = 0;
 	rst_req.flags = flags;
@@ -215,8 +215,6 @@ int application_restart(long *app_id, const char *checkpoint_dir, int flags,
 		res = rst_req.root_pid;
 		*app_id = rst_req.app_id;
 	}
-
-	free(rst_req);
 
 error:
 	return res;

@@ -53,6 +53,8 @@ struct restart_request
 	struct cr_subst_files_array substitution;
 
 	struct cstr storage_dir;
+
+	struct cr_subst_files_array substitution;
 };
 
 struct app_userdata_request
