@@ -19,14 +19,6 @@
 #include <kerrighed_tools.h>
 #include <proc.h>
 
-#define KRG_SERVICES_PATH "/proc/kerrighed/services"
-
-//#define DEBUG_LIBARAGORN
-
-extern pid_t __libc_fork();
-
-
-
 /*****************************************************************************/
 /*                                                                           */
 /*                              EXPORTED FUNCTIONS                           */
