@@ -126,7 +126,8 @@ void check_environment(void)
 
 int write_description(char *description,
 		      struct checkpoint_info *info,
-		      const char* checkpoint_dir)
+		      const char* checkpoint_dir,
+		      short _quiet)
 {
 	FILE* fd;
 	char path[PATH_MAX];
@@ -135,16 +136,17 @@ int write_description(char *description,
 	if (!description)
 		description = "No description";
 
-	printf("Identifier: %ld\n"
-	       "Version: %d\n"
-	       "Description: %s\n"
-	       "Date: %s\n",
-	       info->app_id,
-	       info->chkpt_sn,
-	       description,
-	       ctime(&date));
+	if (!_quiet)
+		printf("Identifier: %ld\n"
+		       "Version: %d\n"
+		       "Description: %s\n"
+		       "Date: %s\n",
+		       info->app_id,
+		       info->chkpt_sn,
+		       description,
+		       ctime(&date));
 
-	// need to write it in a file
+	/* need to write it in a file */
 	snprintf(path, PATH_MAX, "%s/description.txt", checkpoint_dir);
 
 	fd = fopen(path, "a");
@@ -215,7 +217,7 @@ int checkpoint_app(long pid, int flags, const char *checkpoint_dir,
 	r = info.result;
 
 	if (!r)
-		write_description(description, &info, checkpoint_dir);
+		write_description(description, &info, checkpoint_dir, _quiet);
 	else {
 		show_error(errno);
 		clean_checkpoint_dir(&info, checkpoint_dir);
