@@ -8,7 +8,7 @@
 #include "checkpoint.h"
 
 int get_node_id(void);
-int get_nr_cpu(void);
+int get_nr_nodes(void);
 
 /* process migration system calls */
 int migrate (pid_t, int);

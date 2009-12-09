@@ -45,7 +45,7 @@ int get_node_id (void)
 
 /* Return the number of nodes in the cluster */
 
-int get_nr_cpu (void)
+int get_nr_nodes(void)
 {
   int res;
   int count;

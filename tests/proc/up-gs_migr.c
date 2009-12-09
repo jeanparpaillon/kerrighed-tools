@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
     float time = 0.0;
     int n;
 
-    nr_nodes =  get_nr_cpu ();
+    nr_nodes =  get_nr_nodes();
     initial_node = get_node_id () ;
     next_node = (initial_node + 1) % nr_nodes ;
     nr_migrations = nr_nodes + 1 ;

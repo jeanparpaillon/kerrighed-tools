@@ -120,7 +120,7 @@ void check_environment(void)
 	int status;
 
 	/* is Kerrighed launched ? */
-	if (get_nr_cpu() == -1)
+	if (get_nr_nodes() == -1)
 	{
 		fprintf(stderr, "no kerrighed nodes found\n");
 		exit(-EPERM);

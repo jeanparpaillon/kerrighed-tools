@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 {
 	int r = 0 ;
 
-	if (get_nr_cpu() == -1)
+	if (get_nr_nodes() == -1)
 	{
 		fprintf (stderr, "%s: no kerrighed nodes found\n", argv[0]);
 		exit(-1);
