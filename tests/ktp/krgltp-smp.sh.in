@@ -876,7 +876,6 @@ runtests 4 7 msgctl
 rsingle msgctl08     # This test is already a SMP stress test
 rsingle msgctl09     # This test is already a SMP stress test
 # rsingle msgctl10   # This test is already a SMP stress test RECHECK
-# rfail msgctl11     # Disabled because of really too long execution time
 
 ############################ Msgget
 
@@ -1641,6 +1640,7 @@ rsingle cr-post # fake test to clean results of C/R tests
 rfail fcntl15          # NFS locking problem.
 rfail fcntl15_64       # NFS locking problem.
 r epoll-ltp
+rcrash msgctl11	       # OOM
 
 
 let nr=nr+1
