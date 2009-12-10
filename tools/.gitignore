@@ -8,3 +8,9 @@ migrate
 krgadm
 krgcapset
 krgcr-run
+krgboot_helper
+krginit_helper
+ipccheckpoint
+ipcrestart
+krgboot
+krginit
