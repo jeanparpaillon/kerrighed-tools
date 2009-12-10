@@ -4,7 +4,7 @@ set -e
 
 KRG_ROOT=/
 # Path inside $KRG_ROOT
-KRGINIT=/usr/local/bin/krginit
+KRGINIT=@bindir@/krginit
 
 . /etc/kerrighed/krginit_helper.conf
 

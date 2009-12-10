@@ -32,8 +32,25 @@ else
 local_sysconfdir = /etc
 endif
 
+edit = sed \
+        -e 's|@bindir[@]|$(bindir)|g' \
+        -e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
+        -e 's|@prefix[@]|$(prefix)|g'
+
 install-data-local:
 	$(install_sh_SCRIPT) $(srcdir)/krginit_helper.conf $(DESTDIR)$(local_sysconfdir)/kerrighed/krginit_helper.conf
 
 uninstall-local:
 	rm -f $(DESTDIR)$(local_sysconfdir)/kerrighed/krginit_helper.conf
+
+krgboot_helper krginit_helper: Makefile
+	rm -f $@ $@.tmp
+	srcdir=''; \
+	  test -f ./$@.in || srcdir=$(srcdir)/; \
+	  $(edit) $${srcdir}$@.in >$@.tmp
+	chmod +x $@.tmp
+	chmod go-w $@.tmp
+	mv $@.tmp $@
+
+krgboot_helper: $(srcdir)/krgboot_helper.in
+krginit_helper: $(srcdir)/krginit_helper.in
