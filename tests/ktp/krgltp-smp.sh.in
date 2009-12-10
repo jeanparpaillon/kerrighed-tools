@@ -355,7 +355,8 @@ r execv01
 r execve01
 r execve02 -F $BASETEST/test3
 r execve03
-rfail execve04 -F $BASETEST/test3  # Unknown problem.
+rfail execve04 -F $BASETEST/test3  # NFS problem
+			# Doesn't know remotely that a file is open on write
 r execve05 20 $BASETEST/execve05 $BASETEST/execve05 4
 
 r execvp01
