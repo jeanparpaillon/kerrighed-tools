@@ -25,6 +25,7 @@ ipccheckpoint_SOURCES = ipccheckpoint.c
 ipcrestart_SOURCES = ipcrestart.c
 
 EXTRA_DIST = krginit_helper.conf
+CLEANFILES = krgboot_helper krginit_helper
 
 if USER_INSTALL
 local_sysconfdir = $(sysconfdir)
