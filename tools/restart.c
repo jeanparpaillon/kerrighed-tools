@@ -3,6 +3,7 @@
  */
 
 #define _GNU_SOURCE
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -18,10 +19,13 @@
 #include <kerrighed.h>
 #include <libkrgcb.h>
 
-int flags = 0;
-short foreground = 0;
-short quiet = 0;
 int root_pid = 0;
+int flags = 0;
+
+int options = 0;
+#define FOREGROUND	1
+#define STDIN_OUT_ERR	2
+#define QUIET		4
 
 struct cr_subst_files_array substitution;
 
@@ -31,8 +35,69 @@ const int ARRAY_SIZE_INC = 32;
 void show_help()
 {
 	printf ("Restart an application\nusage: restart [-h]"
-		" [-f|-t] directory\n");
+		" [-f|-t] [-q] [-s filekey,fd] directory\n");
 	printf ("  -h : This help\n");
+}
+
+char *__get_returned_word(const char *toexec)
+{
+	FILE *pipe;
+	char *buff;
+
+	pipe = popen(toexec, "r");
+	if (!pipe) {
+		perror(toexec);
+		return NULL;
+	}
+
+	buff = malloc(1024);
+	if (!buff) {
+		fprintf(stderr,"restart: %s\n", strerror(ENOMEM));
+		goto error;
+	}
+	buff[0] = '\0'; /* in case of failure of fread... */
+
+	fread(buff, 1024, 1, pipe);
+	buff = strsep(&buff, " \r\n");
+
+error:
+	pclose(pipe);
+
+	return buff;
+}
+
+char *get_returned_word(char *cmd, ...)
+{
+	int r;
+	va_list args;
+	char *buffer, *result = NULL;
+
+	va_start(args, cmd);
+	r = vasprintf(&buffer, cmd, args);
+	va_end(args);
+
+	if (r == -1)
+		goto error;
+
+	result = __get_returned_word(buffer);
+
+	free(buffer);
+error:
+	return result;
+}
+
+char *get_fd_key(const char *checkpoint_dir, const char *pid, int fd)
+{
+	return get_returned_word(
+		"grep -E '[,|]%s:%d(,|$)' %s/user_info_*.txt | cut -d'|' -f 2",
+		pid, fd, checkpoint_dir);
+}
+
+char *get_root_pid(const char *checkpoint_dir)
+{
+	return get_returned_word(
+		"grep '^Identifier:' %s/description.txt | tr -d ' \n' | cut -d':' -f 2",
+		checkpoint_dir);
 }
 
 int inc_substitution_array_size(struct cr_subst_files_array *subst_array,
@@ -91,7 +156,79 @@ void clean_file_substitution(struct cr_subst_files_array *subst_array)
 		free(subst_array->files[i].file_id);
 }
 
-void parse_args(int argc, char *argv[])
+int replace_fd(const char *checkpoint_dir, const char *root_pid, FILE *file)
+{
+	int i, r, fd;
+	char *fd_key;
+
+	fd = fileno(file);
+	if (fd == -1) {
+		r = -EBADF;
+		goto error;
+	}
+
+	fd_key = get_fd_key(checkpoint_dir, root_pid, fd);
+	if (!fd_key) {
+		r = -ENOENT;
+		goto error;
+	}
+
+	if (strlen(fd_key) == 0) {
+		r = -ENOENT;
+		goto err_free_key;
+	}
+	i = substitution.nr;
+
+	r = inc_substitution_array_size(&substitution, array_size);
+	if (r < 0)
+		goto err_free_key;
+
+	array_size = r;
+
+	substitution.files[i].file_id = fd_key;
+	substitution.files[i].fd = fd;
+
+	r = 0;
+error:
+	return r;
+
+err_free_key:
+	free(fd_key);
+	goto error;
+}
+
+int replace_stdin_stdout_stderr(const char *checkpoint_dir)
+{
+	int r;
+	char *root_pid;
+
+	root_pid = get_root_pid(checkpoint_dir);
+	if (!root_pid) {
+		r = -EINVAL;
+		goto out;
+	}
+
+	r = replace_fd(checkpoint_dir, root_pid, stdin);
+	if (r)
+		goto out;
+
+	r = replace_fd(checkpoint_dir, root_pid, stdout);
+	if (r)
+		goto out;
+
+	r = replace_fd(checkpoint_dir, root_pid, stderr);
+	if (r)
+		goto out;
+
+	free(root_pid);
+out:
+	if (r)
+		fprintf(stderr, "restart: unable to substitute "
+			"stdin, stdout, stderr: %s\n", strerror(-r));
+	return r;
+}
+
+int parse_args(int argc, char *argv[], char **checkpoint_dir)
 {
 	char c;
 	int r, option_index = 0;
@@ -117,15 +254,16 @@ void parse_args(int argc, char *argv[])
 			exit(EXIT_SUCCESS);
 			break;
 		case 'f':
-			foreground = 1;
+			options |= (FOREGROUND | STDIN_OUT_ERR);
 			break;
 		case 't':
+			options |= STDIN_OUT_ERR;
 			break;
 		case 's':
 			r = parse_file_substitution(optarg);
 			break;
 		case 'q':
-			quiet = 1;
+			options |= QUIET;
 			break;
 		default:
 			show_help();
@@ -134,10 +272,31 @@ void parse_args(int argc, char *argv[])
 		}
 
 		if (r) {
-			fprintf(stderr, "restart: fail to parse args: %s\n", strerror(-r));
+			fprintf(stderr,
+				"restart: fail to parse args: %s\n",
+				strerror(-r));
 			exit(EXIT_FAILURE);
 		}
 	}
+
+	if (argc - optind != 1) {
+		show_help();
+		r = -EINVAL;
+		goto exit;
+	}
+
+	*checkpoint_dir = canonicalize_file_name(argv[optind]);
+	if (!*checkpoint_dir) {
+		r = -errno;
+		perror(argv[optind]);
+		goto exit;
+	}
+
+	if (options & STDIN_OUT_ERR)
+		r = replace_stdin_stdout_stderr(*checkpoint_dir);
+
+exit:
+	return r;
 }
 
 void check_environment(void)
@@ -209,34 +368,24 @@ int main(int argc, char *argv[])
 {
 	long appid;
 	int r = 0;
-	char *checkpoint_dir;
+	char *checkpoint_dir = NULL;
 
 	/* Check environment */
 	check_environment();
 
 	/* Manage options with getopt */
-	parse_args(argc, argv);
-
-	if (argc - optind != 1) {
-		show_help();
+	r = parse_args(argc, argv, &checkpoint_dir);
+	if (r)
 		goto exit;
-	}
 
-	checkpoint_dir = canonicalize_file_name(argv[optind]);
-	if (!checkpoint_dir) {
-		r = errno;
-		perror(argv[optind]);
-		goto exit_failure;
-	}
-
-	if (!quiet)
+	if (!(options & QUIET))
 		printf("Restarting application from %s...\n",
 			checkpoint_dir);
 
 	r = application_restart(&appid, checkpoint_dir, flags, &substitution);
 	if (r < 0) {
 		show_error(appid, errno);
-		goto exit_failure;
+		goto exit;
 	}
 
 	root_pid = r;
@@ -244,7 +393,7 @@ int main(int argc, char *argv[])
 	r = cr_execute_restart_callbacks(appid);
 	if (r) {
 		fprintf(stderr, "restart: error during callback execution\n");
-		goto exit_failure;
+		goto exit;
 	}
 
 	r = application_unfreeze_from_appid(appid, 0);
@@ -252,24 +401,23 @@ int main(int argc, char *argv[])
 		fprintf(stderr,
 			"restart: fail to unfreeze the application %ld: %s\n",
 			appid, strerror(errno));
-		goto exit_failure;
+		goto exit;
 	}
 
-	if (!quiet)
+	if (!(options & QUIET))
 		printf("Application %ld has been successfully restarted\n",
 		       appid);
 
-	if (foreground)
+	if (options & FOREGROUND)
 		wait_application_exits();
 
-	free(checkpoint_dir);
-
-	exit(EXIT_SUCCESS);
-
-exit_failure:
-	free(checkpoint_dir);
 exit:
+	free(checkpoint_dir);
+
 	clean_file_substitution(&substitution);
 
-	exit(EXIT_FAILURE);
+	if (r)
+		exit(EXIT_FAILURE);
+
+	exit(EXIT_SUCCESS);
 }
