@@ -277,10 +277,6 @@ if test "$enable_kernel" = "yes"; then
   make --no-print-directory kernel-config
 fi
 
-dnl Prepare modules source in case of out-of-source build
-AC_MSG_NOTICE([Prepare modules sources])
-make  --no-print-directory -C modules modules-prepare
-
 ###
 ### Display results
 ###
