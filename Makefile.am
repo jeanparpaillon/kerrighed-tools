@@ -96,10 +96,10 @@ kernel-uninstall:
 	  rm -rf $(DESTDIR)$(modulesdir)/lib/modules/$$kernelrelease
 
 kernel-clean:
-	$(MAKE) -C kernel clean
+	$(MAKE) -C kernel clean || true
 
 kernel-distclean:
-	$(MAKE) -C kernel mrproper
+	$(MAKE) -C kernel mrproper || true
 	rm -rf _kernel
 	if test ! "$(kernel_builddir)" = "$(kernel_srcdir)"; then \
 	  rm -f $(shell find kernel -name asm-offsets.h); \
