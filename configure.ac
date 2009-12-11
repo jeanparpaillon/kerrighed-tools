@@ -162,39 +162,21 @@ AM_CONDITIONAL([ENABLE_TOOLS], [test "$enable_tools" = "yes"])
 
 AC_ARG_ENABLE([service],
               [AS_HELP_STRING([--disable-service],
-                              [Do not install kerrighed service @<:@default: enable if lsb found@:>@])],
+                              [Do not install kerrighed service @<:@default: enable@:>@])],
               [],
               [enable_service="yes"])
 if test "$enable_service" = "yes"; then
-   AC_CHECK_PROG([lsb], [lsb_release], [yes], [no])
-   if test "$lsb" = "no"; then
-   AC_MSG_ERROR([
-        *** You need lsb tool (or --disable-service)])
-   fi
-else
-   lsb="no"
-fi
-if test "$lsb" = "yes"; then
-   AC_MSG_CHECKING([distribution])
-   DIST_ID=`lsb_release -s -i`
-   DIST_RELEASE=`lsb_release -s -r`
-   AC_MSG_RESULT([$DIST_ID $DIST_RELEASE])
-
-   AC_SUBST([DIST_ID])
-   AC_SUBST([DIST_RELEASE])
-
    AC_MSG_CHECKING([if distribution is supported])
-   if test -d "$srcdir/scripts/distros/$DIST_ID"; then
+   if $srcdir/scripts/update-rc --check; then
       AC_MSG_RESULT([yes])
-      distro="yes"
    else
       AC_MSG_RESULT([no])
-      distro="no"
+      enable_service="no"
       AC_MSG_ERROR([
         *** Your distribution is not supported. Helper scripts won't work. Just launch configure with --disable-service.])
    fi
 fi
-AM_CONDITIONAL([ENABLE_SERVICE], [test "$lsb" = "yes" -a "$distro" = "yes"])
+AM_CONDITIONAL([ENABLE_SERVICE], [test "$enable_service" = "yes"])
 ###
 ### END TOOLS CHECK
 ###
@@ -237,9 +219,14 @@ AM_CONDITIONAL([ENABLE_BENCHMARK], [test "$enable_tests_benchmark" = "yes" -a "x
 
 AC_ARG_WITH([ltp-base],
             [AS_HELP_STRING([--with-ltp-base=PATH],
-                            [Path to ltp base dir @<:@default=/opt/ltp/@:>@])],
+                            [Path to ltp base dir @<:@default=/opt/ltp@:>@])],
             [ltpbase="$withval"],
             [ltpbase="/opt/ltp"])
+# JP: !!!crappy crappy!!! If enable_user_install, ltpbase become $datadir/ltp
+# The other solution is to not default ltpbase to /opt/ltp...
+if test "$enable_user_install" = "yes"; then
+	 ltpbase=$datadir/ltp
+fi
 AC_SUBST([ltpbase])
 ###
 ### END TESTS CHECK
@@ -297,15 +284,7 @@ echo -n "    - Kerrighed service files  : "
 if test "$enable_service" = "no"; then
    echo "no"
 else
-   if test "$lsb" = "yes"; then
-      if test "$distro" = "yes"; then
-         echo "yes ($DIST_ID $DIST_RELEASE)"
-      else
-         echo "no (distribution not supported)"
-      fi
-   else
-      echo "no (missing lsb tools)"
-   fi
+   echo "yes"
 fi
 echo "    - Manpages build           : $xsltproc (only needed in maintainer mode)"
 echo ""
