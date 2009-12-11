@@ -35,7 +35,6 @@ Table of contents
 
    Optional features requires the following:
 
-- lsb_release	: to install Kerrighed startup scripts into /etc/init.d
 - xsltproc      : allow to create documentation in various formats (only needed by
   		  maintainer.
 
