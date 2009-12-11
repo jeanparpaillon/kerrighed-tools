@@ -42,6 +42,9 @@ ncscope.*
 *~
 \#*#
 
+/kernel
+/_kernel
+
 # autotools
 /compile
 /depcomp
@@ -56,3 +59,7 @@ ncscope.*
 /stamp-h1
 Makefile.in
 Makefile
+
+# Generated archive
+/kerrighed-*.tar.gz
+/kerrighed-*.tar.bz2

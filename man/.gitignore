@@ -14,3 +14,5 @@ migrate.1
 migrate.2
 migrate_self.2
 restart.1
+ipccheckpoint.1
+ipcrestart.1
