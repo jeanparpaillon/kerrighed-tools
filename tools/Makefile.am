@@ -24,7 +24,7 @@ krginit_SOURCES = krginit.c
 ipccheckpoint_SOURCES = ipccheckpoint.c
 ipcrestart_SOURCES = ipcrestart.c
 
-EXTRA_DIST = krginit_helper.conf
+EXTRA_DIST = krginit_helper.conf krginit_helper.in krgboot_helper.in
 CLEANFILES = krgboot_helper krginit_helper
 
 if USER_INSTALL
