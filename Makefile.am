@@ -42,6 +42,8 @@ kerneldir = /boot
 modulesdir =
 endif
 
+apttool ?= $(shell which aptitude)
+
 # out-of-source-build
 oosb = $(if $(filter $(kernel_builddir),$(kernel_srcdir)),n,y)
 
@@ -105,6 +107,10 @@ kernel-distclean:
 	  rm -f $(shell find kernel -name asm-offsets.h); \
 	  rm -f kernel/Makefile kernel/Makefile.oosb; \
 	fi
+
+build-reqs-deb:
+	[ -n "$(apttool)" ] && \
+		$(apttool) install build-essential bzip2 wget automake autoconf libtool pkg-config rsync libncurses5-dev xsltproc docbook-xsl
 
 print_notice:
 	@echo -e "****************************************************************"
