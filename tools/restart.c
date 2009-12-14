@@ -26,6 +26,7 @@ int options = 0;
 #define FOREGROUND	1
 #define STDIN_OUT_ERR	2
 #define QUIET		4
+#define DEBUG		8
 
 struct cr_subst_files_array substitution;
 
@@ -35,7 +36,7 @@ const int ARRAY_SIZE_INC = 32;
 void show_help()
 {
 	printf ("Restart an application\nusage: restart [-h]"
-		" [-f|-t] [-q] [-s filekey,fd] directory\n");
+		" [-f|-t] [-q] [-d] [-s filekey,fd] directory\n");
 	printf ("  -h : This help\n");
 }
 
@@ -60,6 +61,11 @@ char *__get_returned_word(const char *toexec)
 	fread(buff, 1024, 1, pipe);
 	buff = strsep(&buff, " \r\n");
 
+	if (options & DEBUG)
+		printf("DEBUG: execution of:\n"
+		       "\t\t\"%s\"\n"
+		       "\t\treturns %s\n",
+		       toexec, buff);
 error:
 	pclose(pipe);
 
@@ -188,6 +194,10 @@ int replace_fd(const char *checkpoint_dir, const char *root_pid, FILE *file)
 	substitution.files[i].file_id = fd_key;
 	substitution.files[i].fd = fd;
 
+	if (options & DEBUG)
+		printf("DEBUG: substitution of file %s by fd %d\n",
+		       fd_key, fd);
+
 	r = 0;
 error:
 	return r;
@@ -207,6 +217,10 @@ int replace_stdin_stdout_stderr(const char *checkpoint_dir)
 		r = -EINVAL;
 		goto out;
 	}
+
+	if (options & DEBUG)
+		printf("DEBUG: root pid: %s\n",
+		       root_pid);
 
 	r = replace_fd(checkpoint_dir, root_pid, stdin);
 	if (r)
@@ -232,7 +246,7 @@ int parse_args(int argc, char *argv[], char **checkpoint_dir)
 {
 	char c;
 	int r, option_index = 0;
-	char * short_options= "hfts:q";
+	char * short_options= "hfts:qd";
 	static struct option long_options[] =
 		{
 			{"help", no_argument, 0, 'h'},
@@ -240,6 +254,7 @@ int parse_args(int argc, char *argv[], char **checkpoint_dir)
 			{"tty", no_argument, 0, 't'},
 			{"substitute-file", required_argument, 0, 's'},
 			{"quiet", no_argument, 0, 'q'},
+			{"debug", no_argument, 0, 'd'},
 			{0, 0, 0, 0}
 		};
 
@@ -264,6 +279,9 @@ int parse_args(int argc, char *argv[], char **checkpoint_dir)
 			break;
 		case 'q':
 			options |= QUIET;
+			break;
+		case 'd':
+			options |= DEBUG;
 			break;
 		default:
 			show_help();
