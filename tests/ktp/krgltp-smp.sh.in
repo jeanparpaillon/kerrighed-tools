@@ -11,7 +11,8 @@ DEVICE_FS_TYPE=tmpfs
 let nr_ps=16
 let nr_run=1
 
-BASETEST=/opt/ltp/testcases/bin/
+BASETEST=@ltpbase@/testcases/bin/
+PATH=${PATH}:@ltpbase@/tools:$BASETEST
 
 ###############################
 ############################### FUNCTIONS DEFINITION
