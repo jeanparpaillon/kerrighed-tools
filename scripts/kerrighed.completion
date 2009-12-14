@@ -34,11 +34,6 @@ _krgcapset()
 }
 [ -n "${have:-}" ] && complete -F _krgcapset krgcapset
 
-_krgnodes()
-{
-    [ -d "/proc/nodes" ] && echo $(command ls -1d /proc/nodes/node* | sed 's#^\(.*/\)##')
-}
-
 have krgadm &&
 _krgadm()
 {
@@ -46,52 +41,50 @@ _krgadm()
 
     local modes='cluster nodes'
     local cluster_actions='status start wait_start poweroff reboot'
-    local cluster_opts='-s --subsessions -n --nodes'
-    local nodes_actions='status add del poweroff reboot fail swap ban unban'
-    local nodes_opts='-s --subsessions -n --nodes'
+    local nodes_actions='status add del'
+    local nodes_status_opts='-n --nodes'
+    local nodes_opts='-n --nodes -a --auto'
     local options='--help -h'
 
     COMPREPLY=()
 
-    case "${prev}" in
-	cluster)
+		case "${prev}" in
+				cluster)
             COMPREPLY=( $(compgen -W "${cluster_actions}" -- ${cur}) )
-	    return 0
-	    ;;
-	nodes)
+						return 0
+						;;
+				nodes)
             COMPREPLY=( $(compgen -W "${nodes_actions}" -- ${cur}) )
-	    return 0
-	    ;;
-	-@(n|-nodes))
-            last_item_in_list="${cur##*,}"
-	    list_before_item="${cur%${last_item_in_list}}"
-            COMPREPLY=(
-		$(
-		    compgen -S "," -P "${list_before_item}" -W "$(_krgnodes)"
-		    )
-		)
-            return 0
-	    ;;
-
-	*)
-	    case "${COMP_WORDS[1]}" in
-		cluster)
-		    COMPREPLY=( $(compgen -W "${cluster_opts}" -- ${cur}) )
-		    return 0
-		    ;;
-		nodes)
-		    COMPREPLY=( $(compgen -W "${nodes_opts}" -- ${cur}) )
-		    return 0
-		    ;;
-	    esac
+						return 0
+						;;
+				start|add|del)
+						COMPREPLY=( $(compgen -W "${nodes_opts}" -- ${cur}) )
+						return 0
+						;;
+				status)
+						if test "${COMP_WORDS[COMP_CWORD-2]}" = "nodes"; then
+								COMPREPLY=( $(compgen -W "${nodes_status_opts}" -- ${cur}) )
+						fi
+						return 0
+						;;
+				*)
+						case "${COMP_WORDS[1]}" in
+								cluster)
+										return 0
+										;;
+								nodes)
+										return 0
+										;;
+						esac
+						;;
     esac
 
     if [[ "${cur}" == -* ]]; then
-	# return one of the possible options
-	COMPREPLY=( $(compgen -W "${options}" -- ${cur} ) )
+       	# return one of the possible options
+				COMPREPLY=( $(compgen -W "${options}" -- ${cur} ) )
     else
         # return one of the possible modes
-	COMPREPLY=( $(compgen -W "${modes}" -- ${cur}) )
+				COMPREPLY=( $(compgen -W "${modes}" -- ${cur}) )
     fi
 
     return 0
