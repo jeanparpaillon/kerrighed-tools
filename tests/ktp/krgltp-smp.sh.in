@@ -37,13 +37,6 @@ function mustbeskipped(){
 
 # Check for possible prerequisites
 function check_environment(){
-	# creat08
-	if ! grep -qs ^nobody: /etc/group ; then
-		echo 'Unable to find "nobody" in /etc/group.'
-		echo 'Needed for at least: creat08'
-		exit 1
-	fi
-
 	# getdtablesize01
 	if [ ! -f /etc/hosts ]; then
 		echo 'Unable to find the /etc/hosts file.'
