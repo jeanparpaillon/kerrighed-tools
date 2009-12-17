@@ -23,7 +23,7 @@ libkerrighed_la_SOURCES = \
 	libcapability.c \
 	libipc.c
 
-libkerrighed_la_LDFLAGS = -version-info 1:0:0
+libkerrighed_la_LDFLAGS = -version-info 2:0:0
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = kerrighed.pc
