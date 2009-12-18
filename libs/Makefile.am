@@ -7,3 +7,7 @@
 ###        Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
 SUBDIRS= include libkerrighed libkrgcb
+
+if ENABLE_PYTHON
+python_PYTHON = kerrighed.py
+endif
