@@ -3,7 +3,7 @@
 set -e
 
 SYS_DIR=/sys/kerrighed/hotplug
-KRGBOOT=/usr/local/bin/krgboot
+KRGBOOT=@bindir@/krgboot
 
 bool_file_to_str() {
 	if [ `< $1` -ne 0 ]; then

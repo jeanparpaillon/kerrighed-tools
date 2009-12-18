@@ -6,7 +6,7 @@ KRG_ROOT=/
 # Path inside $KRG_ROOT
 KRGINIT=@bindir@/krginit
 
-. /etc/kerrighed/krginit_helper.conf
+. @sysconfdir@/kerrighed/krginit_helper.conf
 
 # Prefer caller args
 if [ $# -gt 0 ]; then

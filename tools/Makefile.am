@@ -36,7 +36,8 @@ endif
 edit = sed \
         -e 's|@bindir[@]|$(bindir)|g' \
         -e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
-        -e 's|@prefix[@]|$(prefix)|g'
+        -e 's|@prefix[@]|$(prefix)|g' \
+        -e 's|@sysconfdir[@]|$(local_sysconfdir)|g'
 
 install-data-local:
 	$(install_sh_SCRIPT) $(srcdir)/krginit_helper.conf $(DESTDIR)$(local_sysconfdir)/kerrighed/krginit_helper.conf
