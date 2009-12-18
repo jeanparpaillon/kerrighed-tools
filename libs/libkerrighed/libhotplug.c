@@ -362,7 +362,7 @@ int krg_hotplug_init(void)
 int krg_nodes_add(struct krg_node_set *krg_node_set)
 {
 	struct hotplug_node_set node_set;
-	int i, r;
+	int i;
 
 	krgnodes_clear(node_set.v);
 	node_set.subclusterid = krg_node_set->subclusterid;
@@ -373,16 +373,13 @@ int krg_nodes_add(struct krg_node_set *krg_node_set)
 		}
 	}
 
-	r = call_kerrighed_services(KSYS_HOTPLUG_ADD, &node_set);
-	if (r) return -1;
-	
-	return 0;
-};
+	return call_kerrighed_services(KSYS_HOTPLUG_ADD, &node_set);
+}
 
 int krg_nodes_remove(struct krg_node_set *krg_node_set)
 {
 	struct hotplug_node_set node_set;
-	int i, r;
+	int i;
 
 	krgnodes_clear(node_set.v);
 	node_set.subclusterid = krg_node_set->subclusterid;
@@ -393,15 +390,12 @@ int krg_nodes_remove(struct krg_node_set *krg_node_set)
 		}
 	}
 
-	r = call_kerrighed_services(KSYS_HOTPLUG_REMOVE, &node_set);
-	if (r) return -1;
-
-	return 0;
+	return call_kerrighed_services(KSYS_HOTPLUG_REMOVE, &node_set);
 }
 
 int krg_nodes_fail(struct krg_node_set *krg_node_set){
 	struct hotplug_node_set node_set;
-	int i, r;
+	int i;
 
 	krgnodes_clear(node_set.v);
 	
@@ -411,16 +405,13 @@ int krg_nodes_fail(struct krg_node_set *krg_node_set){
 		}
 	}
 
-	r = call_kerrighed_services(KSYS_HOTPLUG_FAIL, &node_set);
-	if (r) return -1;
-
-	return 0;
+	return call_kerrighed_services(KSYS_HOTPLUG_FAIL, &node_set);
 }
 
 int krg_nodes_poweroff(struct krg_node_set *krg_node_set)
 {
 	struct hotplug_node_set node_set;
-	int i, r;
+	int i;
 
 	krgnodes_clear(node_set.v);
 	
@@ -430,10 +421,7 @@ int krg_nodes_poweroff(struct krg_node_set *krg_node_set)
 		}
 	}
 
-	r = call_kerrighed_services(KSYS_HOTPLUG_POWEROFF, &node_set);
-	if (r) return -1;
-
-	return 0;
+	return call_kerrighed_services(KSYS_HOTPLUG_POWEROFF, &node_set);
 }
 
 struct krg_nodes* krg_nodes_status(void)
@@ -543,15 +531,10 @@ int krg_node_ready(int setup_ok)
 				       setup_ok ? NULL : (void *)1);
 }
 
-int krg_cluster_shutdown(int subclusterid){
-	int r;
-
-	r = call_kerrighed_services(KSYS_HOTPLUG_SHUTDOWN, &subclusterid);
-	if(r)
-		return -1;
-	
-	return 0;
-};
+int krg_cluster_shutdown(int subclusterid)
+{
+	return call_kerrighed_services(KSYS_HOTPLUG_SHUTDOWN, &subclusterid);
+}
 
 int krg_cluster_reboot(int subclusterid)
 {
