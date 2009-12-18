@@ -27,23 +27,17 @@ ipcrestart_SOURCES = ipcrestart.c
 EXTRA_DIST = krginit_helper.conf krginit_helper.in krgboot_helper.in
 CLEANFILES = krgboot_helper krginit_helper
 
-if USER_INSTALL
-local_sysconfdir = $(sysconfdir)
-else
-local_sysconfdir = /etc
-endif
-
 edit = sed \
         -e 's|@bindir[@]|$(bindir)|g' \
         -e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
         -e 's|@prefix[@]|$(prefix)|g' \
-        -e 's|@sysconfdir[@]|$(local_sysconfdir)|g'
+        -e 's|@sysconfdir[@]|$(sysconfdir)|g'
 
 install-data-local:
-	$(install_sh_SCRIPT) $(srcdir)/krginit_helper.conf $(DESTDIR)$(local_sysconfdir)/kerrighed/krginit_helper.conf
+	$(install_sh_SCRIPT) $(srcdir)/krginit_helper.conf $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf
 
 uninstall-local:
-	rm -f $(DESTDIR)$(local_sysconfdir)/kerrighed/krginit_helper.conf
+	rm -f $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf
 
 krgboot_helper krginit_helper: Makefile
 	rm -f $@ $@.tmp
