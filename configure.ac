@@ -37,7 +37,7 @@ AC_HEADER_STDC
 
 AC_ARG_ENABLE([user-install],
               [AS_HELP_STRING([--enable-user-install],
-                              [Use PREFIX for _all_ paths, even for kernel, etc, ... @<:@default=disable@:>@])],
+                              [Use PREFIX for installing kernel, allowing non-root install @<:@default=disable@:>@])],
               [],
               [enable_user_install=no])
 AM_CONDITIONAL([USER_INSTALL], [test "$enable_user_install" = "yes"])
@@ -217,16 +217,18 @@ AM_CONDITIONAL([ENABLE_APPS], [test "$enable_tests_apps" = "yes" -a "x$enable_te
 AM_CONDITIONAL([ENABLE_PROC], [test "$enable_tests_proc" = "yes" -a "x$enable_tests" = "xyes"])
 AM_CONDITIONAL([ENABLE_BENCHMARK], [test "$enable_tests_benchmark" = "yes" -a "x$enable_tests" = "xyes"])
 
+# JP: !!!crappy crappy!!! If enable_user_install, ltpbase become $datadir/ltp
+# The other solution is to not default ltpbase to /opt/ltp...
+if test "$enable_user_install" = "yes"; then
+	 default_ltpbase=$datadir/ltp
+else
+	 default_ltpbase=/opt/ltp
+fi
 AC_ARG_WITH([ltp-base],
             [AS_HELP_STRING([--with-ltp-base=PATH],
                             [Path to ltp base dir @<:@default=/opt/ltp@:>@])],
             [ltpbase="$withval"],
-            [ltpbase="/opt/ltp"])
-# JP: !!!crappy crappy!!! If enable_user_install, ltpbase become $datadir/ltp
-# The other solution is to not default ltpbase to /opt/ltp...
-if test "$enable_user_install" = "yes"; then
-	 ltpbase=$datadir/ltp
-fi
+            [ltpbase="$default_ltpbase"])
 AC_SUBST([ltpbase])
 ###
 ### END TESTS CHECK
