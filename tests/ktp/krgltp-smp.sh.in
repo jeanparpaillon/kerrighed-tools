@@ -58,11 +58,18 @@ function print_progress(){
 	echo -n "$nr_arg"
 }
 
-# Start all concurrent instances of a given test command in separate
+function read_exit_status() {
+	wait ${pid[$1]}
+}
+
+# Run all concurrent instances of a given test command in separate
 # working directories
 # The pids of the commands are stored in the pid[] array.
-function start_all_instances() {
+function run_all_instances() {
+	local check_fun=$1
 	local i
+
+	shift
 
 	# Load any background pipe in its own pgrp
 	set -m
@@ -72,6 +79,14 @@ function start_all_instances() {
 	done
 	# Restore default behavior in non-interactive shell
 	set +m
+
+	for i in `seq 1 $nr_ps`; do
+		$check_fun $i
+	done
+}
+
+function check_runtest() {
+	read_exit_status $1 || exit 0
 }
 
 # run one cmd
@@ -83,10 +98,8 @@ function runtest(){
 
 	print_progress
 	echo "*** $@ ***"
-	start_all_instances $@
-	for i in `seq 1 $nr_ps`; do
-		wait ${pid[$i]} || exit 0
-	done
+	run_all_instances check_runtest $@
+
 	let nbpassed=nbpassed+1
 }
 
@@ -100,6 +113,16 @@ function runtests(){
 	done
 }
 
+function check_rwarn() {
+	local res
+
+	read_exit_status $1
+	res=$?
+	if [ "$res" -ne 4 ] && [ "$res" -ne 0 ]; then
+		exit 0
+	fi
+}
+
 # Run a test and accept a warning. This is mainly used for tests which warn
 # on a .nfs### file. This comes from the behavior of NFS in the presence of
 # a file removed since still being opened. Some tests do that...
@@ -110,14 +133,7 @@ function rwarn(){
 
 	print_progress
 	echo "*** $@ *** expecting WARN due to NFS"
-	start_all_instances $@
-	for i in `seq 1 $nr_ps`; do
-		wait ${pid[$i]}
-		res=$?
-		if [ "$res" -ne 4 ] && [ "$res" -ne 0 ]; then
-		    exit 0
-		fi
-	done
+	run_all_instances check_rwarn $@
 
 	let nbpassed=nbpassed+1
 }
@@ -130,10 +146,8 @@ function rfail(){
 
 	print_progress
 	echo "*** $@ *** expecting FAIL"
-	start_all_instances $@
-	for i in `seq 1 $nr_ps`; do
-		wait ${pid[$i]}
-	done
+	run_all_instances read_exit_status $@
+
 	let nbfailed=nbfailed+1
 }
 
