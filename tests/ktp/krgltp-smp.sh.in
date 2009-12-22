@@ -375,7 +375,7 @@ r faccessat01
 
 ############################ Fadvise (posix)
 
-runtests posix_fadvise 1 4
+runtests 1 4 posix_fadvise
 r posix_fadvise01_64
 r posix_fadvise02_64
 r posix_fadvise03_64
