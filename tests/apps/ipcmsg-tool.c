@@ -201,6 +201,7 @@ void parse_args(int argc, char *argv[])
 			break;
 		case 'b':
 			blocking = 1;
+			break;
 		case 't':
 			type = atoi(optarg);
 			break;
