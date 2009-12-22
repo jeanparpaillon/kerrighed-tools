@@ -26,7 +26,7 @@ int member = 0;
 int delta = 0;
 int use_id = 0;
 int quiet = 0;
-int blocking = 1;
+int blocking = 0;
 int undo = 0;
 
 union semun {
@@ -118,7 +118,7 @@ int add_to_member(int semid, int member, int blocking, int undo, int delta)
 	int r;
 	struct sembuf sem_op = {member, delta, 0};
 
-	if (blocking)
+	if (!blocking)
 		sem_op.sem_flg |= IPC_NOWAIT;
 	if (undo)
 		sem_op.sem_flg |= SEM_UNDO;
@@ -232,6 +232,7 @@ void print_usage()
 	       " -i                     : use semaphore identifier instead of path\n"
 	       " -q                     : be quiet\n"
 	       " -U                     : mark operations as undoable\n"
+	       " -b                     : mark operations as blocking\n"
 		);
 }
 
@@ -252,7 +253,7 @@ void parse_args(int argc, char *argv[])
 
 	while (1) {
 
-		c = getopt(argc, argv, "hc:da:l:u:siqUL");
+		c = getopt(argc, argv, "hc:da:l:u:siqULb");
 		if (c == -1)
 			break;
 
@@ -300,6 +301,9 @@ void parse_args(int argc, char *argv[])
 		case 'L':
 			todo = TESTLOOP;
 			undo = 1;
+			break;
+		case 'b':
+			blocking = 1;
 			break;
 		default:
 			exit(EXIT_FAILURE);
