@@ -15,9 +15,25 @@ BASETEST=@ltpbase@/testcases/bin/
 PATH=${PATH}:@ltpbase@/tools:$BASETEST
 
 ###############################
+# Manage restart of KTP from a chosen test
+firsttest=""
+
+###############################
 ############################### FUNCTIONS DEFINITION
 ###############################
 
+function mustbeskipped(){
+	if [ "$firsttest" = "$1" ]; then
+		echo "We have reached $1, now starting"
+		firsttest=""
+	fi
+	if [ "$firsttest" != "" ]; then
+		echo "*** Skipping test $1"
+		return 0
+	fi
+
+	return 1
+}
 
 # Check for possible prerequisites
 function check_environment(){
@@ -70,6 +86,8 @@ function start_all_instances() {
 function runtest(){
 	local i
 
+	mustbeskipped $@ && return
+
 	print_progress
 	echo "*** $@ ***"
 	start_all_instances $@
@@ -95,6 +113,8 @@ function runtests(){
 function rwarn(){
 	local i
 
+	mustbeskipped $@ && return
+
 	print_progress
 	echo "*** $@ *** expecting WARN due to NFS"
 	start_all_instances $@
@@ -113,6 +133,8 @@ function rwarn(){
 function rfail(){
 	local i
 
+	mustbeskipped $@ && return
+
 	print_progress
 	echo "*** $@ *** expecting FAIL"
 	start_all_instances $@
@@ -124,6 +146,8 @@ function rfail(){
 
 # Test only running if launched alone.
 function rsingle(){
+	mustbeskipped $@ && return
+
 	echo "*** $@ *** SINGLE run"
 
 	# Load any background pipe in its own pgrp
@@ -136,6 +160,8 @@ function rsingle(){
 
 #crashing test: test known to crash
 function rcrash(){
+	mustbeskipped $@ && return
+
 	print_progress
 	echo "*** $@ *** expecting CRASH ! Test not executed"
 	let nbcrash=nbcrash+1
@@ -166,6 +192,9 @@ function usage(){
 	echo
 	echo "       $name -l [other options]<testname>"
 	echo "           Run test <testname> *WITHOUT* distant fork"
+	echo
+	echo "       $name -f [other options]<testname>"
+	echo "           Run tests from test <testname>. Previous tests are skipped"
 	echo
 	echo "       $name -t"
 	echo "           Run test with no distant action to mesure basic execution time"
@@ -1679,7 +1708,7 @@ function run_tests(){
 
 
 # Parse args
-while getopts 'b:lts:n:p:h' name; do
+while getopts 'b:lts:n:p:f:h' name; do
 	case "$name" in
 	b)	onetest="$OPTARG"
 		infiniteloop="yes"
@@ -1698,6 +1727,10 @@ while getopts 'b:lts:n:p:h' name; do
 		;;
 	p)
 		nr_ps=$OPTARG
+		;;
+	f)
+		firsttest=$OPTARG
+		echo "KRGLTP: first test will be $firsttest"
 		;;
 	h)
 		usage; exit 0
