@@ -363,6 +363,7 @@ int nodes_add(struct krg_node_set* node_set, int nb_nodes)
 		break;
 	default:
 		// If 'auto' specified, wait for nodes to be present
+		node_set = krg_node_set_create();
 		if (wait_for_nodes_count(nb_nodes, node_set) == -1)
 			return -1;
 	}
