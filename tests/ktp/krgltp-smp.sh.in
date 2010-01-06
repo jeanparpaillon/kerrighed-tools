@@ -86,7 +86,7 @@ function run_all_instances() {
 }
 
 function check_runtest() {
-	read_exit_status $1 || exit 0
+	read_exit_status $1 || exit 1
 }
 
 # run one cmd
@@ -119,7 +119,7 @@ function check_rwarn() {
 	read_exit_status $1
 	res=$?
 	if [ "$res" -ne 4 ] && [ "$res" -ne 0 ]; then
-		exit 0
+		exit 1
 	fi
 }
 
@@ -159,7 +159,7 @@ function rsingle(){
 
 	# Load any background pipe in its own pgrp
 	set -m
-	$BASETEST/$@ || exit 0
+	$BASETEST/$@ || exit 1
 	# Restore default behavior in non-interactive shell
 	set +m
 	let nbpassed=nbpassed+1
