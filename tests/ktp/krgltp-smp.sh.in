@@ -14,6 +14,8 @@ let nr_run=1
 BASETEST=@ltpbase@/testcases/bin/
 PATH=${PATH}:@ltpbase@/tools:$BASETEST
 
+STATUS_FIFO=$PWD/krgltp.$$
+
 ###############################
 # Manage restart of KTP from a chosen test
 firsttest=""
@@ -58,8 +60,35 @@ function print_progress(){
 	echo -n "$nr_arg"
 }
 
+function check_krgcap() {
+	if [ -z "$localonly" ]; then
+		krgcapset -d +DISTANT_FORK || exit 1
+	fi
+}
+
+function prepare_all_instances() {
+	local status_fifo
+	local i
+
+	for i in `seq 1 $nr_ps`; do
+		status_fifo=${STATUS_FIFO}-$i
+
+		rm $status_fifo
+		mkfifo $status_fifo || { echo "Could not create status fifo ${status_fifo}!"; exit 1; }
+	done
+}
+
 function read_exit_status() {
-	wait ${pid[$1]}
+	local status
+	local status_fifo=${STATUS_FIFO}-$1
+
+	status=`cat $status_fifo`
+	if [ -z "$status" ]; then
+		echo "Could not read status fifo ${status_fifo}!"
+		exit 1
+	fi
+
+	return $status
 }
 
 # Run all concurrent instances of a given test command in separate
@@ -67,18 +96,24 @@ function read_exit_status() {
 # The pids of the commands are stored in the pid[] array.
 function run_all_instances() {
 	local check_fun=$1
+	local status_fifo
 	local i
 
 	shift
 
-	# Load any background pipe in its own pgrp
-	set -m
 	for i in `seq 1 $nr_ps`; do
-		$BASETEST/$@ &
-		pid[$i]=$!
+		status_fifo=${STATUS_FIFO}-$i
+
+		(
+			(
+				check_krgcap
+				# Run the test in its own pgrp
+				set -m
+				$BASETEST/$@
+			)
+			echo $? > $status_fifo || echo "Could not write status fifo ${status_fifo}!"
+		) &
 	done
-	# Restore default behavior in non-interactive shell
-	set +m
 
 	for i in `seq 1 $nr_ps`; do
 		$check_fun $i
@@ -159,6 +194,7 @@ function rsingle(){
 
 	# Load any background pipe in its own pgrp
 	set -m
+	check_krgcap
 	$BASETEST/$@ || exit 1
 	# Restore default behavior in non-interactive shell
 	set +m
@@ -1756,6 +1792,8 @@ shift $nr_shift
 chmod u+s $BASETEST/change_owner
 chmod u+s $BASETEST/create_link
 
+prepare_all_instances
+
 rm -f /tmp/krgltp-slabinfo.dat
 echo "KRGLTP: nbrun=$nr_run" > /tmp/krgltp-slabinfo.dat
 
@@ -1773,7 +1811,6 @@ slab-check
 if [ -z "$localonly" ]; then
 	echo "* Waiting for the cluster to start"
 	krgadm cluster wait_start
-	krgcapset -d +DISTANT_FORK || exit 1
 fi
 
 export KTP_NR_PS=$nr_ps
