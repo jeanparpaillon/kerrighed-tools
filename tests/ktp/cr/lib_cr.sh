@@ -99,6 +99,14 @@ check_written_files()
     # TODO: factorize(1)
     local version=`awk '$1=="Version:" {print $2}' /tmp/chkpt_result${_pid}`
     local filechkpt=/var/chkpt/${_pid}/v${version}/task_${_pid}.bin
+
+    # thanks to NFS, we need the following to force directory cache refresh
+    stat /var/ > /dev/null 2>&1
+    stat /var/chkpt/ > /dev/null 2>&1
+    stat /var/chkpt/${_pid}/ > /dev/null 2>&1
+    stat /var/chkpt/${_pid}/v${version} > /dev/null 2>&1
+    #############################################################
+
     stat $filechkpt > /dev/null 2>&1
 
     r=$?

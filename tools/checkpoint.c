@@ -323,6 +323,38 @@ err_chkpt:
 	return r;
 }
 
+void mkdirp(const char *dir)
+{
+	krg_cap_t caps;
+	char cmd[4096];
+	int r;
+
+	r = krg_capget(&caps);
+	if (r) {
+		fprintf(stderr,
+			"Fail to get Kerrighed capabilities "
+			"of current process (%d)\n", getpid());
+		exit(EXIT_FAILURE);
+	}
+
+	caps.krg_cap_effective &= ~(1 << CAP_DISTANT_FORK);
+	caps.krg_cap_inheritable_effective
+		&= ~((1 << CAP_DISTANT_FORK) | (1 << CAP_CAN_MIGRATE));
+
+	r = krg_capset(&caps);
+	if (r) {
+		fprintf(stderr, "Fail to set Kerrighed capabilities "
+			"of current process (%d)\n", getpid());
+		exit(EXIT_FAILURE);
+	}
+
+	sprintf(cmd, "mkdir -p %s", dir);
+
+	system(cmd);
+
+	return;
+}
+
 int main(int argc, char *argv[])
 {
 	int r = 0;
@@ -341,6 +373,8 @@ int main(int argc, char *argv[])
 			r = -EINVAL;
 			goto exit;
 		}
+
+		mkdirp(argv[optind+1]);
 
 		checkpoint_dir = canonicalize_file_name(argv[optind+1]);
 		if (!checkpoint_dir) {
