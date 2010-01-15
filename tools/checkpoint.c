@@ -52,7 +52,7 @@ void parse_args(int argc, char *argv[])
 {
 	char c;
 	int option_index = 0;
-	char * short_options= "hqacd:bfu::k::i";
+	char * short_options= "hqacd:bfu::k::ip";
 	static struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
 		{"quiet", no_argument, 0, 'q'},
@@ -64,6 +64,7 @@ void parse_args(int argc, char *argv[])
 		{"unfreeze", optional_argument, 0, 'u'},
 		{"kill", optional_argument, 0, 'k'},
 		{"ignore-unsupported-files", no_argument, 0, 'i'},
+		{"create-directory", no_argument, 0, 'p'},
 		{0, 0, 0, 0}
 	};
 
@@ -105,6 +106,9 @@ void parse_args(int argc, char *argv[])
 			break;
 		case 'i':
 			flags |= CKPT_W_UNSUPPORTED_FILE;
+			break;
+		case 'p':
+			flags |= CREATE_DIR;
 			break;
 		default:
 			show_help();
