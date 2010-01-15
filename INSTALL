@@ -37,6 +37,7 @@ Table of contents
 
 - xsltproc      : allow to create documentation in various formats (only needed by
   		  maintainer.
+- Python (>= 2.5) : Python interface is provided to libkerrighed (hotplug part)
 
 2/ Quick install
 ================

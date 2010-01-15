@@ -142,6 +142,21 @@ AC_ARG_ENABLE([libkerrighed],
 	      [],
 	      [enable_libkerrighed=yes])
 AM_CONDITIONAL([ENABLE_LIBKERRIGHED], [test "$enable_libkerrighed" = "yes"])
+
+PYTHON_VERSION_MIN=2.5
+AC_ARG_ENABLE([python],
+				[AS_HELP_STRING([--disable-python],
+								[Disable Python code @<:@default=enable@:>@])],
+								[],
+								[enable_python=yes])
+if test "x$enable_python" = "xyes"; then
+	 AM_PATH_PYTHON([$PYTHON_VERSION_MIN],, [:])
+	 if test "$PYTHON" = ":"; then
+	 		AC_MSG_ERROR([
+        *** You need python >= $PYTHON_VERSION_MIN (or --disable-python)])
+   fi
+fi
+AM_CONDITIONAL([ENABLE_PYTHON], [test "$enable_python" = "yes"])
 ###
 ### END LIBRARIES CHECK
 ###
@@ -281,6 +296,7 @@ else
 fi
 echo "    - Target architecture      : $kernelarch"
 echo "    - libkerrighed             : $enable_libkerrighed"
+echo "    - libkerrighed Python      : $enable_python"
 echo "    - Kerrighed tools          : $enable_tools"
 echo -n "    - Kerrighed service files  : "
 if test "$enable_service" = "no"; then

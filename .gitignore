@@ -59,6 +59,7 @@ ncscope.*
 /stamp-h1
 Makefile.in
 Makefile
+py-compile
 
 # Generated archive
 /kerrighed-*.tar.gz
