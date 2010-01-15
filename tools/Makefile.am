@@ -12,6 +12,7 @@ bin_PROGRAMS = migrate checkpoint restart krgadm krgcapset krgcr-run krgboot krg
 
 INCLUDES = -I@top_srcdir@/libs/include
 LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la @top_builddir@/libs/libkrgcb/libkrgcb.la
+AM_LDFLAGS = -Wl,--as-needed
 
 migrate_SOURCES = migrate.c
 checkpoint_SOURCES = checkpoint.c
