@@ -132,7 +132,7 @@ checkpoint_process()
 
     create_checkpoint_dir $_pid
 
-    checkpoint $_options $_pid /var/chkpt/${_pid}/v${CKPT_VERSION}/ > /tmp/chkpt_result${_pid}
+    checkpoint -p $_options $_pid /var/chkpt/${_pid}/v${CKPT_VERSION}/ > /tmp/chkpt_result${_pid}
 
     r=$?
     if [ $r -ne 0 ]; then
@@ -173,7 +173,7 @@ checkpoint_process_w_signal()
 
     create_checkpoint_dir $_pid
 
-    checkpoint -c $_pid  /var/chkpt/${_pid}/v${CKPT_VERSION}/ > /tmp/chkpt_result${_pid}
+    checkpoint -p -c $_pid  /var/chkpt/${_pid}/v${CKPT_VERSION}/ > /tmp/chkpt_result${_pid}
     r=$?
     if [ $r -ne 0 ]; then
 	tst_brkm TFAIL NULL \
@@ -213,7 +213,9 @@ checkpoint_process_must_fail()
     local _options=$3
     local r=0
 
-    checkpoint $_options $_pid  /var/chkpt/${_pid}/v${CKPT_VERSION}/ > /dev/null 2>&1
+    create_checkpoint_dir $_pid
+
+    checkpoint -p $_options $_pid  /var/chkpt/${_pid}/v${CKPT_VERSION}/ > /dev/null 2>&1
 
     r=$?
     if [ $r -eq 0 ]; then
@@ -258,7 +260,7 @@ checkpoint_frozen_process()
 
     create_checkpoint_dir $_pid
 
-    checkpoint -c $_pid /var/chkpt/${_pid}/v${CKPT_VERSION}/ > /tmp/chkpt_result${_pid}
+    checkpoint -p -c $_pid /var/chkpt/${_pid}/v${CKPT_VERSION}/ > /tmp/chkpt_result${_pid}
 
     r=$?
     if [ $r -ne 0 ]; then
