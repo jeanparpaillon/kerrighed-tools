@@ -413,26 +413,10 @@ err:
 	return r;
 }
 
-int cr_callback_init(void)
+static int initialize_signal_handlers(void)
 {
 	struct sigaction sa;
-	__u64 udata = 0;
 	int r = 0;
-
-	info = (cr_cb_info_t *)malloc(sizeof(cr_cb_info_t));
-
-	if (!info) {
-		r = -ENOMEM;
-		goto err;
-	}
-
-	memset(info, 0, sizeof(cr_cb_info_t));
-
-	udata |= CR_CB_ACTIV_CB;
-
-	r = application_set_userdata(udata);
-	if (r)
-		goto err;
 
 	sa.sa_handler = handle_signal;
 	sa.sa_flags = 0;
@@ -447,6 +431,46 @@ int cr_callback_init(void)
 		goto err;
 
 	r = sigaction(SIG_CB_RUN_CNT, &sa, NULL);
+
+err:
+	return r;
+}
+
+static int initialize_cb_info(void)
+{
+	info = (cr_cb_info_t *)malloc(sizeof(cr_cb_info_t));
+
+	if (!info) {
+		errno = ENOMEM;
+		return -1;
+	}
+
+	memset(info, 0, sizeof(cr_cb_info_t));
+
+	return 0;
+}
+
+static int declare_cb(void)
+{
+	__u64 udata = 0;
+	udata |= CR_CB_ACTIV_CB;
+
+	return application_set_userdata(udata);
+}
+
+int cr_callback_init(void)
+{
+	int r = 0;
+
+	r = initialize_cb_info();
+	if (r)
+		goto err;
+
+	r = initialize_signal_handlers();
+	if (r)
+		goto err;
+
+	r = declare_cb();
 
 err:
 	if (r)
