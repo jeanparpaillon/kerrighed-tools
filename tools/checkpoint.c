@@ -367,6 +367,7 @@ err_chkpt:
 int main(int argc, char *argv[])
 {
 	int r = 0;
+	long pid = -1;
 	char *storage_dir = NULL;
 
 	/* Check environment */
@@ -391,7 +392,7 @@ int main(int argc, char *argv[])
 			goto exit;
 		}
 
-		lookup_parent_directory(checkpoint_dir);
+		lookup_parent_directory(storage_dir);
 
 	} else if (argc - optind != 1) {
 		show_help();

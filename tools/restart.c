@@ -367,7 +367,7 @@ int parse_args(int argc, char *argv[], char **storage_dir)
 		goto exit;
 	}
 
-	lookup_parent_directory(*checkpoint_dir);
+	lookup_parent_directory(*storage_dir);
 
 	if (options & STDIN_OUT_ERR)
 		r = replace_stdin_stdout_stderr(*storage_dir);
