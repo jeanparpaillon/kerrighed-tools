@@ -23,7 +23,7 @@ const char* krg_status_str(int s)
 {
 	static char *str[4] = { "invalid", "possible", "present", "online" };
 
-	if (s >= 0 && s <= HOTPLUG_NODE_ONLINE)
+	if (s <= 0 || s > HOTPLUG_NODE_ONLINE)
 		s = HOTPLUG_NODE_INVALID;
 
 	return str[s];
