@@ -6,7 +6,7 @@
 ### Authors:
 ###        Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
-SUBDIRS= include libkerrighed libkrgcb
+SUBDIRS= include libkerrighed libkrgcb libkrgcheckpoint
 
 if ENABLE_PYTHON
 python_PYTHON = kerrighed.py

@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: Kerrighed Checkpoint-Lib
+Description: Library for application to collaborate with external checkpointer.
+Version: @VERSION@
+Libs: -L${libdir} -lkrgcheckpoint
+Cflags: -I${includedir}/kerrighed
