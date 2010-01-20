@@ -48,6 +48,51 @@ void show_help(void)
 	       );
 }
 
+void lookup_parent_directory(const char *checkpoint_dir)
+{
+	int error, len;
+	struct stat statbuf;
+	char *copy, *delim, *tmp;
+
+	copy = strdup(checkpoint_dir);
+	if (!copy)
+		return;
+
+	tmp = copy;
+
+	while (1) {
+		delim = strchr(tmp, '/');
+		if (!delim)
+			goto end_of_path;
+
+		*delim = '\0';
+		len = strlen(copy);
+		if (len) {
+			error = stat(copy, &statbuf);
+			if (error)
+				goto out;
+
+			/* chown empties the cache */
+			error = chown(copy, statbuf.st_uid, statbuf.st_gid);
+			if (error)
+				goto out;
+		}
+		*delim = '/';
+		tmp = delim + 1;
+	}
+
+end_of_path:
+	error = stat(checkpoint_dir, &statbuf);
+	if (error)
+		goto out;
+
+	error = chown(checkpoint_dir, statbuf.st_uid, statbuf.st_gid);
+
+out:
+	free(copy);
+	return;
+}
+
 void parse_args(int argc, char *argv[])
 {
 	char c;
@@ -322,7 +367,6 @@ err_chkpt:
 int main(int argc, char *argv[])
 {
 	int r = 0;
-	long pid = -1;
 	char *storage_dir = NULL;
 
 	/* Check environment */
@@ -338,12 +382,16 @@ int main(int argc, char *argv[])
 			goto exit;
 		}
 
+		lookup_parent_directory(argv[optind+1]);
+
 		storage_dir = canonicalize_file_name(argv[optind+1]);
 		if (!storage_dir) {
 			r = errno;
 			perror(argv[optind+1]);
 			goto exit;
 		}
+
+		lookup_parent_directory(checkpoint_dir);
 
 	} else if (argc - optind != 1) {
 		show_help();

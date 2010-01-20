@@ -240,6 +240,51 @@ out:
 	return r;
 }
 
+void lookup_parent_directory(const char *checkpoint_dir)
+{
+	int error, len;
+	struct stat statbuf;
+	char *copy, *delim, *tmp;
+
+	copy = strdup(checkpoint_dir);
+	if (!copy)
+		return;
+
+	tmp = copy;
+
+	while (1) {
+		delim = strchr(tmp, '/');
+		if (!delim)
+			goto end_of_path;
+
+		*delim = '\0';
+		len = strlen(copy);
+		if (len) {
+			error = stat(copy, &statbuf);
+			if (error)
+				goto out;
+
+			/* chown empties the cache */
+			error = chown(copy, statbuf.st_uid, statbuf.st_gid);
+			if (error)
+				goto out;
+		}
+		*delim = '/';
+		tmp = delim + 1;
+	}
+
+end_of_path:
+	error = stat(checkpoint_dir, &statbuf);
+	if (error)
+		goto out;
+
+	error = chown(checkpoint_dir, statbuf.st_uid, statbuf.st_gid);
+
+out:
+	free(copy);
+	return;
+}
+
 int parse_args(int argc, char *argv[], char **storage_dir)
 {
 	char c;
@@ -305,12 +350,24 @@ int parse_args(int argc, char *argv[], char **storage_dir)
 		goto exit;
 	}
 
+	/* remove DISTANT_FORK and MIGRATION capability */
+	krg_cap_t newcap;
+	newcap.krg_cap_effective = 0;
+	newcap.krg_cap_permitted = 0;
+	newcap.krg_cap_inheritable_effective = 0;
+	newcap.krg_cap_inheritable_permitted = 0;
+	krg_capset(&newcap);
+
+	lookup_parent_directory(argv[optind]);
+
 	*storage_dir = canonicalize_file_name(argv[optind]);
 	if (!*storage_dir) {
 		r = -errno;
 		perror(argv[optind]);
 		goto exit;
 	}
+
+	lookup_parent_directory(*checkpoint_dir);
 
 	if (options & STDIN_OUT_ERR)
 		r = replace_stdin_stdout_stderr(*storage_dir);
