@@ -1,0 +1,18 @@
+#=====================================================
+# /etc/default/kerrighed
+#
+#=====================================================
+
+# Start kerrighed cluster
+ENABLE=true
+#ENABLE=false
+
+# krgadm cluster start options. Can be used to wait for some nodes.
+# See man krgadm(1)
+START_OPTS=""
+#START_OPTS="--auto 4"
+#START_OPTS="--nodes 1-4"
+
+# Enable/Disable legacy scheduler behaviour
+LEGACY_SCHED=true
+#LEGACY_SCHED=false

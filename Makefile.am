@@ -18,8 +18,8 @@ endif
 if ENABLE_TOOLS
 SUBDIRS += tools
 endif
-if ENABLE_SERVICE
-SUBDIRS += scripts
+if ENABLE_HOST_TOOLS
+SUBDIRS += tools-host
 endif
 if ENABLE_TESTS
 SUBDIRS += tests

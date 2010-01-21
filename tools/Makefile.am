@@ -6,9 +6,8 @@
 ### Author:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
-dist_bin_SCRIPTS = krg_legacy_scheduler krgboot_helper krginit_helper
-
-bin_PROGRAMS = migrate checkpoint restart krgadm krgcapset krgcr-run krgboot krginit ipccheckpoint ipcrestart
+dist_bin_SCRIPTS = krg_legacy_scheduler krginit_helper
+bin_PROGRAMS = migrate checkpoint restart krgadm krgcapset krgcr-run krginit ipccheckpoint ipcrestart
 
 INCLUDES = -I@top_srcdir@/libs/include
 LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la @top_builddir@/libs/libkrgcb/libkrgcb.la
@@ -19,27 +18,39 @@ restart_SOURCES = restart.c
 krgcapset_SOURCES = krgcapset.c
 krgadm_SOURCES = krgadm.c
 krgcr_run_SOURCES = krgcr-run.c
-krgboot_SOURCES = krgboot.c
 krginit_SOURCES = krginit.c
 ipccheckpoint_SOURCES = ipccheckpoint.c
 ipcrestart_SOURCES = ipcrestart.c
 
-EXTRA_DIST = krginit_helper.conf krginit_helper.in krgboot_helper.in
-CLEANFILES = krgboot_helper krginit_helper
+EXTRA_DIST = \
+	krginit_helper.conf \
+	krginit_helper.in \
+	kerrighed.default \
+	kerrighed.init \
+	kerrighed.completion
+
+CLEANFILES = krginit_helper
 
 edit = sed \
         -e 's|@bindir[@]|$(bindir)|g' \
+        -e 's|@sbindir[@]|$(sbindir)|g' \
         -e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
         -e 's|@prefix[@]|$(prefix)|g' \
         -e 's|@sysconfdir[@]|$(sysconfdir)|g'
 
-install-data-local:
-	$(install_sh_SCRIPT) $(srcdir)/krginit_helper.conf $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf
+install-data-local: krginit_helper.conf kerrighed.completion kerrighed.init kerrighed.default
+	$(install_sh_DATA) $(srcdir)/krginit_helper.conf $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf
+	$(install_sh_DATA) $(srcdir)/kerrighed.completion $(DESTDIR)$(sysconfdir)/bash_completion.d/kerrighed
+	$(install_sh_SCRIPT) $(srcdir)/kerrighed.init $(DESTDIR)$(sysconfdir)/init.d/kerrighed
+	$(install_sh_DATA) $(srcdir)/kerrighed.default $(DESTDIR)$(sysconfdir)/default/kerrighed
 
 uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf
+	rm -f $(DESTDIR)$(sysconfdir)/init.d/kerrighed
+	rm -f $(DESTDIR)$(sysconfdir)/default/kerrighed
+	rm -f $(DESTDIR)$(sysconfdir)/bash_completion.d/kerrighed
 
-krgboot_helper krginit_helper: Makefile
+krginit_helper: Makefile
 	rm -f $@ $@.tmp
 	srcdir=''; \
 	  test -f ./$@.in || srcdir=$(srcdir)/; \
@@ -48,5 +59,4 @@ krgboot_helper krginit_helper: Makefile
 	chmod go-w $@.tmp
 	mv $@.tmp $@
 
-krgboot_helper: $(srcdir)/krgboot_helper.in
 krginit_helper: $(srcdir)/krginit_helper.in

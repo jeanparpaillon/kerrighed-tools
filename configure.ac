@@ -175,23 +175,12 @@ if test "x$enable_libkerrighed" != "xyes"; then
 fi
 AM_CONDITIONAL([ENABLE_TOOLS], [test "$enable_tools" = "yes"])
 
-AC_ARG_ENABLE([service],
-              [AS_HELP_STRING([--disable-service],
-                              [Do not install kerrighed service @<:@default: enable@:>@])],
+AC_ARG_ENABLE([host-tools],
+              [AS_HELP_STRING([--enable-host-tools],
+                              [Enable kerrighed host tools @<:@default: disable@:>@])],
               [],
-              [enable_service="yes"])
-if test "$enable_service" = "yes"; then
-   AC_MSG_CHECKING([if distribution is supported])
-   if $srcdir/scripts/update-rc --check; then
-      AC_MSG_RESULT([yes])
-   else
-      AC_MSG_RESULT([no])
-      enable_service="no"
-      AC_MSG_ERROR([
-        *** Your distribution is not supported. Helper scripts won't work. Just launch configure with --disable-service.])
-   fi
-fi
-AM_CONDITIONAL([ENABLE_SERVICE], [test "$enable_service" = "yes"])
+              [enable_host_tools="no"])
+AM_CONDITIONAL([ENABLE_HOST_TOOLS], [test "$enable_host_tools" = "yes"])
 ###
 ### END TOOLS CHECK
 ###
@@ -201,7 +190,7 @@ AM_CONDITIONAL([ENABLE_SERVICE], [test "$enable_service" = "yes"])
 ###
 AC_ARG_ENABLE([tests],
               [AS_HELP_STRING([--enable-tests],
-                              [Globally enable tests @<:@default=disable@:>@])],
+                              [Globally enable tests @<:@default: disable@:>@])],
               [],
               [enable_tests=no])
 AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" = "xyes"])
@@ -264,7 +253,7 @@ AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([patches/Makefile])
 AC_CONFIG_FILES([libs/Makefile libs/include/Makefile libs/libkerrighed/Makefile libs/libkerrighed/kerrighed.pc libs/libkrgcb/Makefile libs/libkrgcb/krgcb.pc])
 AC_CONFIG_FILES([tools/Makefile])
-AC_CONFIG_FILES([scripts/Makefile])
+AC_CONFIG_FILES([tools-host/Makefile])
 AC_CONFIG_FILES([man/Makefile])
 AC_CONFIG_FILES([tests/Makefile tests/include/Makefile tests/apps/Makefile tests/proc/Makefile])
 AC_CONFIG_FILES([tests/ktp/Makefile tests/ktp/cr/Makefile tests/benchmark/Makefile])
@@ -298,12 +287,7 @@ echo "    - Target architecture      : $kernelarch"
 echo "    - libkerrighed             : $enable_libkerrighed"
 echo "    - libkerrighed Python      : $enable_python"
 echo "    - Kerrighed tools          : $enable_tools"
-echo -n "    - Kerrighed service files  : "
-if test "$enable_service" = "no"; then
-   echo "no"
-else
-   echo "yes"
-fi
+echo "    - Kerrighed host tools     : $enable_host_tools"
 echo "    - Manpages build           : $xsltproc (only needed in maintainer mode)"
 echo ""
 echo "    - Kerrighed tests          : $enable_tests"
