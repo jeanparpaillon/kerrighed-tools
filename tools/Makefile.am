@@ -6,8 +6,9 @@
 ### Author:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
-dist_bin_SCRIPTS = krg_legacy_scheduler krginit_helper
-bin_PROGRAMS = migrate checkpoint restart krgadm krgcapset krgcr-run krginit ipccheckpoint ipcrestart
+dist_sbin_SCRIPTS = krginit_helper krg_legacy_scheduler
+bin_PROGRAMS = migrate checkpoint restart krgcapset krgcr-run ipccheckpoint ipcrestart
+sbin_PROGRAMS = krgadm krginit
 
 INCLUDES = -I@top_srcdir@/libs/include
 LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la @top_builddir@/libs/libkrgcb/libkrgcb.la
