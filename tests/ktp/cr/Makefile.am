@@ -49,6 +49,7 @@ tests_SCRIPTS = \
 	cr_ipc_sem02 \
 	cr_pipe01 \
 	cr_pipe02 \
+	cr_exclude_mm01 \
 	lib_cr.sh \
 	lib_cr_ipc.sh
 
