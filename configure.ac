@@ -221,18 +221,11 @@ AM_CONDITIONAL([ENABLE_APPS], [test "$enable_tests_apps" = "yes" -a "x$enable_te
 AM_CONDITIONAL([ENABLE_PROC], [test "$enable_tests_proc" = "yes" -a "x$enable_tests" = "xyes"])
 AM_CONDITIONAL([ENABLE_BENCHMARK], [test "$enable_tests_benchmark" = "yes" -a "x$enable_tests" = "xyes"])
 
-# JP: !!!crappy crappy!!! If enable_user_install, ltpbase become $datadir/ltp
-# The other solution is to not default ltpbase to /opt/ltp...
-if test "$enable_user_install" = "yes"; then
-	 default_ltpbase=$datadir/ltp
-else
-	 default_ltpbase=/opt/ltp
-fi
 AC_ARG_WITH([ltp-base],
             [AS_HELP_STRING([--with-ltp-base=PATH],
-                            [Path to ltp base dir @<:@default=/opt/ltp@:>@])],
+                            [Path to ltp base dir @<:@default=${datadir}/ltp@:>@])],
             [ltpbase="$withval"],
-            [ltpbase="$default_ltpbase"])
+            [ltpbase="${datadir}/ltp"])
 AC_SUBST([ltpbase])
 ###
 ### END TESTS CHECK
@@ -257,7 +250,6 @@ AC_CONFIG_FILES([tools-host/Makefile])
 AC_CONFIG_FILES([man/Makefile])
 AC_CONFIG_FILES([tests/Makefile tests/include/Makefile tests/apps/Makefile tests/proc/Makefile])
 AC_CONFIG_FILES([tests/ktp/Makefile tests/ktp/cr/Makefile tests/benchmark/Makefile])
-AC_CONFIG_FILES([tests/ktp/krgltp-smp.sh])
 
 dnl write all stuff
 AC_OUTPUT
