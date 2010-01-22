@@ -108,6 +108,9 @@ kernel-distclean:
 	  rm -f kernel/Makefile kernel/Makefile.oosb; \
 	fi
 
+build-patch:
+	$(MAKE) -C patches build-patch
+
 build-reqs-deb:
 	[ -n "$(apttool)" ] && \
 		$(apttool) install build-essential bzip2 wget automake autoconf libtool pkg-config rsync libncurses5-dev xsltproc docbook-xsl
