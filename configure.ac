@@ -177,7 +177,7 @@ AM_CONDITIONAL([ENABLE_TOOLS], [test "$enable_tools" = "yes"])
 
 AC_ARG_ENABLE([host-tools],
               [AS_HELP_STRING([--enable-host-tools],
-                              [Enable kerrighed host tools @<:@default: disable@:>@])],
+                              [Enable kerrighed host tools @<:@default=disable@:>@])],
               [],
               [enable_host_tools="no"])
 AM_CONDITIONAL([ENABLE_HOST_TOOLS], [test "$enable_host_tools" = "yes"])
@@ -190,29 +190,29 @@ AM_CONDITIONAL([ENABLE_HOST_TOOLS], [test "$enable_host_tools" = "yes"])
 ###
 AC_ARG_ENABLE([tests],
               [AS_HELP_STRING([--enable-tests],
-                              [Globally enable tests @<:@default: disable@:>@])],
+                              [Globally enable tests @<:@default=disable@:>@])],
               [],
               [enable_tests=no])
 AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" = "xyes"])
 
 AC_ARG_ENABLE([tests-ktp],
               [AS_HELP_STRING([--disable-tests-ktp],
-                              [Disable 'ktp' tests @<:@default: enable@:>@])],
+                              [Disable 'ktp' tests @<:@default=enable@:>@])],
               [],
               [enable_tests_ktp=yes])
 AC_ARG_ENABLE([tests-apps],
               [AS_HELP_STRING([--disable-tests-apps],
-                              [Disable 'apps' tests @<:@default: enable@:>@])],
+                              [Disable 'apps' tests @<:@default=enable@:>@])],
               [],
               [enable_tests_apps=yes])
 AC_ARG_ENABLE([tests-proc],
               [AS_HELP_STRING([--disable-tests-proc],
-                              [Disable 'proc' tests @<:@default: enable@:>@])],
+                              [Disable 'proc' tests @<:@default=enable@:>@])],
               [],
               [enable_tests_proc=yes])
 AC_ARG_ENABLE([tests-benchmark],
               [AS_HELP_STRING([--disable-tests-benchmark],
-                              [Disable 'benchmark' tests @<:@default: enable@:>@])],
+                              [Disable 'benchmark' tests @<:@default=enable@:>@])],
               [],
               [enable_tests_benchmark=yes])
 
@@ -223,7 +223,7 @@ AM_CONDITIONAL([ENABLE_BENCHMARK], [test "$enable_tests_benchmark" = "yes" -a "x
 
 AC_ARG_WITH([ltp-base],
             [AS_HELP_STRING([--with-ltp-base=PATH],
-                            [Path to ltp base dir @<:@default=${datadir}/ltp@:>@])],
+                            [Path to ltp base dir @<:@default=DATAROOTDIR/ltp@:>@])],
             [ltpbase="$withval"],
             [ltpbase="${datadir}/ltp"])
 AC_SUBST([ltpbase])

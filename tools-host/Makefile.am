@@ -47,5 +47,5 @@ krgboot_helper kerrighed-host.default: Makefile
 	chmod go-w $@.tmp
 	mv $@.tmp $@
 
-krgboot_helper: $(srcdir)/krgboot_helper.in
-kerrighed-host.default: $(srcdir)/kerrighed-host.default.in
+krgboot_helper: krgboot_helper.in
+kerrighed-host.default: kerrighed-host.default.in

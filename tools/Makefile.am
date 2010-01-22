@@ -60,4 +60,4 @@ krginit_helper: Makefile
 	chmod go-w $@.tmp
 	mv $@.tmp $@
 
-krginit_helper: $(srcdir)/krginit_helper.in
+krginit_helper: krginit_helper.in
