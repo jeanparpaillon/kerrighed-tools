@@ -123,7 +123,7 @@ if test "x$enable_kernel" = "xyes"; then
    fi
 fi
 
-if test -d $srcdir/kernel; then
+if test -e $srcdir/kernel/include/linux/kernel.h; then
    kernel_srcdir=\$\(top_srcdir\)/kernel
 else
    kernel_srcdir=\$\(top_builddir\)/_kernel
