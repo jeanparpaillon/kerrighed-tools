@@ -433,6 +433,22 @@ restart_process_must_fail()
 
 ###############################################################################
 
+skip_test_if_only_one_node()
+{
+    local nrnodes=0
+
+    if [ -e /proc/nodes/nrnodes ]; then
+	nrnodes=`cat /proc/nodes/nrnodes|grep ONLINE|cut -d: -f2`
+    fi
+
+    if [ $nrnodes -lt 2 ]; then
+	tst_resm TWARN "Kerrighed is running on only one node. Skipping test."
+	return 0
+    fi
+
+    return 1
+}
+
 get_cpu_hosting_process()
 {
     local _pid=$1

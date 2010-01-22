@@ -35,6 +35,11 @@ cr15()
     TCID="$FUNCNAME"               # Identifier of this testcase.
     TST_COUNT=$[$TST_COUNT+1]      # Test case number.
 
+    skip_test_if_only_one_node
+    if [ $? -eq 0 ]; then
+	return 0
+    fi
+
     runcommand +CHECKPOINTABLE,CAN_MIGRATE || return $?
 
     migrate_process $PID $TESTCMD || return $?

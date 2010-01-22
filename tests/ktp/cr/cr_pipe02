@@ -45,6 +45,11 @@ cr_pipe02()
     TCID="$FUNCNAME"               # Identifier of this testcase.
     TST_COUNT=$[$TST_COUNT+1]      # Test case number.
 
+    skip_test_if_only_one_node
+    if [ $? -eq 0 ]; then
+	return 0
+    fi
+
     local oldcap=`krgcapset -s - | grep "Inheritable Effective" | cut -d: -f2`
 
     krgcapset -d -DISTANT_FORK
