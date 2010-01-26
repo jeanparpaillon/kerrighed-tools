@@ -38,7 +38,7 @@ const int ARRAY_SIZE_INC = 32;
 void show_help()
 {
 	printf ("Restart an application\nusage: restart [-h]"
-		" [-f|-t] [-q] [-d] [-s filekey,fd] id version\n");
+		" [-f|-t] [-q] [-d] [-p] id version\n");
 	printf ("  -h : This help\n");
 	exit(1);
 }
@@ -250,12 +250,13 @@ int parse_args(int argc, char *argv[])
 	char *checkpoint_dir;
 	char c;
 	int r, option_index = 0;
-	char * short_options= "hfts:qd";
+	char * short_options= "hftps:qd";
 	static struct option long_options[] =
 		{
 			{"help", no_argument, 0, 'h'},
 			{"foreground", no_argument, 0, 'f'},
 			{"tty", no_argument, 0, 't'},
+			{"pids", no_argument, 0, 'p'},
 			{"substitute-file", required_argument, 0, 's'},
 			{"quiet", no_argument, 0, 'q'},
 			{"debug", no_argument, 0, 'd'},
@@ -277,6 +278,9 @@ int parse_args(int argc, char *argv[])
 			break;
 		case 't':
 			options |= STDIN_OUT_ERR;
+			break;
+		case 'p':
+			flags |= APP_REPLACE_PGRP_SID;
 			break;
 		case 's':
 			r = parse_file_substitution(optarg);
