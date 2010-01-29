@@ -1,0 +1,58 @@
+#!/bin/bash
+###############################################################################
+##
+## Copyright (c) Kerlabs, 2010
+##
+## This program is free software;  you can redistribute it and#or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+## or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+## for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program;  if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+##
+###############################################################################
+#
+# Description:  Test program for Kerrighed checkpoint/restart of an application
+#               composed of two processes and that to some mm exclusions.
+#
+# Author:       Matthieu Fertré, matthieu.fertre@kerlabs.fr
+#
+
+source `dirname $0`/lib_cr.sh
+
+description="(2 processes) Basic C/R test: Run, C, K, R"
+
+# Application with 2 processes and mm exclusions
+TESTCMD="bi-exclude-mm"
+TESTCMD_OPTIONS="-q"
+
+# Basic C/R test for a tree of processes: Run, C, K, R
+cr-exclude-mm01()
+{
+    TCID="$FUNCNAME"               # Identifier of this testcase.
+    TST_COUNT=$[$TST_COUNT+1]      # Test case number.
+
+    runcommand +CHECKPOINTABLE 2 || return $?
+
+    checkpoint_process $PID $TESTCMD || return $?
+
+    kill_group $PID $TESTCMD || return $?
+
+    restart_process $PID 1 $TESTCMD || return $?
+
+    kill_group $PID $TESTCMD || return $?
+
+    print_success $?
+    return $?
+}
+
+CR_setup $@ || exit $?
+
+cr-exclude-mm01 || exit $?
