@@ -5,8 +5,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <kerrighed/kerrighed.h>
-#include <kerrighed/libkrgcheckpoint.h>
+#include <kerrighed.h>
+#include <libkrgcheckpoint.h>
 #include "libbi.h"
 
 int numloops = -1 ;
