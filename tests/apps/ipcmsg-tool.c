@@ -221,7 +221,7 @@ void parse_args(int argc, char *argv[])
 
 int main(int argc, char* argv[])
 {
-	int r, msgid;
+	int r = 0, msgid;
 
 	parse_args(argc, argv);
 

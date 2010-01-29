@@ -315,7 +315,7 @@ void parse_args(int argc, char *argv[])
 
 int main(int argc, char* argv[])
 {
-	int r, semid;
+	int r = 0, semid;
 
 	parse_args(argc, argv);
 

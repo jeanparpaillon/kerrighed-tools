@@ -188,7 +188,7 @@ int cr_mm_exclusion_restart_cb(void *arg)
 {
 	struct cr_mm_region_excluded *mm_region;
 	struct child_process *child;
-	int ret, r = 0;
+	int ret = 0, r = 0;
 
 	mm_region = first_mm_region_excluded;
 	while (mm_region) {
