@@ -73,7 +73,7 @@ function prepare_all_instances() {
 	for i in `seq 1 $nr_ps`; do
 		status_fifo=${STATUS_FIFO}-$i
 
-		rm $status_fifo
+		rm -f $status_fifo
 		mkfifo $status_fifo || { echo "Could not create status fifo ${status_fifo}!"; exit 1; }
 	done
 }
