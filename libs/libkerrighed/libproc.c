@@ -182,12 +182,8 @@ int application_restart(long app_id, int chkpt_sn, int flags)
 	rst_req.flags = flags;
 
 	res = call_kerrighed_services(KSYS_APP_RESTART, &rst_req);
-
-	/* in case of success, rst_req.app_id has been replaced by the
-	 * application root process id.
-	 */
 	if (!res)
-		res = rst_req.app_id;
+		res = rst_req.root_pid;
 
 	return res;
 }
