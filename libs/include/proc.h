@@ -28,7 +28,8 @@ struct checkpoint_info application_checkpoint_from_pid(pid_t pid,
 						       int flags);
 
 /* return the pid of the application root process in case of success */
-int application_restart(long app_id, int chkpt_sn, int flags);
+int application_restart(long app_id, int chkpt_sn, int flags,
+			struct cr_subst_files_array *substitution);
 
 int application_set_userdata(__u64 data);
 int application_get_userdata_from_appid(long app_id, __u64 *data);

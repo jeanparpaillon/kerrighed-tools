@@ -172,20 +172,47 @@ struct checkpoint_info application_checkpoint_from_pid(pid_t pid, int flags)
 	return ckpt_info;
 }
 
-int application_restart(long app_id, int chkpt_sn, int flags)
+int application_restart(long app_id, int chkpt_sn, int flags,
+			struct cr_subst_files_array *substitution)
 {
-	int res;
+	int res, i;
 	struct restart_request rst_req;
+	size_t subst_str_len;
 
 	rst_req.app_id = app_id;
 	rst_req.chkpt_sn = chkpt_sn;
 	rst_req.flags = flags;
 
+	rst_req.substitution = *substitution;
+
+	if (rst_req.substitution.nr) {
+
+		subst_str_len = sizeof(kerrighed_node_t)*2 +
+			sizeof(unsigned long)*2;
+
+		for (i = 0; i < rst_req.substitution.nr; i++) {
+
+			if (strlen(substitution->files[i].file_id)
+			    != subst_str_len)
+				goto err_inval;
+
+			if (fcntl(substitution->files[i].fd, F_GETFL) == -1)
+				goto err_inval;
+		}
+
+	} else if (rst_req.substitution.files)
+		goto err_inval;
+
 	res = call_kerrighed_services(KSYS_APP_RESTART, &rst_req);
 	if (!res)
 		res = rst_req.root_pid;
 
+error:
 	return res;
+err_inval:
+	res = -1;
+	errno = EINVAL;
+	goto error;
 }
 
 int application_set_userdata(__u64 data)

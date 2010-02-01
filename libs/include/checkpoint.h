@@ -25,12 +25,26 @@ struct checkpoint_info
 
 #define GET_RESTART_CMD_PTS 1
 
+struct cr_subst_file
+{
+	int fd;
+	char *file_id;
+};
+
+struct cr_subst_files_array
+{
+	unsigned int nr;
+	struct cr_subst_file *files;
+};
+
 struct restart_request
 {
 	long app_id;
 	int chkpt_sn;
 	int flags;
 	pid_t root_pid;
+
+	struct cr_subst_files_array substitution;
 };
 
 struct app_userdata_request
