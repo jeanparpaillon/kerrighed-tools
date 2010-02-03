@@ -49,7 +49,6 @@ ncscope.*
 /compile
 /depcomp
 /ltmain.sh
-/install-sh
 /missing
 /configure
 /config.*
