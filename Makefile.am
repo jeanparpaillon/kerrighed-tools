@@ -26,7 +26,7 @@ SUBDIRS += tests
 endif
 SUBDIRS += man
 
-EXTRA_DIST = README INSTALL NEWS ChangeLog linux_version.sh
+EXTRA_DIST = README INSTALL NEWS ChangeLog linux_version.sh autogen.sh clean.sh m4/
 
 kernel_srcdir = $(abspath @kernel_srcdir@)
 kernel_builddir = $(abspath $(top_builddir)/kernel)
