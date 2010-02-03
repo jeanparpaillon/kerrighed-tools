@@ -3,9 +3,8 @@
 #
 #=====================================================
 
-# Start kerrighed cluster
-ENABLE=true
-#ENABLE=false
+# Start Kerrighed container on this node. If -1, does not start container.
+BOOT_ID=1
 
 # Local namespaces to isolate Kerrighed from
 # Leaving unset won't change kernel's current settings
@@ -34,7 +33,3 @@ ISOLATE_USER=false
 # Something else may be used on the node starting the cluster.
 # krginit_helper has his configuration in /etc/kerrighed/krginit_helper.conf
 CLUSTER_INIT_HELPER=@bindir@/krginit_helper
-
-# Enable/Disable legacy scheduler behaviour
-LEGACY_SCHED=true
-#LEGACY_SCHED=false

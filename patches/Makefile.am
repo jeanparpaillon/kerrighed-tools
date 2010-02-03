@@ -27,7 +27,7 @@ get_sha1 = case $(orig_version) in \
 							 echo v$(orig_version); \
 						 ;; \
 					 esac
-orig_tag = $(shell $(get_sha1))
+ORIG_TAG = $(shell $(get_sha1))
 KERRIGHED_TAG ?=
 
 vanilla_dir = linux-$(orig_version)
@@ -59,7 +59,7 @@ linux-$(orig_version).tar.bz2:
 	  wget -O $@ -c $(vanilla_url); \
 	fi
 
-$(krgpatch):
+build-patch:
 	if [ -d "$(kernel_srcdir)" ]; then \
 		if [ ! -d "$(kernel_srcdir)/.git" ]; then \
 	    echo "E: Can not find git informations in kernel source dir. Can not create patch..."; \
@@ -68,7 +68,23 @@ $(krgpatch):
 	else \
 			$(MAKE) $(kernel_srcdir)/.git; \
 	fi
-	cd $(kernel_srcdir) && git diff $(orig_tag)..$(KERRIGHED_TAG) > $(krgpatch)
+	cd $(kernel_srcdir) && git diff $(ORIG_TAG)..$(KERRIGHED_TAG) > $(krgpatch)
+
+$(krgpatch):
+	@echo "# "
+	@echo "# WARNING: Can not find $(abs_srcdir)/$@ !"
+	@echo "# That generally means that you run make dist without any kerrighed patch."
+	@echo "# You can build the patch running:"
+	@echo "# $ make build-patch"
+	@echo "# "
+	@echo "# If kernel sources are not found in $(kernel_srcdir), they will be get from the url in"
+	@echo "# var KERRIGHED_REPOS (default=$(KERRIGHED_REPOS))."
+	@echo "# "
+	@echo "# Then, patch is a diff between sha1 (or tag) in the following variables:"
+	@echo "# - ORIG_TAG (default=$(orig_version))"
+	@echo "# - KERRIGHED_TAG (default=$(KERRIGHED_TAG))"
+	@echo "# "
+	@exit 1
 
 $(kernel_srcdir)/.git:
 	git clone --no-checkout $(KERRIGHED_REPOS) $(kernel_srcdir)

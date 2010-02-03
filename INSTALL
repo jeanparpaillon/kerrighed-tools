@@ -16,6 +16,7 @@ Table of contents
 3.3/ Operation Controls
 3.4/ Specific configure options
 3.5/ Build from outside of source dir
+4/ Starting Kerrighed
 
 1/ Pre-requisites
 =================
@@ -127,9 +128,9 @@ operates.
    --disable-kernel  	   Disable automatic kernel configuration/build/install
    			   [default=enable]
    --disable-libkerrighed  Disable libkerrighed [default=enable]
+   --disable-python	   Disable Python code [default=enable]
    --disable-tools	   Disable tools [default=enable]
-   --disable-service	   Do not install Kerrighed service [default=enable if
-   			   lsb found]
+   --enable-kerrighed-host Enable Kerrighed host service [default=disable]
    --enable-tests	   Globally enable tests [default=disable]
    --disable-tests-ktp	   Disable 'ktp' tests
    --disable-tests-apps	   Disable 'apps' tests
@@ -143,7 +144,10 @@ operates.
 			   If you use automatic kernel config/build/install, use one of these target to configure
 			   the kernel.
                            [default=defconfig]
-   --with-ltp-base	   Path to ltp base dir [default=LIBDIR/debian-test/tests/linux]
+   --with-kernel-config-file
+			   If specified, path to a .config file which will be used for kernel configuration.
+			   [default=none]
+   --with-ltp-base	   Path to ltp base dir [default=DATAROOTDIR/ltp]
 
 3.5/ Build from outside of source tree
 ======================================

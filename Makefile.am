@@ -18,8 +18,8 @@ endif
 if ENABLE_TOOLS
 SUBDIRS += tools
 endif
-if ENABLE_SERVICE
-SUBDIRS += scripts
+if ENABLE_HOST_TOOLS
+SUBDIRS += tools-host
 endif
 if ENABLE_TESTS
 SUBDIRS += tests
@@ -107,6 +107,9 @@ kernel-distclean:
 	  rm -f $(shell find kernel -name asm-offsets.h); \
 	  rm -f kernel/Makefile kernel/Makefile.oosb; \
 	fi
+
+build-patch:
+	$(MAKE) -C patches build-patch
 
 build-reqs-deb:
 	[ -n "$(apttool)" ] && \
