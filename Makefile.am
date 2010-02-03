@@ -47,6 +47,11 @@ apttool ?= $(shell which aptitude)
 # out-of-source-build
 oosb = $(if $(filter $(kernel_builddir),$(kernel_srcdir)),n,y)
 
+K_V = $(K_V_$(V))
+K_V_ = $(AM_DEFAULT_VERBOSITY)
+K_V_0 = 0
+K_V_1 = 1
+
 if ENABLE_KERNEL
 all-local: kernel
 install-exec-local: kernel-install
@@ -56,8 +61,8 @@ distclean-local: kernel-distclean
 endif
 
 kernel: kernel-config
-	$(MAKE) -C $(kernel_builddir) bzImage
-	$(MAKE) -C $(kernel_builddir) modules
+	$(MAKE) -C $(kernel_builddir) bzImage V=$(K_V)
+	$(MAKE) -C $(kernel_builddir) modules V=$(K_V)
 
 kernel-prepare: $(kernel_builddir)-$(oosb)
 
@@ -65,9 +70,9 @@ $(kernel_builddir)-y: $(kernel_builddir)/Makefile.oosb
 
 $(kernel_builddir)/Makefile.oosb:
 	$(MAKE) $(AM_MAKEFLAGS) kernel-src
-	mkdir -p $(@D)
-	$(MAKE) -C $(kernel_srcdir) outputmakefile O="$(abspath $(kernel_builddir))"
-	ln -s Makefile $@
+	$(MKDIR_P) $(@D)
+	$(MAKE) -C $(kernel_srcdir) outputmakefile O="$(abspath $(kernel_builddir))" V=$(K_V)
+	$(LN_S) Makefile $@
 
 $(kernel_builddir)-n: kernel-src
 
@@ -79,15 +84,15 @@ kernel-config: $(kernel_builddir)/.config
 $(kernel_builddir)/.config: $(kernel_config_file)
 	$(MAKE) $(AM_MAKEFLAGS) kernel-prepare
 	@if test -n "$(kernel_config_file)"; then \
-	  cp $(kernel_config_file) $@; \
+	  $(AM_V_GEN)cp $(kernel_config_file) $@; \
 	else \
-	  $(MAKE) -C $(kernel_builddir) $(kernel_config); \
+	  $(MAKE) -C $(kernel_builddir) $(kernel_config) V=$(K_V); \
 	fi
 
 kernel-install:
-	mkdir -p $(DESTDIR)$(kerneldir)
-	$(MAKE) -C $(kernel_builddir) install INSTALL_PATH=$(DESTDIR)$(kerneldir)
-	$(MAKE) -C $(kernel_builddir) modules_install INSTALL_MOD_PATH=$(DESTDIR)$(modulesdir)
+	$(MKDIR_P) $(DESTDIR)$(kerneldir)
+	$(MAKE) -C $(kernel_builddir) install INSTALL_PATH=$(DESTDIR)$(kerneldir) V=$(K_V)
+	$(MAKE) -C $(kernel_builddir) modules_install INSTALL_MOD_PATH=$(DESTDIR)$(modulesdir) V=$(K_V)
 
 kernel-uninstall:
 	kernelrelease=$$($(MAKE) --quiet -C $(kernel_builddir) kernelrelease | sed '/^make/d'); \
@@ -98,11 +103,10 @@ kernel-uninstall:
 	  rm -rf $(DESTDIR)$(modulesdir)/lib/modules/$$kernelrelease
 
 kernel-clean:
-	$(MAKE) -C kernel clean || true
+	$(MAKE) -C kernel clean  V=$(K_V) || true
 
 kernel-distclean:
-	$(MAKE) -C kernel mrproper || true
-	rm -rf _kernel
+	$(MAKE) -C kernel mrproper  V=$(K_V) || true
 	if test ! "$(kernel_builddir)" = "$(kernel_srcdir)"; then \
 	  rm -f $(shell find kernel -name asm-offsets.h); \
 	  rm -f kernel/Makefile kernel/Makefile.oosb; \
