@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <getopt.h>
 
+#include <config.h>
 #include <kerrighed.h>
 
 enum {
@@ -49,10 +50,20 @@ static struct option nodes_mode_options[] = {
 	{NULL, 0, NULL, 0}
 };
 
+void version(char * program_name)
+{
+  printf("\
+%s %s\n\
+Copyright (C) 2010 Kerlabs.\n\
+This is free software; see source for copying conditions. There is NO\n\
+warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
+\n", program_name, VERSION);
+}
+
 void help(char * program_name)
 {
 	printf("\
-Usage: %s -h,--help\n\
+Usage: %s [-h|--help] [--version]\n\
   or:  %s cluster {start|status|wait_start|poweroff|reboot}\n\
   or:  %s nodes status [-n|--nodes]\n\
   or:  %s nodes {add|del} {(-n|--nodes node_list) | (-c|--count node_count) | (-a|--all)}\n",
@@ -80,6 +91,14 @@ Node Status:\n\
   present           available for integrating the cluster\n\
   online            participating in the cluster\n\
 \n");
+}
+
+int check_kerrighed(void)
+{
+  if (krg_hotplug_init() == -1)
+    return -1;
+  else
+    return 0;
 }
 
 char* node_set_str(struct krg_node_set* node_set)
@@ -579,6 +598,11 @@ int cluster(int argc, char* argv[], char* program_name)
 	int ret = EXIT_SUCCESS;
 	int r;
 
+	if ( check_kerrighed() == -1 ) {
+	  perror("can not initialize libkerrighed");
+	  return EXIT_FAILURE;
+	}
+
 	if(argc == 0 || ! strcmp(*argv, "status"))
 		action = STATUS;
 	else if(! strcmp(*argv, "start"))
@@ -669,6 +693,11 @@ int nodes(int argc, char* argv[], char* program_name)
 	int nb_nodes = NB_NODES_UNSET;
 	int action = NONE;
 
+	if ( check_kerrighed() == -1 ) {
+	  perror("libkerrighed initialization failed");
+	  return EXIT_FAILURE;
+	}
+
 	if(argc == 0 || !strcmp(*argv, "status")) {
 		action = STATUS;
 	} else if(! strcmp(*argv, "add"))
@@ -757,18 +786,13 @@ int main(int argc, char* argv[])
 	int count;
 	int ret = EXIT_SUCCESS;
 
-	if (krg_hotplug_init() == -1) {
-		printf("Must be run inside a Kerrighed container: %s", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
 	arg = argv;
 	count = argc;
 	program_name = argv[0];
 
 	if(argc == 1){
-		help(program_name);
-		exit(EXIT_SUCCESS);
+	  help(program_name);
+	  exit(EXIT_SUCCESS);
 	}
 
 	opterr = 0;
@@ -780,6 +804,8 @@ int main(int argc, char* argv[])
 		ret = cluster(count-1, arg+1, program_name);
 	else if (! strcmp(argv[1], "nodes"))
 		ret = nodes(count-1, arg+1, program_name);
+	else if (! strcmp(argv[1], "--version") )
+	  version(program_name);
 	else
 		help(program_name);
 
