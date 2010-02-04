@@ -32,4 +32,4 @@ ISOLATE_USER=false
 # Userspace application to use as local init process in the Kerrighed container
 # Something else may be used on the node starting the cluster.
 # krginit_helper has his configuration in /etc/kerrighed/krginit_helper.conf
-CLUSTER_INIT_HELPER=@bindir@/krginit_helper
+CLUSTER_INIT_HELPER=@sbindir@/krginit_helper

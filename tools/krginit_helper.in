@@ -4,7 +4,7 @@ set -e
 
 KRG_ROOT=/
 # Path inside $KRG_ROOT
-KRGINIT=@bindir@/krginit
+KRGINIT=@sbindir@/krginit
 
 . @sysconfdir@/kerrighed/krginit_helper.conf
 
