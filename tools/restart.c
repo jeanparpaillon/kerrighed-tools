@@ -18,10 +18,6 @@
 #include <kerrighed.h>
 #include <libkrgcb.h>
 
-#define CHKPT_DIR "/var/chkpt"
-
-long appid;
-int version;
 int flags = 0;
 pid_t root_pid = 0;
 int options = 0;
@@ -38,9 +34,8 @@ const int ARRAY_SIZE_INC = 32;
 void show_help()
 {
 	printf ("Restart an application\nusage: restart [-h]"
-		" [-f|-t] [-q] [-d] [-p] id version\n");
+		" [-f|-t] [-q] [-d] [-p] [-s filekey,fd] directory\n");
 	printf ("  -h : This help\n");
-	exit(1);
 }
 
 char *__get_returned_word(const char *toexec)
@@ -245,9 +240,8 @@ out:
 	return r;
 }
 
-int parse_args(int argc, char *argv[])
+int parse_args(int argc, char *argv[], char **storage_dir)
 {
-	char *checkpoint_dir;
 	char c;
 	int r, option_index = 0;
 	char * short_options= "hftps:qd";
@@ -305,24 +299,27 @@ int parse_args(int argc, char *argv[])
 		}
 	}
 
-	if (argc - optind != 2) {
+	if (argc - optind != 1) {
 		show_help();
-		exit(EXIT_FAILURE);
+		r = -EINVAL;
+		goto exit;
 	}
 
-	appid = atol(argv[optind]);
-	version = atoi(argv[optind+1]);
-	asprintf(&checkpoint_dir, CHKPT_DIR "/%ld/v%d/", appid, version);
+	*storage_dir = canonicalize_file_name(argv[optind]);
+	if (!*storage_dir) {
+		r = -errno;
+		perror(argv[optind]);
+		goto exit;
+	}
 
 	if (options & STDIN_OUT_ERR)
-		r = replace_stdin_stdout_stderr(checkpoint_dir);
+		r = replace_stdin_stdout_stderr(*storage_dir);
 
-	free(checkpoint_dir);
-
+exit:
 	return r;
 }
 
-void show_error(int _errno)
+void show_error(long appid, int _errno)
 {
 	switch (_errno) {
 	case E_CR_APPBUSY:
@@ -338,7 +335,8 @@ void show_error(int _errno)
 			"(corrupted or wrong kernel version)\n");
 		break;
 	default:
-		perror("restart");
+		fprintf(stderr, "restart: %s\n", strerror(_errno));
+		break;
 	}
 }
 
@@ -378,43 +376,34 @@ void wait_application_exits()
 
 void check_environment(void)
 {
-	struct stat buffer;
-	int status;
-
 	/* is Kerrighed launched ? */
-	if (get_nr_nodes() == -1)
-	{
+	if (get_nr_nodes() == -1) {
 		fprintf(stderr, "no kerrighed nodes found\n");
 		exit(-EPERM);
-	}
-
-	/* /var/chkpt exists ? */
-	status = stat(CHKPT_DIR, &buffer);
-	if (status) {
-		perror(CHKPT_DIR);
-		exit(-ENOENT);
 	}
 }
 
 int main(int argc, char *argv[])
 {
+	long appid;
 	int r = 0;
+	char *storage_dir = NULL;
 
 	/* Check environment */
 	check_environment();
 
 	/* Manage options with getopt */
-	r = parse_args(argc, argv);
+	r = parse_args(argc, argv, &storage_dir);
 	if (r)
 		goto exit;
 
 	if (!(options & QUIET))
-		printf("Restarting application %ld (v%d) ...\n",
-		       appid, version);
+		printf("Restarting application from %s...\n",
+		       storage_dir);
 
-	r = application_restart(appid, version, flags, &substitution);
+	r = application_restart(storage_dir, &appid, flags, &substitution);
 	if (r < 0) {
-		show_error(errno);
+		show_error(appid, errno);
 		goto exit;
 	}
 
@@ -442,6 +431,9 @@ int main(int argc, char *argv[])
 		wait_application_exits();
 
 exit:
+	if (storage_dir)
+		free(storage_dir);
+
 	clean_file_substitution(&substitution);
 
 	if (r)
