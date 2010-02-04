@@ -130,7 +130,7 @@ operates.
    --disable-libkerrighed  Disable libkerrighed [default=enable]
    --disable-python	   Disable Python code [default=enable]
    --disable-tools	   Disable tools [default=enable]
-   --enable-kerrighed-host Enable Kerrighed host service [default=disable]
+   --enable-host-tools      Enable Kerrighed host service [default=disable]
    --enable-tests	   Globally enable tests [default=disable]
    --disable-tests-ktp	   Disable 'ktp' tests
    --disable-tests-apps	   Disable 'apps' tests
