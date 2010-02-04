@@ -144,7 +144,8 @@ int application_unfreeze_from_pid(pid_t pid, int signal)
 	return r;
 }
 
-struct checkpoint_info application_checkpoint_from_appid(long app_id, int flags)
+struct checkpoint_info application_checkpoint_from_appid(
+	long app_id, int flags, const char *storage_dir)
 {
 	struct checkpoint_info ckpt_info;
 
@@ -152,13 +153,16 @@ struct checkpoint_info application_checkpoint_from_appid(long app_id, int flags)
 	ckpt_info.chkpt_sn = 0;
 	ckpt_info.flags = flags;
 	ckpt_info.signal = 0;
+	ckpt_info.storage_dir.len = strlen(storage_dir) + 1;
+	ckpt_info.storage_dir.path = storage_dir;
 	ckpt_info.result = call_kerrighed_services(KSYS_APP_CHKPT,
-						    &ckpt_info);
+						   &ckpt_info);
 
 	return ckpt_info;
 }
 
-struct checkpoint_info application_checkpoint_from_pid(pid_t pid, int flags)
+struct checkpoint_info application_checkpoint_from_pid(
+	pid_t pid, int flags, const char *storage_dir)
 {
 	struct checkpoint_info ckpt_info;
 
@@ -166,23 +170,25 @@ struct checkpoint_info application_checkpoint_from_pid(pid_t pid, int flags)
 	ckpt_info.chkpt_sn = 0;
 	ckpt_info.flags = flags | APP_FROM_PID;
 	ckpt_info.signal = 0;
+	ckpt_info.storage_dir.len = strlen(storage_dir) + 1;
+	ckpt_info.storage_dir.path = storage_dir;
 	ckpt_info.result = call_kerrighed_services(KSYS_APP_CHKPT,
-						    &ckpt_info);
+						   &ckpt_info);
 
 	return ckpt_info;
 }
 
-int application_restart(long app_id, int chkpt_sn, int flags,
+int application_restart(const char *storage_dir, long *app_id, int flags,
 			struct cr_subst_files_array *substitution)
 {
 	int res, i;
 	struct restart_request rst_req;
 	size_t subst_str_len;
 
-	rst_req.app_id = app_id;
-	rst_req.chkpt_sn = chkpt_sn;
+	rst_req.app_id = 0;
 	rst_req.flags = flags;
-
+	rst_req.storage_dir.len = strlen(storage_dir) + 1;
+	rst_req.storage_dir.path = storage_dir;
 	rst_req.substitution = *substitution;
 
 	if (rst_req.substitution.nr) {
@@ -204,8 +210,10 @@ int application_restart(long app_id, int chkpt_sn, int flags,
 		goto err_inval;
 
 	res = call_kerrighed_services(KSYS_APP_RESTART, &rst_req);
-	if (!res)
+	if (!res) {
 		res = rst_req.root_pid;
+		*app_id = rst_req.app_id;
+	}
 
 error:
 	return res;

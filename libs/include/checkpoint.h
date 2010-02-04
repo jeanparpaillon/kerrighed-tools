@@ -11,6 +11,12 @@
 #define APP_FROM_PID		1
 #define CKPT_W_UNSUPPORTED_FILE	2
 
+struct cstr
+{
+	size_t len; /* including the final \0 */
+	const char *path;
+};
+
 struct checkpoint_info
 {
 	long app_id;
@@ -21,6 +27,8 @@ struct checkpoint_info
 	int result;
 
 	int signal;
+
+	struct cstr storage_dir;
 };
 
 struct cr_subst_file
@@ -38,9 +46,10 @@ struct cr_subst_files_array
 struct restart_request
 {
 	long app_id;
-	int chkpt_sn;
 	int flags;
 	pid_t root_pid;
+
+	struct cstr storage_dir;
 
 	struct cr_subst_files_array substitution;
 };

@@ -2,6 +2,7 @@
  *  Copyright (C) 2001-2006, INRIA, Universite de Rennes 1, EDF.
  */
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -38,12 +39,12 @@ void show_help(void)
 	printf("Usage : \n"
 	       "checkpoint [-h]:\t print this help\n"
 	       "checkpoint [-b --no-callbacks] [(-d|--description) description] [(-k|--kill)[signal]] "
-	       "<pid> | -a <appid> :"
-	       "\t checkpoint a running application\n"
+	       "<pid> | -a <appid> DIRECTORY:"
+	       "\t checkpoint a running application and store checkpoint in DIRECTORY\n"
 	       "checkpoint  [-b --no-callbacks] -f|--freeze <pid>| -a <appid> :\t freeze an application\n"
 	       "checkpoint  [-b --no-callbacks] -u|--unfreeze[=signal] <pid>| -a <appid> :\t unfreeze an application\n"
 	       "checkpoint -c|--ckpt-only [(-d|--description) description] <pid> | -a <appid> :"
-	       "\t checkpoint a frozen application\n"
+	       "\t checkpoint a frozen application and store checkpoint in DIRECTORY\n"
 	       );
 }
 
@@ -113,49 +114,40 @@ void parse_args(int argc, char *argv[])
 	}
 }
 
-
 void check_environment(void)
 {
-	struct stat buffer;
-	int status;
-
 	/* is Kerrighed launched ? */
 	if (get_nr_nodes() == -1)
 	{
 		fprintf(stderr, "no kerrighed nodes found\n");
 		exit(-EPERM);
 	}
-
-	/* /var/chkpt exists ? */
-	status = stat(CHKPT_DIR, &buffer);
-	if (status) {
-		perror(CHKPT_DIR);
-		exit(-ENOENT);
-	}
 }
 
 int write_description(char *description,
-		      struct checkpoint_info *info)
+		      struct checkpoint_info *info,
+		      const char *storage_dir,
+		      short _quiet)
 {
 	FILE* fd;
-	char path[256];
+	char path[PATH_MAX];
 	time_t date = time(NULL);
 
 	if (!description)
 		description = "No description";
 
-	printf("Identifier: %ld\n"
-	       "Version: %d\n"
-	       "Description: %s\n"
-	       "Date: %s\n",
-	       info->app_id,
-	       info->chkpt_sn,
-	       description,
-	       ctime(&date));
+	if (!_quiet)
+		printf("Identifier: %ld\n"
+		       "Version: %d\n"
+		       "Description: %s\n"
+		       "Date: %s\n",
+		       info->app_id,
+		       info->chkpt_sn,
+		       description,
+		       ctime(&date));
 
-	// need to write it in a file
-	sprintf(path, "%s/%ld/v%d/description.txt", CHKPT_DIR,
-		info->app_id, info->chkpt_sn);
+	/* need to write it in a file */
+	snprintf(path, PATH_MAX, "%s/description.txt", storage_dir);
 
 	fd = fopen(path, "a");
 	if (!fd) {
@@ -189,64 +181,21 @@ void show_error(int _errno)
 	}
 }
 
-void clean_checkpoint_dir(struct checkpoint_info *info)
+void clean_checkpoint_dir(struct checkpoint_info *info,
+			  const char *storage_dir)
 {
-	DIR *dir;
-	struct dirent *ent;
-	char path[256];
-	int r;
+	/* we cannot clean the checkpoint dir easily since it has been
+	 *  given by the user.
+	 * There may be some files unrelated with current checkpoint.
+	 */
 
-	if (!info->chkpt_sn)
-		return;
-
-	/* to refresh NFS cache... */
-	dir = opendir(CHKPT_DIR);
-	if (!dir) {
-		perror("opendir");
-		return;
-	}
-	closedir(dir);
-
-	sprintf(path, "%s/%ld/", CHKPT_DIR, info->app_id);
-	dir = opendir(path);
-	if (!dir) {
-		perror("opendir");
-		return;
-	}
-	closedir(dir);
-
-	sprintf(path, "%s/%ld/v%d/", CHKPT_DIR,
-		info->app_id, info->chkpt_sn);
-
-	/* remove the file and directory */
-	dir = opendir(path);
-	if (!dir) {
-		perror("opendir");
-		return;
-	}
-
-	while ((ent = readdir(dir)) != NULL) {
-		if (ent->d_type == DT_REG) {
-			sprintf(path, "%s/%ld/v%d/%s", CHKPT_DIR,
-				info->app_id, info->chkpt_sn, ent->d_name);
-			r = remove(path);
-			if (r)
-				perror("remove");
-		}
-	}
-	closedir(dir);
-
-	sprintf(path, "%s/%ld/v%d/", CHKPT_DIR,
-		info->app_id, info->chkpt_sn);
-	r = remove(path);
-	if (r)
-		perror("remove");
-
-	sprintf(path, "%s/%ld/", CHKPT_DIR, info->app_id);
-	remove(path);
+	fprintf(stderr,
+		"WARNING: checkpoint has failed. Some files may be left"
+		"in the directory %s.\n", storage_dir);
 }
 
-int checkpoint_app(long pid, int flags, short _quiet)
+int checkpoint_app(long pid, int flags, const char *storage_dir,
+		   short _quiet)
 {
 	int r;
 
@@ -255,21 +204,23 @@ int checkpoint_app(long pid, int flags, short _quiet)
 		if (!_quiet)
 			printf("Checkpointing application %ld...\n", pid);
 
-		info = application_checkpoint_from_appid(pid, flags);
+		info = application_checkpoint_from_appid(pid, flags,
+							 storage_dir);
 	} else {
 		if (!_quiet)
 			printf("Checkpointing application in which "
 			       "process %d is involved...\n", (pid_t)pid);
-		info = application_checkpoint_from_pid((pid_t)pid, flags);
+		info = application_checkpoint_from_pid((pid_t)pid, flags,
+						       storage_dir);
 	}
 
 	r = info.result;
 
 	if (!r)
-		write_description(description, &info);
+		write_description(description, &info, storage_dir, _quiet);
 	else {
 		show_error(errno);
-		clean_checkpoint_dir(&info);
+		clean_checkpoint_dir(&info, storage_dir);
 	}
 
 	return r;
@@ -346,14 +297,15 @@ err:
 	return r;
 }
 
-int freeze_checkpoint_unfreeze(long pid, int flags, int signal, short _quiet)
+int freeze_checkpoint_unfreeze(long pid, int flags, const char *storage_dir,
+			       int signal, short _quiet)
 {
 	int r;
 
 	r = freeze_app(pid, _quiet);
 	if (r)
 		goto err_freeze;
-	r = checkpoint_app(pid, flags, _quiet);
+	r = checkpoint_app(pid, flags, storage_dir, _quiet);
 	if (r)
 		goto err_chkpt;
 	r = unfreeze_app(pid, signal, _quiet);
@@ -371,6 +323,7 @@ int main(int argc, char *argv[])
 {
 	int r = 0;
 	long pid = -1;
+	char *storage_dir = NULL;
 
 	/* Check environment */
 	check_environment();
@@ -378,9 +331,24 @@ int main(int argc, char *argv[])
 	/* Manage options with getopt */
 	parse_args(argc, argv);
 
-	if (argc - optind != 1) {
+	if (action == ALL || action == CHECKPOINT) {
+		if (argc - optind != 2) {
+			show_help();
+			r = -EINVAL;
+			goto exit;
+		}
+
+		storage_dir = canonicalize_file_name(argv[optind+1]);
+		if (!storage_dir) {
+			r = errno;
+			perror(argv[optind+1]);
+			goto exit;
+		}
+
+	} else if (argc - optind != 1) {
 		show_help();
-		exit(EXIT_FAILURE);
+		r = -EINVAL;
+		goto exit;
 	}
 
 	/* get the pid */
@@ -392,7 +360,7 @@ int main(int argc, char *argv[])
 
 	switch (action) {
 	case CHECKPOINT:
-		r = checkpoint_app(pid, flags, quiet);
+		r = checkpoint_app(pid, flags, storage_dir, quiet);
 		break;
 	case FREEZE:
 		r = freeze_app(pid, quiet);
@@ -401,11 +369,15 @@ int main(int argc, char *argv[])
 		r = unfreeze_app(pid, sig, quiet);
 		break;
 	case ALL:
-		r = freeze_checkpoint_unfreeze(pid, flags, sig, quiet);
+		r = freeze_checkpoint_unfreeze(pid, flags, storage_dir,
+					       sig, quiet);
 		break;
 	}
 
 exit:
+	if (storage_dir)
+		free(storage_dir);
+
 	if (r)
 		exit(EXIT_FAILURE);
 
