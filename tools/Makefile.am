@@ -40,11 +40,15 @@ edit = sed \
         -e 's|@prefix[@]|$(prefix)|g' \
         -e 's|@sysconfdir[@]|$(sysconfdir)|g'
 
+if ENABLE_PRESERVE_CONF
+preserve = -p
+endif
+
 install-data-local: krginit_helper.conf kerrighed.completion kerrighed.init kerrighed.default
-	$(install_sh_DATA) $(srcdir)/krginit_helper.conf $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf
+	$(install_sh_DATA) $(preserve) $(srcdir)/krginit_helper.conf $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf
 	$(install_sh_DATA) $(srcdir)/kerrighed.completion $(DESTDIR)$(sysconfdir)/bash_completion.d/kerrighed
 	$(install_sh_SCRIPT) $(srcdir)/kerrighed.init $(DESTDIR)$(sysconfdir)/init.d/kerrighed
-	$(install_sh_DATA) $(srcdir)/kerrighed.default $(DESTDIR)$(sysconfdir)/default/kerrighed
+	$(install_sh_DATA) $(preserve) $(srcdir)/kerrighed.default $(DESTDIR)$(sysconfdir)/default/kerrighed
 
 uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf

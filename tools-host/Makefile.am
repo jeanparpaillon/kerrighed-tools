@@ -28,11 +28,15 @@ edit = sed \
         -e 's|@prefix[@]|$(prefix)|g' \
         -e 's|@sysconfdir[@]|$(sysconfdir)|g'
 
+if ENABLE_PRESERVE_CONF
+preserve = -p
+endif
+
 all-local: kerrighed-host.default
 
 install-data-local: kerrighed-host.init kerrighed-host.default
 	$(install_sh_SCRIPT) $(srcdir)/kerrighed-host.init $(DESTDIR)$(sysconfdir)/init.d/kerrighed-host
-	$(install_sh_DATA) $(builddir)/kerrighed-host.default $(DESTDIR)$(sysconfdir)/default/kerrighed-host
+	$(install_sh_DATA) $(preserve) $(builddir)/kerrighed-host.default $(DESTDIR)$(sysconfdir)/default/kerrighed-host
 
 uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/init.d/kerrighed-host
