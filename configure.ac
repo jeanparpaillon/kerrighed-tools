@@ -184,6 +184,13 @@ AC_ARG_ENABLE([host-tools],
               [],
               [enable_host_tools="yes"])
 AM_CONDITIONAL([ENABLE_HOST_TOOLS], [test "$enable_host_tools" = "yes"])
+
+AC_ARG_ENABLE([preserve-conf],
+              [AS_HELP_STRING([--enable-preserve-conf],
+                              [Preserve configuration files if exist @<:@default=disable@:>@])],
+              [],
+              [enable_preserve_conf="no"])
+AM_CONDITIONAL([ENABLE_PRESERVE_CONF], [test "$enable_preserve_conf" = "yes"])
 ###
 ### END TOOLS CHECK
 ###
