@@ -48,7 +48,15 @@ d_check_kerrighed() {
 # Start the Kerrighed container
 #
 d_start_container() {
+    if test -n "$NEWVT"; then
+	CURVT=$(fgconsole 2> /dev/null || true)
+	test -n "$CURVT" && chvt $(fgconsole --next-available)
+    fi
     krgboot_helper
+    ret=$?
+    test -n "$CURVT" && chvt $CURVT
+
+    return $ret
 }
 
 #
@@ -70,13 +78,17 @@ d_start() {
     log_progress_msg "cluster_init"
     echo -n $CLUSTER_INIT_HELPER > /sys/kerrighed/hotplug/cluster_init_helper || log_progress_msg "(failed)"
 
+    log_progress_msg "container"
     if test "$(cat /sys/kerrighed/node_id)" = "$BOOT_ID"; then
-	d_start_container
+	if ! d_start_container; then
+	    log_progress_msg "(failed)"
+	    STATUS=1
+	fi
     else
 	log_progress_msg "this node is not the initializer"
     fi
 
-    return $?
+    return ${STATUS:-0}
 }
 
 d_set_isolate_ns() {
