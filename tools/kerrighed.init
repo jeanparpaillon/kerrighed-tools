@@ -78,7 +78,18 @@ d_start() {
     fi
 
     log_progress_msg "scheduler"
-    d_trigger_krg_legacy_scheduler &
+    case "x$LEGACY_SCHED" in
+	xtrue)
+	    d_trigger_krg_legacy_scheduler &
+	    ;;
+	xfalse)
+	    log_progress_msg "disabled in $CFG"
+	    ;;
+	*)
+	    log_progress_msg "value of LEGACY_SCHED in $CFG must be either 'true' or 'false'"
+	    STATUS=1
+	    ;;
+    esac
 
     log_end_msg ${STATUS:-0}
     return $?
