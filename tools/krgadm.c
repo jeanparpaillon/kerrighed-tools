@@ -146,7 +146,7 @@ int parse_nodes_interval(char *ch, struct krg_node_set *node_set)
 	for(node = node1; node <= node2; node++)
 		krg_node_set_add(node_set, node);
 
- exit:
+exit:
 	return r;
 }
 
@@ -174,7 +174,7 @@ int parse_nodes(char *ch, struct krg_node_set *node_set)
 		if ((r = parse_node(ch, node_set)) == -1)
 			goto exit;
 
- exit:
+exit:
 	return r;
 }
 
@@ -229,7 +229,7 @@ int wait_for_nodes_count(int i, struct krg_node_set* node_set)
 
 	krg_nodes_destroy(status);
 
- exit:
+exit:
 	if (r == 0)
 		printf(" done\n");
 	else
@@ -281,7 +281,7 @@ int wait_for_nodes(struct krg_node_set* node_set)
 
 	} while (! done);
 
- exit:
+exit:
 	if (r == 1)
 		printf(" done\n");
 	else
@@ -310,7 +310,7 @@ int nodes_status(struct krg_node_set* node_set, int nb_nodes)
 	}
 
 	if (nb_nodes == -1) {
-		// If not specified add all nodes with status PRESENT or ONLINE
+		/* If not specified add all nodes with status PRESENT or ONLINE */
 		node_set = krg_node_set_create();
 		for (bcl = 0; bcl < kerrighed_max_nodes; bcl++) {
 			if (status->nodes[bcl] > HOTPLUG_NODE_POSSIBLE)
@@ -356,7 +356,7 @@ int nodes_add(struct krg_node_set* node_set, int nb_nodes)
 
 	switch (nb_nodes) {
 	case NB_NODES_ALL:
-		// add all PRESENT nodes
+		/* add all PRESENT nodes */
 		node_set = krg_nodes_get_present(status);
 		if (! node_set) {
 			errno = ENOMEM;
@@ -370,7 +370,7 @@ int nodes_add(struct krg_node_set* node_set, int nb_nodes)
 			return -1;
 		break;
 	default:
-		// If 'count' specified, wait for nodes to be present
+		/* If 'count' specified, wait for nodes to be present */
 		if (nb_nodes < 1)
 			return -1;
 
@@ -413,14 +413,14 @@ int nodes_remove(struct krg_node_set* node_set, int nb_nodes)
 	}
 
 	if (nb_nodes == NB_NODES_ALL) {
-		// remove all nodes except current
+		/* remove all nodes except current */
 		node_set = krg_node_set_create();
 		for (bcl = 0; bcl < kerrighed_max_nodes; bcl++) {
 			if (krg_nodes_is_online(status, bcl) && get_node_id() != bcl)
 				krg_node_set_add(node_set, bcl);
 		}
 	} else if (nb_nodes == NB_NODES_LIST) {
-		// If list of nodes specified, check they are 'online', and not the current one
+		/* If list of nodes specified, check they are 'online', and not the current one */
 		node = krg_node_set_next(node_set, -1);
 		while (node != -1) {
 			if (! krg_nodes_is_online(status, node)) {
@@ -433,7 +433,7 @@ int nodes_remove(struct krg_node_set* node_set, int nb_nodes)
 			node = krg_node_set_next(node_set, node);
 		}
 	} else if (nb_nodes > 0) {
-		// If 'count' specified, remove 'nb_nodes' first online nodes
+		/* If 'count' specified, remove 'nb_nodes' first online nodes */
 		node_set = krg_nodes_get_online(status);
 		if (nb_nodes < krg_node_set_weight(node_set)) {
 			bcl = 0;
@@ -486,7 +486,7 @@ int cluster_status(void)
 		i = krg_nodes_num_online(krg_nodes_status());
 	}
 
- exit:
+exit:
 	krg_clusters_destroy(cluster_status);
 	return i;
 }
@@ -510,7 +510,7 @@ int cluster_start(int argc, char* argv[], char* program_name)
 	if (! node_set)
 		return -1;
 
-	// Start cluster with current node
+	/* Start cluster with current node */
 	krg_node_set_add(node_set, get_node_id());
 
 	printf("Starting cluster with node %d... ", get_node_id());
@@ -522,7 +522,7 @@ int cluster_start(int argc, char* argv[], char* program_name)
 
 	krg_node_set_clear(node_set);
 
-	// Add other nodes, if asked for
+	/* Add other nodes, if asked for */
 	while ((c = getopt_long(argc, argv, "n:c:",
 				cluster_start_options, &option_index)) != -1) {
 		switch (c) {
@@ -536,7 +536,7 @@ int cluster_start(int argc, char* argv[], char* program_name)
 			if (parse_nodes(optarg, node_set) == -1)
 				return -1;
 
-			// If only asked for current nodes, it's already done
+			/* If only asked for current nodes, it's already done */
 			if (krg_node_set_weight(node_set) == 1 && krg_node_set_contains(node_set, get_node_id()))
 				return 0;
 			break;
@@ -553,7 +553,7 @@ int cluster_start(int argc, char* argv[], char* program_name)
 				return -1;
 			}
 
-			// Remove 1 as cluster is already started with one node
+			/* Remove 1 as cluster is already started with one node */
 			if (--nb_nodes == 0)
 				return 0;
 			break;
@@ -594,18 +594,18 @@ int cluster(int argc, char* argv[], char* program_name)
 	case STATUS:
 		printf("status: ");
 		r = cluster_status();
-			switch(r){
-			case -1:
-				printf("error\n");
-				ret = EXIT_FAILURE;
-				break;
-			case 0:
-				printf("down\n");
-				break;
-			default:
-				printf("up on %d nodes\n", r);
-			}
+		switch(r){
+		case -1:
+			printf("error\n");
+			ret = EXIT_FAILURE;
 			break;
+		case 0:
+			printf("down\n");
+			break;
+		default:
+			printf("up on %d nodes\n", r);
+		}
+		break;
 	case START:
 		r = cluster_start(argc, argv, program_name);
 		if (r == -1)
@@ -650,7 +650,7 @@ int cluster(int argc, char* argv[], char* program_name)
 			} else
 				printf("done\n");
 		}
-	break;
+		break;
 	default:
 		help(program_name);
 	}
