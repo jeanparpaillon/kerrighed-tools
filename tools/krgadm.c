@@ -23,21 +23,29 @@ enum {
 	REBOOT,
 };
 
+enum {
+	NB_NODES_UNSET = -2,
+	NB_NODES_ALL   = -1,
+	NB_NODES_LIST  = 0,
+};
+
 #define NODE_SEP ','
 #define NODE_RANGE_SEP '-'
 #define POLL_NODES 1
 #define NODES_OPTION "nodes", required_argument, NULL, 'n'
-#define AUTO_OPTION "auto", required_argument,NULL, 'a'
+#define COUNT_OPTION "count", required_argument, NULL, 'c'
+#define ALL_OPTION "all", no_argument, NULL, 'a'
 
 static struct option cluster_start_options[] = {
 	{NODES_OPTION},
-	{AUTO_OPTION},
+	{COUNT_OPTION},
 	{NULL, 0, NULL, 0}
 };
 
 static struct option nodes_mode_options[] = {
 	{NODES_OPTION},
-	{AUTO_OPTION},
+	{COUNT_OPTION},
+	{ALL_OPTION},
 	{NULL, 0, NULL, 0}
 };
 
@@ -47,7 +55,7 @@ void help(char * program_name)
 Usage: %s -h,--help\n\
   or:  %s cluster {start|status|wait_start|poweroff|reboot}\n\
   or:  %s nodes status [-n|--nodes]\n\
-  or:  %s nodes {add|del} [-n|--nodes] [-a|--auto]\n",
+  or:  %s nodes {add|del} {(-n|--nodes node_list) | (-c|--count node_count) | (-a|--all)}\n",
 	       program_name, program_name, program_name, program_name);
 	printf("\n\
 Cluster Mode:\n\
@@ -65,7 +73,8 @@ Nodes Mode:\n\
 Options:\n\
   -n, --nodes       list of nodes to apply action to\n\
                     ie: 2,3,6-10,42-45\n\
-  -a, --auto        number of nodes to apply action to\n\
+  -c, --count       number of nodes to apply action to\n\
+  -a, --all         apply to all nodes\n\
 \n\
 Node Status:\n\
   present           available for integrating the cluster\n\
@@ -328,16 +337,15 @@ int nodes_status(struct krg_node_set* node_set, int nb_nodes)
 /*
  * nodes_add
  *
- * If nb_nodes<0, add all PRESENT nodes
- * If nb_nodes==0, add nodes in node_set
- * If nb_nodes>0, wait for nb_nodes nodes to be PRESENT, then add them
+ * If nb_nodes == NB_NODES_ALL, add all PRESENT nodes
+ * If nb_nodes == NB_NODES_LIST, add nodes in node_set
+ * If nb_nodes > 0, wait for nb_nodes nodes to be PRESENT, then add them
  *
  * Return 0 on success, -1 on failure
  */
 int nodes_add(struct krg_node_set* node_set, int nb_nodes)
 {
 	struct krg_nodes* status;
-	//int node, r = 0;
 	int r = 0;
 
 	status = krg_nodes_status();
@@ -347,8 +355,8 @@ int nodes_add(struct krg_node_set* node_set, int nb_nodes)
 	}
 
 	switch (nb_nodes) {
-	case -1:
-		// If not specified add all PRESENT nodes
+	case NB_NODES_ALL:
+		// add all PRESENT nodes
 		node_set = krg_nodes_get_present(status);
 		if (! node_set) {
 			errno = ENOMEM;
@@ -357,12 +365,15 @@ int nodes_add(struct krg_node_set* node_set, int nb_nodes)
 			return -1;
 		}
 		break;
-	case 0:
+	case NB_NODES_LIST:
 		if (wait_for_nodes(node_set) == -1)
 			return -1;
 		break;
 	default:
-		// If 'auto' specified, wait for nodes to be present
+		// If 'count' specified, wait for nodes to be present
+		if (nb_nodes < 1)
+			return -1;
+
 		node_set = krg_node_set_create();
 		if (wait_for_nodes_count(nb_nodes, node_set) == -1)
 			return -1;
@@ -384,9 +395,9 @@ int nodes_add(struct krg_node_set* node_set, int nb_nodes)
 /*
  * nodes_remove
  *
- * If nb_nodes<0, remove all ONLINE nodes except current one
- * If nb_nodes==0, remove nodes in node_set
- * If nb_nodes>0, remove nb_nodes ONLINE nodes
+ * If nb_nodes == NB_NODES_ALL, remove all ONLINE nodes except current one
+ * If nb_nodes == NB_NODES_LIST, remove nodes in node_set
+ * If nb_nodes > 0, remove nb_nodes ONLINE nodes
  *
  * Return 0 on success, -1 on failure
  */
@@ -401,14 +412,14 @@ int nodes_remove(struct krg_node_set* node_set, int nb_nodes)
 		return -1;
 	}
 
-	if (nb_nodes == -1) {
-		// If not specified, remove all nodes except current
+	if (nb_nodes == NB_NODES_ALL) {
+		// remove all nodes except current
 		node_set = krg_node_set_create();
 		for (bcl = 0; bcl < kerrighed_max_nodes; bcl++) {
 			if (krg_nodes_is_online(status, bcl) && get_node_id() != bcl)
 				krg_node_set_add(node_set, bcl);
 		}
-	} else if (nb_nodes == 0) {
+	} else if (nb_nodes == NB_NODES_LIST) {
 		// If list of nodes specified, check they are 'online', and not the current one
 		node = krg_node_set_next(node_set, -1);
 		while (node != -1) {
@@ -422,7 +433,7 @@ int nodes_remove(struct krg_node_set* node_set, int nb_nodes)
 			node = krg_node_set_next(node_set, node);
 		}
 	} else if (nb_nodes > 0) {
-		// If 'auto' specified, remove 'nb_nodes' first online nodes
+		// If 'count' specified, remove 'nb_nodes' first online nodes
 		node_set = krg_nodes_get_online(status);
 		if (nb_nodes < krg_node_set_weight(node_set)) {
 			bcl = 0;
@@ -439,9 +450,10 @@ int nodes_remove(struct krg_node_set* node_set, int nb_nodes)
 			}
 		} else {
 			printf("Can not remove so much nodes. Aborting.\n");
-			return EXIT_FAILURE;
+			return -1;
 		}
-	}
+	} else
+		return -1;
 
 	if (krg_node_set_weight(node_set) > 0) {
 		printf("Removing nodes %s... ", node_set_str(node_set));
@@ -486,12 +498,12 @@ int cluster_start(int argc, char* argv[], char* program_name)
 {
 	struct krg_node_set* node_set;
 	int c, option_index;
-	int nb_nodes = -1;
+	int nb_nodes = NB_NODES_UNSET;
 	char* endptr;
 
 	if (cluster_status() > 0) {
 		errno = EALREADY;
-		return EXIT_FAILURE;
+		return -1;
 	}
 
 	node_set = krg_node_set_create();
@@ -511,16 +523,16 @@ int cluster_start(int argc, char* argv[], char* program_name)
 	krg_node_set_clear(node_set);
 
 	// Add other nodes, if asked for
-	while ((c = getopt_long(argc, argv, "n:a:",
-													cluster_start_options, &option_index)) != -1) {
+	while ((c = getopt_long(argc, argv, "n:c:",
+				cluster_start_options, &option_index)) != -1) {
 		switch (c) {
 		case 'n':
-			if (nb_nodes != -1) {
-				printf("--nodes and --auto are mutually exclusive. Aborting.\n");
-				return EXIT_FAILURE;
+			if (nb_nodes != NB_NODES_UNSET) {
+				printf("--nodes and --count are mutually exclusive. Aborting.\n");
+				return -1;
 			}
 
-			nb_nodes = 0;
+			nb_nodes = NB_NODES_LIST;
 			if (parse_nodes(optarg, node_set) == -1)
 				return -1;
 
@@ -528,10 +540,10 @@ int cluster_start(int argc, char* argv[], char* program_name)
 			if (krg_node_set_weight(node_set) == 1 && krg_node_set_contains(node_set, get_node_id()))
 				return 0;
 			break;
-		case 'a':
-			if (nb_nodes == 0) {
-				printf("--nodes and --auto are mutually exclusive. Aborting.\n");
-				return EXIT_FAILURE;
+		case 'c':
+			if (nb_nodes != NB_NODES_UNSET) {
+				printf("--nodes and --count are mutually exclusive. Aborting.\n");
+				return -1;
 			}
 
 			nb_nodes = strtol(optarg, &endptr, 10);
@@ -550,6 +562,10 @@ int cluster_start(int argc, char* argv[], char* program_name)
 			return 0;
 		}
 	}
+
+	/* Default for cluster start: start all available nodes */
+	if (nb_nodes == NB_NODES_UNSET)
+		nb_nodes = NB_NODES_ALL;
 
 	return nodes_add(node_set, nb_nodes);
 }
@@ -650,7 +666,7 @@ int nodes(int argc, char* argv[], char* program_name)
 	struct krg_node_set* node_set = NULL;
 	char* endptr;
 	int c, option_index;
-	int nb_nodes = -1;
+	int nb_nodes = NB_NODES_UNSET;
 	int action = NONE;
 
 	if(argc == 0 || !strcmp(*argv, "status")) {
@@ -660,25 +676,25 @@ int nodes(int argc, char* argv[], char* program_name)
 	else if(! strcmp(*argv, "del"))
 		action = DEL;
 
-	while ((c = getopt_long(argc, argv, "n:a:",
-													nodes_mode_options, &option_index)) != -1) {
+	while ((c = getopt_long(argc, argv, "n:c:a:",
+				nodes_mode_options, &option_index)) != -1) {
 		switch (c) {
 		case 'n':
-			if (nb_nodes != -1) {
-				printf("--nodes and --auto are mutually exclusive. Aborting.\n");
+			if (nb_nodes != NB_NODES_UNSET) {
+				printf("--nodes, --count and --all are mutually exclusive. Aborting.\n");
 				return EXIT_FAILURE;
 			}
-				
-			nb_nodes = 0;
+
+			nb_nodes = NB_NODES_LIST;
 			node_set = krg_node_set_create();
 			if (! node_set)
 				return EXIT_FAILURE;
 			if (parse_nodes(optarg, node_set) == -1)
 				return EXIT_FAILURE;
 			break;
-		case 'a':
-			if (nb_nodes == 0) {
-				printf("--nodes and --auto are mutually exclusive. Aborting.\n");
+		case 'c':
+			if (nb_nodes != NB_NODES_UNSET) {
+				printf("--nodes, --count and --all are mutually exclusive. Aborting.\n");
 				return EXIT_FAILURE;
 			}
 
@@ -693,10 +709,25 @@ int nodes(int argc, char* argv[], char* program_name)
 				return EXIT_FAILURE;
 			}
 			break;
+		case 'a':
+			if (nb_nodes != NB_NODES_UNSET) {
+				printf("--nodes, --count and --all are mutually exclusive. Aborting.\n");
+				return EXIT_FAILURE;
+			}
+			nb_nodes = NB_NODES_ALL;
+			break;
 		default:
 			help(program_name);
 			return EXIT_FAILURE;
 		}
+	}
+
+	if (action == STATUS && nb_nodes == NB_NODES_UNSET)
+		nb_nodes = NB_NODES_ALL;
+
+	if (nb_nodes == NB_NODES_UNSET) {
+		help(program_name);
+		return EXIT_FAILURE;
 	}
 
 	switch (action) {
