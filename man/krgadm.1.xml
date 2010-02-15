@@ -33,38 +33,42 @@
       <command>krgadm</command>
       <arg choice="plain" >cluster start</arg>
       <group choice="opt" >
-				<arg choice="plain" >-n</arg>
-				<arg choice="plain" >--nodes</arg>
+	<arg choice="plain" >-n</arg>
+	<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
       </group>
       <group choice="opt">
-				<arg choice="plain" >-a</arg>
-				<arg choice="plain" >--auto</arg>
+	<arg choice="plain" >-c</arg>
+	<arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
       </group>
     </cmdsynopsis>
     <cmdsynopsis>
       <command>krgadm</command>
       <arg choice="plain">nodes status</arg>
       <group choice="opt" >
-				<arg choice="plain" >-n</arg>
-				<arg choice="plain" >--nodes</arg>
+	<arg choice="plain" >-n</arg>
+	<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
       </group>
-		</cmdsynopsis>
+    </cmdsynopsis>
     <cmdsynopsis>
       <command>krgadm</command>
       <arg choice="plain">nodes</arg>
       <group choice="req" >
-				<arg choice="plain">add</arg>
-				<arg choice="plain">del</arg>
+	<arg choice="plain">add</arg>
+	<arg choice="plain">del</arg>
       </group>
       <group choice="opt" >
-				<arg choice="plain" >-n</arg>
-				<arg choice="plain" >--nodes</arg>
+	<arg choice="plain" >-n</arg>
+	<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
       </group>
       <group choice="opt" >
-				<arg choice="plain" >-a</arg>
-				<arg choice="plain" >--auto</arg>
+	<arg choice="plain" >-c</arg>
+	<arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
       </group>
-		</cmdsynopsis>
+      <group choice="opt" >
+	<arg choice="plain" >-a</arg>
+	<arg choice="plain" >--all</arg>
+      </group>
+    </cmdsynopsis>
   </refsynopsisdiv>
 
   <refsect1>
@@ -124,11 +128,11 @@
 						<arg choice="plain" >start</arg>
 						<group choice="opt" >
 							<arg choice="plain" >-n</arg>
-							<arg choice="plain" >--nodes</arg>
+							<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
 						</group>
 						<group choice="opt" >
-							<arg choice="plain" >-a</arg>
-							<arg choice="plain" >--auto</arg>
+							<arg choice="plain" >-c</arg>
+							<arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
 						</group>
 					</term>
 					<listitem>
@@ -140,9 +144,13 @@
 							wait for a given list of nodes before starting.
 						</para>
 						<para>
-							With the <arg choice="plain" >--auto</arg> option, wait
+							With the <arg choice="plain" >--count</arg> option, wait
 							for the given number of nodes to be present before
 							starting.
+						</para>
+						<para>
+						  Options <arg choice="plain" >--nodes</arg> and <arg choice="plain" >--count</arg>
+						  are mutually exclusive.
 						</para>
 					</listitem>
 				</varlistentry>
@@ -183,7 +191,7 @@
 						<arg choice="plain" >status</arg>
 						<group choice="opt" >
 							<arg choice="plain" >-n</arg>
-							<arg choice="plain" >--nodes</arg>
+							<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
 						</group>
 					</term>
 					<listitem>
@@ -199,17 +207,20 @@
 						<arg choice="plain" >add</arg>
 						<group choice="opt" >
 							<arg choice="plain" >-n</arg>
-							<arg choice="plain" >--nodes</arg>
+							<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
+						</group>
+						<group choice="opt" >
+							<arg choice="plain" >-c</arg>
+							<arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
 						</group>
 						<group choice="opt" >
 							<arg choice="plain" >-a</arg>
-							<arg choice="plain" >--auto</arg>
+							<arg choice="plain" >--all</arg>
 						</group>
 					</term>
 					<listitem>
 						<para>
-							Add nodes to the running cluster. By default, add
-							all available nodes (state present).
+							Add nodes to the running cluster.
 						</para>
 						<para>
 							With the <arg choice="plain" >--nodes</arg> option, wait
@@ -217,9 +228,18 @@
 							running cluster.
 						</para>
 						<para>
-							With the <arg choice="plain" >--auto</arg> option, wait
+							With the <arg choice="plain" >--count</arg> option, wait
 							for the given number of nodes to be present, then add
 							them to the running cluster.
+						</para>
+						<para>
+							With the <arg choice="plain" >--all</arg> option, add
+							all the available node (state present) to the running
+							cluster.
+						</para>
+						<para>
+						  One of the options <arg choice="plain" >--nodes</arg>, <arg choice="plain" >--count</arg>
+						  or <arg choice="plain" >--all</arg> must be used.
 						</para>
 					</listitem>
 				</varlistentry>
@@ -228,17 +248,20 @@
 						<arg choice="plain" >del</arg>
 						<group choice="opt" >
 							<arg choice="plain" >-n</arg>
-							<arg choice="plain" >--nodes</arg>
+							<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
+						</group>
+						<group choice="opt" >
+							<arg choice="plain" >-c</arg>
+							<arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
 						</group>
 						<group choice="opt" >
 							<arg choice="plain" >-a</arg>
-							<arg choice="plain" >--auto</arg>
+							<arg choice="plain" >--all</arg>
 						</group>
 					</term>
 					<listitem>
 						<para>
-							Remove nodes from the running cluster. By default,
-							remove all nodes of the cluster, except current one.
+							Remove nodes from the running cluster.
 						</para>
 						<para>
 							With the <arg choice="plain" >--nodes</arg> option,
@@ -246,9 +269,17 @@
 							cluster.
 						</para>
 						<para>
-							With the <arg choice="plain" >--auto</arg> option,
+							With the <arg choice="plain" >--count</arg> option,
 							remove the given number of nodes from the cluster. Fail
 							if there are no such nodes.
+						</para>
+						<para>
+							With the <arg choice="plain" >--all</arg> option, remove
+							all nodes of the cluster, except current one.
+						</para>
+						<para>
+						  One of the options <arg choice="plain" >--nodes</arg>, <arg choice="plain" >--count</arg>
+						  or <arg choice="plain" >--all</arg> must be used.
 						</para>
 					</listitem>
 				</varlistentry>
@@ -287,6 +318,9 @@
     </para>
     <para>
       Jean Parpaillon <email>jean.parpaillon@kerlabs.com</email>
+    </para>
+    <para>
+      Matthieu Fertré <email>matthieu.fertre@kerlabs.com</email>
     </para>
   </refsect1>
 </refentry>
