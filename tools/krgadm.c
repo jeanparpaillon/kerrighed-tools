@@ -450,7 +450,7 @@ int nodes_remove(struct krg_node_set* node_set, int nb_nodes)
 		if (r == -1)
 			perror("fail");
 		else
-			printf("done");
+			printf("done\n");
 	} else
 		printf("No online node to remove.\n");
 	return r;
