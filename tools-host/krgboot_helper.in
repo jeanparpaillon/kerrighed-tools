@@ -6,7 +6,7 @@ SYS_DIR=/sys/kerrighed/hotplug
 KRGBOOT=@sbindir@/krgboot
 
 bool_file_to_str() {
-	if [ `< $1` -ne 0 ]; then
+	if [ `cat $1` -ne 0 ]; then
 		echo "true"
 	fi
 }
