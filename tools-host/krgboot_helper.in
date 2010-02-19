@@ -10,23 +10,17 @@ error() {
     exit 1
 }
 
-bool_file_to_str() {
-	if [ `cat $1` -ne 0 ]; then
-		echo "true"
-	fi
-}
-
 if [ ! -x "$KRGBOOT" ]; then
     error "Can not find krgboot: $KRGBOOT"
 fi
 
-ISOLATE_UTS=`bool_file_to_str $SYS_DIR/isolate_uts`
-ISOLATE_IPC=`bool_file_to_str $SYS_DIR/isolate_ipc`
-ISOLATE_MNT=`bool_file_to_str $SYS_DIR/isolate_mnt`
-ISOLATE_PID=`bool_file_to_str $SYS_DIR/isolate_pid`
-ISOLATE_NET=`bool_file_to_str $SYS_DIR/isolate_net`
-ISOLATE_USER=`bool_file_to_str $SYS_DIR/isolate_user`
-CLUSTER_INIT_HELPER=`< $SYS_DIR/cluster_init_helper`
+ISOLATE_UTS=`cat $SYS_DIR/isolate_uts`
+ISOLATE_IPC=`cat $SYS_DIR/isolate_ipc`
+ISOLATE_MNT=`cat $SYS_DIR/isolate_mnt`
+ISOLATE_PID=`cat $SYS_DIR/isolate_pid`
+ISOLATE_NET=`cat $SYS_DIR/isolate_net`
+ISOLATE_USER=`cat $SYS_DIR/isolate_user`
+CLUSTER_INIT_HELPER=`cat $SYS_DIR/cluster_init_helper`
 
 if [ -z "$CLUSTER_INIT_HELPER" ]; then
     error "$SYS_DIR/cluster_init_helper not set"
@@ -37,22 +31,22 @@ if [ ! -x "$CLUSTER_INIT_HELPER" ]; then
 fi
 
 NS_ARGS=
-if [ -n "$ISOLATE_UTS" ]; then
+if [ "$ISOLATE_UTS" -ne 0 ]; then
 	NS_ARGS="$NS_ARGS -u"
 fi
-if [ -n "$ISOLATE_IPC" ]; then
+if [ "$ISOLATE_IPC" -ne 0 ]; then
 	NS_ARGS="$NS_ARGS -i"
 fi
-if [ -n "$ISOLATE_MNT" ]; then
+if [ "$ISOLATE_MNT" -ne 0 ]; then
 	NS_ARGS="$NS_ARGS -m"
 fi
-if [ -n "$ISOLATE_PID" ]; then
+if [ "$ISOLATE_PID" -ne 0 ]; then
 	NS_ARGS="$NS_ARGS -p"
 fi
-if [ -n "$ISOLATE_NET" ]; then
+if [ "$ISOLATE_NET" -ne 0 ]; then
 	NS_ARGS="$NS_ARGS -n"
 fi
-if [ -n "$ISOLATE_USER" ]; then
+if [ "$ISOLATE_USER" -ne 0 ]; then
 	NS_ARGS="$NS_ARGS -U"
 fi
 
