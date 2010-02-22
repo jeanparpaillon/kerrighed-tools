@@ -179,10 +179,10 @@ fi
 AM_CONDITIONAL([ENABLE_TOOLS], [test "$enable_tools" = "yes"])
 
 AC_ARG_ENABLE([host-tools],
-              [AS_HELP_STRING([--enable-host-tools],
-                              [Enable kerrighed host tools @<:@default=disable@:>@])],
+              [AS_HELP_STRING([--disable-host-tools],
+                              [Disable kerrighed host tools @<:@default=enable@:>@])],
               [],
-              [enable_host_tools="no"])
+              [enable_host_tools="yes"])
 AM_CONDITIONAL([ENABLE_HOST_TOOLS], [test "$enable_host_tools" = "yes"])
 ###
 ### END TOOLS CHECK
