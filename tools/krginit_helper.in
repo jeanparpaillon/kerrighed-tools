@@ -6,6 +6,15 @@ KRG_ROOT=/
 # Path inside $KRG_ROOT
 KRGINIT=@sbindir@/krginit
 
+error() {
+    echo "E: $@"
+    exit 1
+}
+
+if [ ! -x "$KRG_ROOT$KRGINIT" ]; then
+    error "Can not find krginit: $KRG_ROOT$KRGINIT"
+fi
+
 . @sysconfdir@/kerrighed/krginit_helper.conf
 
 # Prefer caller args

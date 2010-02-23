@@ -5,11 +5,20 @@ set -e
 SYS_DIR=/sys/kerrighed/hotplug
 KRGBOOT=@sbindir@/krgboot
 
+error() {
+    echo "E: $@"
+    exit 1
+}
+
 bool_file_to_str() {
 	if [ `cat $1` -ne 0 ]; then
 		echo "true"
 	fi
 }
+
+if [ ! -x "$KRGBOOT" ]; then
+    error "Can not find krgboot: $KRGBOOT"
+fi
 
 ISOLATE_UTS=`bool_file_to_str $SYS_DIR/isolate_uts`
 ISOLATE_IPC=`bool_file_to_str $SYS_DIR/isolate_ipc`
@@ -18,6 +27,14 @@ ISOLATE_PID=`bool_file_to_str $SYS_DIR/isolate_pid`
 ISOLATE_NET=`bool_file_to_str $SYS_DIR/isolate_net`
 ISOLATE_USER=`bool_file_to_str $SYS_DIR/isolate_user`
 CLUSTER_INIT_HELPER=`< $SYS_DIR/cluster_init_helper`
+
+if [ -z "$CLUSTER_INIT_HELPER" ]; then
+    error "$SYS_DIR/cluster_init_helper not set"
+fi
+
+if [ ! -x "$CLUSTER_INIT_HELPER" ]; then
+    error "Can not find cluster init helper: $CLUSTER_INIT_HELPER"
+fi
 
 NS_ARGS=
 if [ -n "$ISOLATE_UTS" ]; then
