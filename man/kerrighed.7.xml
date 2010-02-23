@@ -93,19 +93,83 @@
   </refsect1>
 
   <refsect1>
-    <title>Files</title>
+    <title>Configuration</title>
     <para>
-      <variablelist>
-	<varlistentry>
-	  <term><filename>/etc/kerrighed_nodes</filename></term>
-	  <listitem>
-	    <para>
-	      This file contains the list of nodes used in the Kerrighed cluster. 
-	    </para>
-	  </listitem>
-	</varlistentry>
-      </variablelist>
+      Kerrighed kernel can be setup
+      with <filename>/etc/kerrighed_nodes</filename>(5) or with kernel
+      boot parameters.
     </para>
+
+    <refsect2>
+      <title>Boot parameters</title>
+      <para>
+	<variablelist>
+	  <varlistentry>
+	    <term>session_id=X</term>
+	    <listitem>
+	      <para>
+		The <varname>session_id</varname> contains identifier
+		of the cluster. When several Kerrighed clusters have
+		to share the same ethernet switch, each cluster should
+		define a different session identifier to avoid
+		collisions. A session identifier is a simple integer.
+	      </para>
+	      <para>
+		This parameter is mandatory, unless specified
+		through <filename>/etc/kerrighed_nodes</filename>(5). There
+		is no default.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>node_id=Y</term>
+	    <listitem>
+	      <para>
+		The <varname>node_id</varname> contains identifier of
+		the node. It is an integer. It must be unique over the
+		Kerrighed cluster.
+	      </para>
+	      <para>
+		Unless <varname>autonodeid</varname> is activated or
+		<filename>/etc/kerrighed_nodes</filename>(5) file is complete,
+		this parameter is mandatory.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>autonodeid=0|1</term>
+	    <listitem>
+	      <para>
+		When <varname>autonodeid</varname> value is
+		1, <varname>node_id</varname> is the last digit of the
+		IP address. This implies NIC driver to be compiled
+		into the kernel and IP address to be set really early,
+		either by DHCP or as kernel boot parameters
+		(see <command>bootparam</command>(7)).
+	      </para>
+	      <para>
+		Default is 1 (activated).
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>nb_nodes_min=N</term>
+	    <listitem>
+	      <para>
+		The <varname>nb_nodes_min</varname> controls the
+		autostart feature of Kerrighed. If set to an integer,
+		kernel waits for this amount of nodes to be present
+		before starting Kerrighed cluster.
+	      </para>
+	      <para>
+		If not specified, Kerrighed cluster is not started
+		automatically.
+	      </para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </para>
+    </refsect2>
   </refsect1>
 
   <refsect1>
@@ -113,11 +177,15 @@
     <para>
       Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email>
     </para>
+    <para>
+      Jean Parpaillon <email>jean.parpaillon@kerlabs.com</email>
+    </para>
   </refsect1>
 
   <refsect1>
     <title>See also</title>
     <para>
+      <ulink url="kerrighed_nodes.5.html" ><command>kerrighed_nodes</command> (5)</ulink>, 
       <ulink url="kerrighed_capabilities.7.html" ><command>kerrighed_capabilities</command> (7)</ulink>, 
       <ulink url="migrate.1.html" ><command>migrate</command> (1)</ulink>, 
       <ulink url="krgcapset.1.html" ><command>krgcapset</command> (1)</ulink>, 

@@ -16,7 +16,7 @@
   <refsect1>
     <title>Description</title>
     <para>
-      The <filename>kerrighed_nodes</filename> file contains the list of nodes belonging 
+      The <filename>/etc/kerrighed_nodes</filename> file contains the list of nodes belonging 
       to the Kerrighed cluster. Each node name is on a separate line and is followed by 
       the logical node number and the name of the network device to
       use for Kerrighed communications.
@@ -51,10 +51,6 @@
         node4:3:eth0
       </programlisting>
     </example>
-    <para>
-      The default location for the <filename>kerrighed_nodes</filename> file is the 
-      <filename>/etc/kerrighed/</filename> directory.
-    </para>
   </refsect1>
 
   <refsect1>
