@@ -6,7 +6,7 @@
 #               Cyril Brulebois <cyril.brulebois@kerlabs.com>
 #
 # Copyright:    INRIA-IRISA - 2006-2007
-#               Kerlabs - 2008-2009
+#               Kerlabs - 2008-2010
 #
 
 ### BEGIN INIT INFO
@@ -48,7 +48,7 @@ d_check_kerrighed() {
 # Start the Kerrighed container
 #
 d_start_container() {
-    krgboot_helper > /dev/null 2>&1
+    krgboot_helper
 }
 
 #
@@ -139,7 +139,6 @@ else
 	restart)
 	    log_daemon_msg "Restart $DESC"
 	    d_stop || log_end_msg 1
-	    d_check_for_no_start
 	    d_start || log_end_msg 1
 	    log_end_msg 0
 	    ;;
