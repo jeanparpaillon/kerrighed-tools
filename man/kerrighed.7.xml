@@ -113,6 +113,7 @@
 		to share the same ethernet switch, each cluster should
 		define a different session identifier to avoid
 		collisions. A session identifier is a simple integer.
+		Valid range is 1..9999.
 	      </para>
 	      <para>
 		This parameter is mandatory, unless specified
@@ -128,6 +129,7 @@
 		The <varname>node_id</varname> contains identifier of
 		the node. It is an integer. It must be unique over the
 		Kerrighed cluster.
+		Valid range is 0..255.
 	      </para>
 	      <para>
 		Unless <varname>autonodeid</varname> is activated or
