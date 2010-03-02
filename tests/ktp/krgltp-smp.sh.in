@@ -1113,7 +1113,7 @@ r recvfrom01
 
 ############################ Recvmsg
 
-rcrash recvmsg01       # User level deadlock
+rcrash recvmsg01       # User level deadlock: missing FAF support for Unix ancillary data
 
 ############################ Remap_file_pages
 
