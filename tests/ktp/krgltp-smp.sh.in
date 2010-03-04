@@ -1446,7 +1446,7 @@ r sockioctl01
 ############################ Splice
 
 rfail splice01        # Cannot be run over NFS
-seq 1 10000000 | r splice02 splice02-temp    # Unknown issue + script problem
+seq 1 10000000 | rcrash splice02 splice02-temp # FAF splice not implemented + script problem
                                              # with the pipe.
 rfail tee01           # Cannot be run over NFS
 
