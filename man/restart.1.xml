@@ -81,6 +81,26 @@
 	  </listitem>
 	</varlistentry>
 
+	<varlistentry>
+	  <term><option>-p</option></term>
+	  <term><option>--pids</option></term>
+	  <listitem>
+	    <para>Replace orphan process group identifiers (pgrp) and session
+	      identifiers (sid) of the processes of the application to restart
+	      by the ones of the <command>restart</command> command.
+	    </para>
+	    <para>Process group identifier equals to the group leader process
+	      identifier (pid). Similarly, session identifier equals to the
+	      session leader process identifier (pid). A process group or session
+	      is orphan if it has no leader anymore.
+	    </para>
+	    <para>In case of checkpoint/restart, that means that the group or
+	      session leader has not been checkpointed because it was not part
+	      of the application.
+	    </para>
+	  </listitem>
+	</varlistentry>
+
       </variablelist>
     </para>
   </refsect1>
