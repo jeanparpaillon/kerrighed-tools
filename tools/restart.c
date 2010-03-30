@@ -422,14 +422,15 @@ int main(int argc, char *argv[])
 
 	r = cr_execute_restart_callbacks(appid);
 	if (r) {
-		fprintf(stderr, "restart: error during callback execution\n");
+		fprintf(stderr, "restart: error during callback execution"
+			" for application %ld\n", appid);
 		goto exit;
 	}
 
 	r = application_unfreeze_from_appid(appid, 0);
 	if (r) {
-		perror("restart");
-		fprintf(stderr, "restart: fail to unfreeze the application\n");
+		fprintf(stderr, "restart: fail to unfreeze application %ld: "
+			"%s\n", appid, strerror(errno));
 		goto exit;
 	}
 
