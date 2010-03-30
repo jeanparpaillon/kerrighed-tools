@@ -676,7 +676,7 @@ int nodes(int argc, char* argv[], char* program_name)
 	else if(! strcmp(*argv, "del"))
 		action = DEL;
 
-	while ((c = getopt_long(argc, argv, "n:c:a:",
+	while ((c = getopt_long(argc, argv, "n:c:a",
 				nodes_mode_options, &option_index)) != -1) {
 		switch (c) {
 		case 'n':
