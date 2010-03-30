@@ -7,6 +7,10 @@
 #ifndef LIBKRG_CB_H
 #define LIBKRG_CB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* callback function type */
 typedef int (*cr_cb_callback_t)(void *);
 
@@ -30,4 +34,9 @@ int cr_register_continue_callback(cr_cb_callback_t func, void *arg);
 int cr_register_chkpt_thread_callback(cr_cb_callback_t func, void *arg);
 int cr_register_restart_thread_callback(cr_cb_callback_t func, void *arg);
 int cr_register_continue_thread_callback(cr_cb_callback_t func, void *arg);
-#endif // LIBKRG_CB_H
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* LIBKRG_CB_H */

@@ -7,6 +7,10 @@
 #ifndef LIBKRGCHECKPOINT_H
 #define LIBKRGCHECKPOINT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int cr_disable(void);
 int cr_enable(void);
 
@@ -17,4 +21,8 @@ int cr_exclude_on(void *data, size_t datasize,
 
 int cr_exclude_off(void *data);
 
-#endif // LIBKRGCHECKPOINT_H
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* LIBKRGCHECKPOINT_H */
