@@ -18,7 +18,7 @@
 #include <kerrighed.h>
 #include <libkrgcb.h>
 
-#define CHKPT_DIR "/var/chkpt/"
+#define CHKPT_DIR "/var/chkpt"
 
 long appid;
 int version;
@@ -312,7 +312,7 @@ int parse_args(int argc, char *argv[])
 
 	appid = atol(argv[optind]);
 	version = atoi(argv[optind+1]);
-	asprintf(&checkpoint_dir, "/var/chkpt/%ld/v%d/", appid, version);
+	asprintf(&checkpoint_dir, CHKPT_DIR "/%ld/v%d/", appid, version);
 
 	if (options & STDIN_OUT_ERR)
 		r = replace_stdin_stdout_stderr(checkpoint_dir);
