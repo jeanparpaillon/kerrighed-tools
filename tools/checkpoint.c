@@ -135,7 +135,8 @@ void check_environment(void)
 }
 
 int write_description(char *description,
-		      struct checkpoint_info *info)
+		      struct checkpoint_info *info,
+		      short _quiet)
 {
 	FILE* fd;
 	char path[256];
@@ -144,14 +145,15 @@ int write_description(char *description,
 	if (!description)
 		description = "No description";
 
-	printf("Identifier: %ld\n"
-	       "Version: %d\n"
-	       "Description: %s\n"
-	       "Date: %s\n",
-	       info->app_id,
-	       info->chkpt_sn,
-	       description,
-	       ctime(&date));
+	if (!_quiet)
+		printf("Identifier: %ld\n"
+		       "Version: %d\n"
+		       "Description: %s\n"
+		       "Date: %s\n",
+		       info->app_id,
+		       info->chkpt_sn,
+		       description,
+		       ctime(&date));
 
 	// need to write it in a file
 	sprintf(path, "%s/%ld/v%d/description.txt", CHKPT_DIR,
@@ -266,7 +268,7 @@ int checkpoint_app(long pid, int flags, short _quiet)
 	r = info.result;
 
 	if (!r)
-		write_description(description, &info);
+		write_description(description, &info, _quiet);
 	else {
 		show_error(errno);
 		clean_checkpoint_dir(&info);
