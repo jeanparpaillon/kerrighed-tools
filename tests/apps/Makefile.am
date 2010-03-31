@@ -8,7 +8,12 @@
 ###
 AM_CFLAGS = -Wall -Werror
 
-bin_PROGRAMS = bi bi-cr bi-cr-static bi-file bi-signal bi-double bi-clone-files bi-clone-fs bi-clone-semundo bi-thread bi-server-socket bi-pipe bi-exclude-mm bi-cr-disable ipcshm-tool ipcmsg-tool ipcsem-tool
+bin_PROGRAMS = bi bi-cr bi-cr-static bi-file bi-signal bi-double \
+	bi-clone-files bi-clone-fs bi-clone-semundo bi-thread bi-server-socket \
+	bi-pipe bi-exclude-mm bi-cr-disable \
+	ipcshm-tool ipcmsg-tool ipcsem-tool \
+	posixshm-tool
+
 lib_LTLIBRARIES = libbi.la
 include_HEADERS = libbi.h
 
@@ -81,3 +86,7 @@ ipcmsg_tool_SOURCES = ipcmsg-tool.c
 ipcsem_tool_SOURCES = ipcsem-tool.c
 ipcsem_tool_LDADD = -lbi
 ipcsem_tool_DEPENDENCIES = libbi.la
+
+posixshm_tool_SOURCES = posixshm-tool.c
+posixshm_tool_LDADD = -lbi -lrt
+posixshm_tool_DEPENDENCIES = libbi.la
