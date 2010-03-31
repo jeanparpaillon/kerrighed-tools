@@ -37,8 +37,6 @@ cr_ipc_sem02()
     TCID="$FUNCNAME"               # Identifier of this testcase.
     TST_COUNT=$[$TST_COUNT+1]      # Test case number.
 
-    SYNCFILE="/tmp/${FUNCNAME}_sync"
-
     # create the sem and get its identifier
     local sempath=`mktemp -d`
     local semvalue="-1"
@@ -59,7 +57,7 @@ cr_ipc_sem02()
 
     runcommand +CHECKPOINTABLE 2 nosync || return $?
 
-    wait_other_instances $SYNCFILE 'ipcs -s|grep "^0x"|wc -l' || return $?
+    wait_other_instances 'ipcs -s|grep "^0x"|wc -l' || return $?
 
     freeze_process $PID $TESTCMD || return $?
 

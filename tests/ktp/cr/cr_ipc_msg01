@@ -34,15 +34,13 @@ cr_ipc_msg01()
     TCID="$FUNCNAME"               # Identifier of this testcase.
     TST_COUNT=$[$TST_COUNT+1]      # Test case number.
 
-    SYNCFILE="/tmp/${FUNCNAME}_sync"
-
     local msgpath=`mktemp -d`
     local written_msg="$RANDOM"
 
     # create the msg and get its identifier
     create_msg $msgpath $written_msg || return $?
 
-    wait_other_instances $SYNCFILE 'ipcs -q|grep "^0x"|wc -l' || return $?
+    wait_other_instances 'ipcs -q|grep "^0x"|wc -l' || return $?
 
     # dump it
     dump_msg $MSGID $msgpath $msgpath/msg_v1.bin || return $?
