@@ -52,96 +52,192 @@ wait_other_instances()
 }
 
 ###########################################################################
+# SYSTEM V SHM
+###########################################################################
 
-create_shm()
+create_sysv_shm()
 {
     local shm_path=$1
     local msg_to_write=$2
 
-    LTP_print_step_info "creating shm from $shm_path"
+    LTP_print_step_info "creating SYSV SHM from $shm_path"
     SHMID=`ipcshm-tool -c"$msg_to_write" $shm_path | cut -d':' -f1`
     local r=$?
     if [ $r -ne 0 ]; then
-	tst_brkm TFAIL NULL "Fail to create SHM from $shm_path: $r"
+	tst_brkm TFAIL NULL "Fail to create SYSV SHM from $shm_path: $r"
     fi
     return $r
 }
 
-delete_shm()
+delete_sysv_shm()
 {
     local shm_id=$1
     local shm_path=$2
 
-    LTP_print_step_info "deleting $shm_id ($shm_path)"
+    LTP_print_step_info "deleting SYSV SHM $shm_id ($shm_path)"
     ipcshm-tool -d -i $shm_id
     local r=$?
     if [ $r -ne 0 ]; then
-	tst_brkm TFAIL NULL "Fail to delete SHM $shm_id ($shm_path): $r"
+	tst_brkm TFAIL NULL "Fail to delete SYSV SHM $shm_id ($shm_path): $r"
     fi
     return $r
 }
 
-dump_shm()
+dump_sysv_shm()
 {
     local shm_id=$1
     local shm_path=$2
     local file=$3
 
-    LTP_print_step_info "dumping $shm_id ($shm_path)"
+    LTP_print_step_info "dumping SYSV SHM $shm_id ($shm_path)"
     ipccheckpoint -m $shm_id $file
     local r=$?
     if [ $r -ne 0 ]; then
-	tst_brkm TFAIL NULL "Fail to checkpoint SHM $shm_id ($shm_path): $r"
+	tst_brkm TFAIL NULL "Fail to checkpoint SYSV SHM $shm_id ($shm_path): $r"
     fi
 
     return $r
 }
 
-restore_shm()
+restore_sysv_shm()
 {
     local shm_id=$1
     local shm_path=$2
     local file=$3
 
-    LTP_print_step_info "restoring $shm_id ($shm_path)"
+    LTP_print_step_info "restoring SYSV SHM $shm_id ($shm_path)"
     ipcrestart -m $file
     local r=$?
     if [ $r -ne 0 ]; then
-	tst_brkm TFAIL NULL "Fail to restart SHM $shm_id ($shm_path): $r"
+	tst_brkm TFAIL NULL "Fail to restart SYSV SHM $shm_id ($shm_path): $r"
     fi
     return $r
 }
 
-check_shm_value()
+check_sysv_shm_value()
 {
     local shm_id=$1
     local shm_path=$2
 
-    LTP_print_step_info "checking $shm_id ($shm_path)"
+    LTP_print_step_info "checking SYSV SHM $shm_id ($shm_path)"
 
     local written_msg=$3
     local read_msg=`ipcshm-tool -r1 -i $shm_id`
     if [ "$read_msg" != "$written_msg" ]; then
 	tst_brkm TFAIL NULL \
-	    "SHM value has changed ('$read_msg' != '$written_msg')"
+	    "SYSV SHM $shm_id value has changed ('$read_msg' != '$written_msg')"
 	return 1
     fi
 
     return 0
 }
 
-write_shm_value()
+write_sysv_shm_value()
 {
     local shm_id=$1
     local shm_path=$2
     local msg_to_write=$3
 
-    LTP_print_step_info "updating $shm_id ($shm_path): $msg_to_write"
+    LTP_print_step_info "updating SYSV SHM $shm_id ($shm_path): $msg_to_write"
 
     ipcshm-tool -q -w"$msg_to_write" -i $shm_id
     local r=$?
     if [ $r -ne 0 ]; then
-	tst_brkm TFAIL NULL "Fail to delete SHM $shm_id ($shm_path): $r"
+	tst_brkm TFAIL NULL "Fail to update SYSV SHM $shm_id ($shm_path): $r"
+    fi
+
+    return $r
+}
+
+###########################################################################
+# POSIX SHM
+###########################################################################
+
+create_posix_shm()
+{
+    local shm_name=$1
+    local msg_to_write=$2
+
+    LTP_print_step_info "creating POSIX SHM $shm_name"
+    posixshm-tool -c"$msg_to_write" $shm_name > /dev/null
+    local r=$?
+    if [ $r -ne 0 ]; then
+	tst_brkm TFAIL NULL "Fail to create POSIX SHM $shm_name: $r"
+    fi
+    return $r
+}
+
+delete_posix_shm()
+{
+    local shm_name=$1
+
+    LTP_print_step_info "deleting POSIX SHM $shm_name"
+    posixshm-tool -d $shm_name
+    local r=$?
+    if [ $r -ne 0 ]; then
+	tst_brkm TFAIL NULL "Fail to delete POSIX SHM $shm_name: $r"
+    fi
+    return $r
+}
+
+dump_posix_shm()
+{
+    local shm_name=$1
+    local file=$2
+
+    LTP_print_step_info "dumping POSIX SHM $shm_name"
+    cp /dev/shm/$shm_name $file
+    local r=$?
+    if [ $r -ne 0 ]; then
+	tst_brkm TFAIL NULL "Fail to checkpoint POSIX SHM $shm_name: $r"
+    fi
+
+    return $r
+}
+
+restore_posix_shm()
+{
+    local shm_name=$1
+    local file=$2
+
+    LTP_print_step_info "restoring POSIX SHM $shm_name"
+    cp $file /dev/shm/$shm_name
+    local r=$?
+    if [ $r -ne 0 ]; then
+	tst_brkm TFAIL NULL "Fail to restart POSIX SHM $shm_name: $r"
+    fi
+    return $r
+}
+
+check_posix_shm_value()
+{
+    local shm_name=$1
+    local written_msg=$2
+
+    LTP_print_step_info "checking POSIX SHM $shm_name"
+
+
+    local read_msg=`posixshm-tool -r1 $shm_name`
+    if [ "$read_msg" != "$written_msg" ]; then
+	tst_brkm TFAIL NULL \
+	    "POSIX SHM $shm_name value has changed ('$read_msg' != '$written_msg')"
+	return 1
+    fi
+
+    return 0
+}
+
+write_posix_shm_value()
+{
+    local shm_name=$1
+    local msg_to_write=$2
+
+    LTP_print_step_info "updating POSIX SHM $shm_name: $msg_to_write"
+
+    posixshm-tool -q -w"$msg_to_write" $shm_name
+    local r=$?
+    if [ $r -ne 0 ]; then
+	tst_brkm TFAIL NULL "Fail to update POSIX SHM $shm_id ($shm_path): $r"
     fi
 
     return $r

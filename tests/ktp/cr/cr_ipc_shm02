@@ -43,7 +43,7 @@ cr_ipc_shm02()
     local written_msg="$RANDOM"
     local shmpath=`mktemp -d`
 
-    create_shm $shmpath $written_msg || return $?
+    create_sysv_shm $shmpath $written_msg || return $?
 
     TESTCMD_OPTIONS="-r10000 -q -i $SHMID"
 
@@ -55,7 +55,7 @@ cr_ipc_shm02()
 
     checkpoint_frozen_process $PID $TESTCMD || return $?
 
-    dump_shm $SHMID $shmpath $shmpath/shm_v1.bin || return $?
+    dump_sysv_shm $SHMID $shmpath $shmpath/shm_v1.bin || return $?
 
     unfreeze_process $PID $TESTCMD || return $?
 
@@ -65,17 +65,17 @@ cr_ipc_shm02()
 
     kill_group $PID $TESTCMD || return $?
 
-    delete_shm $SHMID $shmpath || return $?
+    delete_sysv_shm $SHMID $shmpath || return $?
 
     restart_process_must_fail $PID 1 $TESTCMD || return $?
 
-    restore_shm $SHMID $shmpath $shmpath/shm_v1.bin || return $?
+    restore_sysv_shm $SHMID $shmpath $shmpath/shm_v1.bin || return $?
 
     restart_process $PID 1 $TESTCMD || return $?
 
     kill_group $PID $TESTCMD || return $?
 
-    delete_shm $SHMID $shmpath || return $?
+    delete_sysv_shm $SHMID $shmpath || return $?
 
     ret=$?
 

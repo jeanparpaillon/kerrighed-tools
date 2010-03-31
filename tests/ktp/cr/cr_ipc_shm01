@@ -40,46 +40,46 @@ cr_ipc_shm01()
     local written_msg="$RANDOM"
 
     # create the shm and get its identifier
-    create_shm $shmpath $written_msg || return $?
+    create_sysv_shm $shmpath $written_msg || return $?
 
     wait_other_instances $SYNCFILE 'ipcs -m|grep "^0x"|wc -l' || return $?
 
     # dump it
-    dump_shm $SHMID $shmpath $shmpath/shm_v1.bin || return $?
+    dump_sysv_shm $SHMID $shmpath $shmpath/shm_v1.bin || return $?
 
     # check the value is still ok
-    check_shm_value $SHMID $shmpath "$written_msg" || return $?
+    check_sysv_shm_value $SHMID $shmpath "$written_msg" || return $?
 
     # update the value
-    write_shm_value $SHMID $shmpath "$RANDOM" || return $?
+    write_sysv_shm_value $SHMID $shmpath "$RANDOM" || return $?
 
     # delete it
-    delete_shm $SHMID $shmpath || return $?
+    delete_sysv_shm $SHMID $shmpath || return $?
 
     # restore it
-    restore_shm $SHMID $shmpath $shmpath/shm_v1.bin || return $?
+    restore_sysv_shm $SHMID $shmpath $shmpath/shm_v1.bin || return $?
 
-    check_shm_value $SHMID $shmpath "$written_msg" || return $?
-
-    written_msg="$RANDOM"
-    write_shm_value $SHMID $shmpath "$written_msg" || return $?
-
-    check_shm_value $SHMID $shmpath "$written_msg" || return $?
-
-    dump_shm $SHMID $shmpath $shmpath/shm_v2.bin || return $?
+    check_sysv_shm_value $SHMID $shmpath "$written_msg" || return $?
 
     written_msg="$RANDOM"
-    write_shm_value $SHMID $shmpath "$written_msg" || return $?
+    write_sysv_shm_value $SHMID $shmpath "$written_msg" || return $?
 
-    dump_shm $SHMID $shmpath $shmpath/shm_v3.bin || return $?
+    check_sysv_shm_value $SHMID $shmpath "$written_msg" || return $?
 
-    delete_shm $SHMID $shmpath || return $?
+    dump_sysv_shm $SHMID $shmpath $shmpath/shm_v2.bin || return $?
 
-    restore_shm $SHMID $shmpath $shmpath/shm_v3.bin || return $?
+    written_msg="$RANDOM"
+    write_sysv_shm_value $SHMID $shmpath "$written_msg" || return $?
 
-    check_shm_value $SHMID $shmpath "$written_msg" || return $?
+    dump_sysv_shm $SHMID $shmpath $shmpath/shm_v3.bin || return $?
 
-    delete_shm $SHMID $shmpath || return $?
+    delete_sysv_shm $SHMID $shmpath || return $?
+
+    restore_sysv_shm $SHMID $shmpath $shmpath/shm_v3.bin || return $?
+
+    check_sysv_shm_value $SHMID $shmpath "$written_msg" || return $?
+
+    delete_sysv_shm $SHMID $shmpath || return $?
 
     ret=$?
 
