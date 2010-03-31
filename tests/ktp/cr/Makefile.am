@@ -47,6 +47,8 @@ tests_SCRIPTS = \
 	cr_ipc_msg01 \
 	cr_ipc_sem01 \
 	cr_ipc_sem02 \
+	cr_posix_shm01 \
+	cr_posix_shm02 \
 	cr_pipe01 \
 	cr_pipe02 \
 	cr_exclude_mm01 \

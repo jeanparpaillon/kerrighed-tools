@@ -1,0 +1,103 @@
+#!/bin/bash
+###############################################################################
+##
+## Copyright (c) Kerlabs, 2009
+##
+## This program is free software;  you can redistribute it and#or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+## or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+## for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program;  if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+##
+###############################################################################
+#
+# Description:  Test program for Kerrighed checkpoint/restart of process
+#               attached to POSIX SHM (derived from cr_ipc_shm02)
+#
+# Author:       Matthieu Fertré, matthieu.fertre@kerlabs.com
+#
+
+source `dirname $0`/lib_cr.sh
+source `dirname $0`/lib_cr_ipc.sh
+
+description="Checkpoint/Restart of process attached to POSIX SHM"
+
+TESTCMD="posixshm-tool"
+
+cr_posix_shm02()
+{
+    TCID="$FUNCNAME"               # Identifier of this testcase.
+    TST_COUNT=$[$TST_COUNT+1]      # Test case number.
+
+    SYNCFILE="/tmp/${FUNCNAME}_sync"
+
+    # create the shm and get its identifier
+    local written_msg="$RANDOM"
+    local shmname="${FUNCNAME}_$$"
+
+    #
+    # WARNING: this test must be run without DISTANT_FORK
+    #
+    local oldincap=`krgcapset -s - | grep "Inheritable Effective" | cut -d: -f2`
+    local oldefcap=`krgcapset -s - | grep "^Effective" | cut -d: -f2`
+    krgcapset -d -DISTANT_FORK
+    krgcapset -e -DISTANT_FORK
+
+    create_posix_shm $shmname $written_msg || return $?
+
+    TESTCMD_OPTIONS="-r10000 -q $shmname"
+
+    runcommand +CHECKPOINTABLE 1 nosync || return $?
+
+    local cmd="ls -l /dev/shm|grep $FUNCNAME|wc -l"
+    wait_other_instances $FUNCNAME "$cmd" || return $?
+
+    freeze_process $PID $TESTCMD || return $?
+
+    checkpoint_frozen_process $PID $TESTCMD || return $?
+
+    dump_posix_shm $shmname /var/chkpt/shm_$shmname.bin || return $?
+
+    unfreeze_process $PID $TESTCMD || return $?
+
+    kill_group $PID $TESTCMD || return $?
+
+    restart_process $PID 1 $TESTCMD || return $?
+
+    kill_group $PID $TESTCMD || return $?
+
+    delete_posix_shm $shmname || return $?
+
+    restart_process_must_fail $PID 1 $TESTCMD || return $?
+
+    restore_posix_shm $shmname /var/chkpt/shm_$shmname.bin || return $?
+
+    restart_process $PID 1 $TESTCMD || return $?
+
+    kill_group $PID $TESTCMD || return $?
+
+    delete_posix_shm $shmname || return $?
+
+    ret=$?
+
+    #
+    # WARNING: this test was run without DISTANT_FORK
+    #
+    krgcapset -d $oldincap
+    krgcapset -e $oldefcap
+
+    print_success $ret
+    return $ret
+}
+
+CR_setup $@ || exit $?
+
+cr_posix_shm02 || exit $?
