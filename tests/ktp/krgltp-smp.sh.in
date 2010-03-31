@@ -78,6 +78,17 @@ function prepare_all_instances() {
 	done
 }
 
+function clean_all_instances() {
+	local status_fifo
+	local i
+
+	for i in `seq 1 $nr_ps`; do
+		status_fifo=${STATUS_FIFO}-$i
+
+		rm -f $status_fifo
+	done
+}
+
 function read_exit_status() {
 	local status
 	local status_fifo=${STATUS_FIFO}-$1
@@ -1829,7 +1840,6 @@ if [ ! -z "$onetest" ]; then
 			export KTP_ITERATION=$i
 			r $onetest $@
 		done
-		exit 0
 	else
 		i=0
 		while /bin/true; do
@@ -1846,3 +1856,5 @@ else
 	echo "*** Memory leak checking"
 	slab-check
 fi
+
+clean_all_instances
