@@ -196,7 +196,20 @@
       queue. The process will replay the action after the restart if the IPC
       objects still exits. State of System V IPC objects can be saved and
       restored using respectfully <command>ipccheckpoint</command>(1) and
-      <command>ipcrestart</command>(1).
+      <command>ipcrestart</command>(1). For consistency, application should be
+      frozen before saving state of System V IPC objects.
+    </para>
+
+    <para>Similarly to System V IPC objects, POSIX shared memory segment (SHM)
+      are not checkpointed with the application. However, similarly to System V
+      shared memory segments, POSIX shared memory segments can be saved
+      independently. Process(es) will be reattached at restart time if the shared
+      memory segments still exist or if they have been restored. In Linux, state
+      of POSIX shared memory segment can be saved/restored by copying
+      (using <command>cp</command>(1)) from/to
+      <filename>/dev/shm/<replaceable>&lt;shm_name&gt;</replaceable></filename>.
+      For consistency, application should be frozen before saving state of POSIX
+      shared memory segment (SHM).
     </para>
 
     <para>Files are not checkpointed nor restored. The files are reopened at
