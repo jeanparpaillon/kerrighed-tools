@@ -154,12 +154,13 @@
     </para>
 
     <para>
-      Options <option>-f</option>, <option>-c</option>, <option>-u</option>,
-      <option>-k</option> are mutually exclusive.
+      Options <option>--freeze</option>, <option>--ckpt-only</option>,
+      <option>--unfreeze</option>, <option>--kill</option> are mutually exclusive.
     </para>
 
     <para>
-      Options <option>-d</option> and <option>-i</option> make sense only when
+      Options <option>--description</option> and
+      <option>--ignore-unsupported-files</option> make sense only when
       really checkpointing the application.
     </para>
   </refsect1>
@@ -170,20 +171,23 @@
     <para>Multi-process applications and multithreaded programs are supported.
       To be able to restart the application, all process identifiers (including
       process group and session identifier) used by the application must be
-      unused.
+      unused. Option <option>--pid</option> of <command>restart</command>(1) may
+      be useful if process group leader or session leader has not been
+      checkpointed.
     </para>
 
     <para>Checkpointing applications with zombie processes is not supported.
     </para>
 
     <para>Checkpointing of applications using socket(s) or named pipe(s) (fifo) is
-      not supported. Therefore, graphic applications are not supported since
+      not supported (unless using <option>--ignore-unsupported-files</option>).
+      Therefore, graphic applications are not supported since
       there are using sockets to communicate with the X server.
     </para>
 
     <para>Checkpointing of application using anonymous pipe(s) may work
-      depending on where the processes are running. Else, it fails with 'Function
-      not implemented'.
+      depending on where the processes are running. Else, it fails at checkpoint
+      time with 'Function not implemented'.
     </para>
 
     <para>System V IPC objects are not restored but it is possible to checkpoint
@@ -198,8 +202,9 @@
     <para>Files are not checkpointed nor restored. The files are reopened at
       restart time and file pointers are restored. That means that files must be
       in consistent states at restart time. Else, you can expect a strange
-      behavior from your application. You can take advantage of the freeze
-      option before the checkpoint to manually backup the files.
+      behavior from your application. You can take advantage of the
+      <option>--freeze</option> option before the checkpoint to manually backup
+      the files.
     </para>
 
     <para>
