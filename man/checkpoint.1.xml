@@ -229,6 +229,102 @@
   </refsect1>
 
   <refsect1>
+    <title>Example</title>
+    <para>
+      The following example shows how to start an application, checkpoint it and restart it.
+    </para>
+    <refsect2>
+      <title>Start the application</title>
+
+      <para>$ krgcr-run ./mycomputeprogram 12 1024 58</para>
+
+    </refsect2>
+    <refsect2>
+      <title>Checkpoint the application</title>
+      <para>
+	<variablelist>
+	  <varlistentry>
+	    <term>Freeze the application:</term>
+	    <listitem>
+	      <para>$ checkpoint --freeze `pgrep mycomputeprogram`</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>Save related System V IPC objects:</term>
+	    <listitem>
+	      <para>$ ipccheckpoint -s 2 ~/chkpt/ipcsem.bin</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>Save related POSIX shared memory segments:</term>
+	    <listitem>
+	      <para>$ cp /dev/shm/shm_computeprogram12 ~/chkpt/shm_computeprogram12.bin</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>Save related files:</term>
+	    <listitem>
+	      <para>$ cp ./compute12_result.log ~/chkpt/compute12_result.log</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>Dump state of application processes:</term>
+	    <listitem>
+	      <para>$ checkpoint --ckpt-only `pgrep mycomputeprogram`</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>Unfreeze the application:</term>
+	    <listitem>
+	      <para>$ checkpoint --unfreeze `pgrep mycomputeprogram`</para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </para>
+    </refsect2>
+
+    <refsect2>
+      <title>Restart the application</title>
+      <para>
+	Later, you may want to restart your application from the last
+	checkpoint.
+      </para>
+      <para>
+	<variablelist>
+	  <varlistentry>
+	    <term>Restore related System V IPC objects:</term>
+	    <listitem>
+	      <para>$ ipcrestart -s ~/chkpt/ipcsem.bin</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>Restore related POSIX shared memory segments:</term>
+	    <listitem>
+	      <para>$ cp ~/chkpt/shm_computeprogram12.bin /dev/shm/shm_computeprogram12</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>Restore related files:</term>
+	    <listitem>
+	      <para>$ cp ~/chkpt/compute12_result.log ./compute12_result.log</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>
+	      Finally, restart the program using its <replaceable>appid</replaceable>
+	      (1632 in this example):
+	    </term>
+	    <listitem>
+	      <para>$ restart --foreground 1632 1</para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </para>
+    </refsect2>
+
+  </refsect1>
+
+  <refsect1>
     <title>Files</title>
     <para>
       <variablelist>
