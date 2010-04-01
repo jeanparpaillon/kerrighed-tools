@@ -27,6 +27,12 @@
       by one of its processes given by <varname>pid</varname>.
     </para>
     <para>
+      Checkpoint/Restart basically consists of storing a snapshot of the current
+      application state. Later on, application can be restarted from this snapshot.
+      It can be useful for fault tolerance, scheduling, hardware maintenance and
+      debugging.
+    </para>
+    <para>
       Checkpointing an application consists in three steps: freezing the
       application, saving the application state on disk, unfreezing the
       application. By default, all three steps are run in sequence.
