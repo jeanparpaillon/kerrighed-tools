@@ -256,6 +256,8 @@ function main()
 let nr=0
 while [ "$nr" -lt "$1" ]; do
 
+export KTP_ITERATION=$(($nr+1))
+
 echo "KRGLTP: run #$nr" >> /tmp/krgltp-slabinfo.dat
 cat /proc/slabinfo >> /tmp/krgltp-slabinfo.dat
 
@@ -1814,6 +1816,7 @@ if [ -z "$localonly" ]; then
 fi
 
 export KTP_NR_PS=$nr_ps
+export KTP_ROOT_PID=$$
 
 # Check if we just want a single test
 if [ ! -z "$onetest" ]; then
@@ -1821,6 +1824,7 @@ if [ ! -z "$onetest" ]; then
 		for i in $(seq 1 $nr_run); do
 			echo
 			echo "[ITERATION $i/$nr_run starts...]"
+			export KTP_ITERATION=$i
 			r $onetest $@
 		done
 		exit 0
@@ -1830,6 +1834,7 @@ if [ ! -z "$onetest" ]; then
 			i=$((i+1))
 			echo
 			echo "[ITERATION $i/infinity starts...]"
+			export KTP_ITERATION=$i
 			r $onetest $@
 		done
 	fi

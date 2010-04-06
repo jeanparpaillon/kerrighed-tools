@@ -28,8 +28,11 @@
 
 wait_other_instances()
 {
-    local syncfile=$1
+    local testid=$1
     local counterfunc=$2
+    local syncfile="/tmp/ktp_sync_${testid}.${KTP_ROOT_PID}.${KTP_ITERATION}"
+
+    LTP_print_step_info "waiting for every test to be ready"
 
     # waiting for everybody to be ready
     local nr_obj=`eval $counterfunc`
@@ -47,6 +50,8 @@ wait_other_instances()
 	return 1
     fi
     touch $syncfile
+
+    LTP_print_step_info "every tests are ready!"
 
     return 0
 }
