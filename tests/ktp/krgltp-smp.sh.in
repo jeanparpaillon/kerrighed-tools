@@ -1575,10 +1575,10 @@ r tkill02
 ############################ Truncate
 
 runtests 1 4 truncate
-truncate01_64
-truncate02_64
-truncate03_64
-truncate04_64
+r truncate01_64
+r truncate02_64
+r truncate03_64
+r truncate04_64
 
 ############################ Ulimit
 
