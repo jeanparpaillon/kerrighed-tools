@@ -101,6 +101,32 @@
 	  </listitem>
 	</varlistentry>
 
+	<varlistentry>
+	  <term><option>-s</option> <replaceable>file_identifier</replaceable>,<replaceable>fd</replaceable></term>
+	  <term><option>--substitute-file</option>=<replaceable>file_identifier</replaceable>,<replaceable>fd</replaceable></term>
+	  <listitem>
+	    <para>This option allows to replace one of the open files of the checkpointed
+	      application by one of the file opened by the process calling the
+	      <command>restart</command> command.
+	    </para>
+	    <para><replaceable>fd</replaceable> is the file descriptor
+	      (as given by <function>open</function> (2)) of the calling process that
+	      will be used as a replacement after the restart.
+	    </para>
+	    <para><replaceable>file_identifier</replaceable> is an identifier of
+	      one the open files of the checkpointed application. This identifier is
+	      generated at checkpoint time. It can be retrieved from the file(s)
+	      <filename>user_info_*.txt</filename> that live(s) in the checkpoint directory.
+	      Each line of this file refers to one of the open files of the checkpointed
+	      application. For each open file, we get the following information:
+	      type|<replaceable>file_identifier</replaceable>|symbolic name|list of pid:fd
+	    </para>
+	    <para>
+	      This option can be used several times to substitute several files.
+	    </para>
+	  </listitem>
+	</varlistentry>
+
       </variablelist>
     </para>
   </refsect1>
