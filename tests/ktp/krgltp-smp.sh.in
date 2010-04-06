@@ -17,8 +17,9 @@ PATH=${PATH}:@ltpbase@/tools:$BASETEST
 STATUS_FIFO=$PWD/krgltp.$$
 
 ###############################
-# Manage restart of KTP from a chosen test
+# Manage tests interval
 firsttest=""
+lasttest="NONE"
 
 ###############################
 ############################### FUNCTIONS DEFINITION
@@ -30,6 +31,13 @@ function mustbeskipped(){
 		firsttest=""
 	fi
 	if [ "$firsttest" != "" ]; then
+		echo "*** Skipping test $1"
+		return 0
+	fi
+
+	if [ "$lasttest" = "$1" ]; then
+		lasttest=""
+	elif [ "$lasttest" = "" ]; then
 		echo "*** Skipping test $1"
 		return 0
 	fi
@@ -247,8 +255,11 @@ function usage(){
 	echo "       $name -l [other options]<testname>"
 	echo "           Run test <testname> *WITHOUT* distant fork"
 	echo
-	echo "       $name -f [other options]<testname>"
+	echo "       $name -F [other options]<testname>"
 	echo "           Run tests from test <testname>. Previous tests are skipped"
+	echo
+	echo "       $name -L [other options]<testname>"
+	echo "           Run tests until test <testname>. Next tests are skipped"
 	echo
 	echo "       $name -t"
 	echo "           Run test with no distant action to mesure basic execution time"
@@ -1767,7 +1778,7 @@ function run_tests(){
 
 
 # Parse args
-while getopts 'b:lts:n:p:f:h' name; do
+while getopts 'b:lts:n:p:F:L:h' name; do
 	case "$name" in
 	b)	onetest="$OPTARG"
 		infiniteloop="yes"
@@ -1787,9 +1798,13 @@ while getopts 'b:lts:n:p:f:h' name; do
 	p)
 		nr_ps=$OPTARG
 		;;
-	f)
+	F)
 		firsttest=$OPTARG
 		echo "KRGLTP: first test will be $firsttest"
+		;;
+	L)
+		lasttest=$OPTARG
+		echo "KRGLTP: last test will be $lasttest"
 		;;
 	h)
 		usage; exit 0
