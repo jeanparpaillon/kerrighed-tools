@@ -122,7 +122,12 @@ create_checkpoint_dir()
 	dir=${CHKPTDIR}/${_pid}/v${CKPT_VERSION}/
     done
 
+    local oldefcap=`krgcapset -s - | grep "^Effective" | cut -d: -f2`
+    krgcapset -e -DISTANT_FORK
     mkdir -p $dir
+    touch $dir/stupid
+    sync
+    krgcapset -e $oldefcap
 }
 
 checkpoint_process()

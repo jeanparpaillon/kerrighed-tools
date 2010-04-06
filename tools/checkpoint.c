@@ -50,7 +50,7 @@ void show_help(void)
 
 void lookup_parent_directory(const char *checkpoint_dir)
 {
-	int error, len;
+	int error, len, fd;
 	struct stat statbuf;
 	char *copy, *delim, *tmp;
 
@@ -68,26 +68,51 @@ void lookup_parent_directory(const char *checkpoint_dir)
 		*delim = '\0';
 		len = strlen(copy);
 		if (len) {
-			error = stat(copy, &statbuf);
-			if (error)
-				goto out;
+/* 			error = stat(copy, &statbuf); */
+/* 			if (error) { */
+/* 				fprintf(stderr, "stat %s: %d\n", copy, error); */
+/* 				goto out; */
+/* 			} */
 
-			/* chown empties the cache */
-			error = chown(copy, statbuf.st_uid, statbuf.st_gid);
-			if (error)
+			/* chmod empties the cache */
+			error = chmod(copy, S_IRUSR | S_IWUSR | S_IXUSR);
+			if (error) {
+				fprintf(stderr, "chmod %s: %d\n", copy, error);
 				goto out;
+			}
+
+			fd = open(copy, O_RDONLY|O_NONBLOCK|O_DIRECTORY|O_CLOEXEC);
+			if (fd == -1) {
+				fprintf(stderr, "open %s: %d\n", copy, error);
+				goto out;
+			}
+
+			close(fd);
 		}
 		*delim = '/';
 		tmp = delim + 1;
 	}
 
 end_of_path:
-	error = stat(checkpoint_dir, &statbuf);
-	if (error)
-		goto out;
+/* 	error = stat(checkpoint_dir, &statbuf); */
+/* 	if (error) { */
+/* 		fprintf(stderr, "stat %s: %d\n", checkpoint_dir, error); */
+/* 		goto out; */
+/* 	} */
 
 	error = chown(checkpoint_dir, statbuf.st_uid, statbuf.st_gid);
+	if (error) {
+		fprintf(stderr, "chmod %s: %d\n", checkpoint_dir, error);
+		goto out;
+	}
 
+	fd = open(checkpoint_dir, O_RDONLY|O_NONBLOCK|O_DIRECTORY|O_CLOEXEC);
+	if (fd == -1) {
+		fprintf(stderr, "open %s: %d\n", checkpoint_dir, error);
+		goto out;
+	}
+
+	close(fd);
 out:
 	free(copy);
 	return;
@@ -385,12 +410,15 @@ int main(int argc, char *argv[])
 
 		lookup_parent_directory(argv[optind+1]);
 
-		storage_dir = canonicalize_file_name(argv[optind+1]);
-		if (!storage_dir) {
-			r = errno;
-			perror(argv[optind+1]);
-			goto exit;
-		}
+/* 		storage_dir = canonicalize_file_name(argv[optind+1]); */
+/* 		if (!storage_dir) { */
+/* 			r = errno; */
+/* 			fprintf(stderr, "canonicalize: %s: %s\n", */
+/* 				argv[optind+1], strerror(errno)); */
+/* 			goto exit; */
+/* 		} */
+
+		storage_dir = strdup(argv[optind+1]);
 
 		lookup_parent_directory(storage_dir);
 
