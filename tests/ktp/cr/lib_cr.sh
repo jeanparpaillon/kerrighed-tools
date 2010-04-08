@@ -770,6 +770,10 @@ CR_cleanup()
 {
     killall `echo "$TESTCMD" | cut -f1 -d" "` > /dev/null 2>&1
     rm -rf /var/chkpt/* > /dev/null 2>&1
+    rm -rf /tmp/chkpt_result* > /dev/null 2>&1
+    rm -rf /tmp/ps_* > /dev/null 2>&1
+    rm -rf /tmp/ktp_sync_* > /dev/null 2>&1
+    rm -rf /tmp/java_tmp_root_* > /dev/null 2>&1
 
     return 0
 }
