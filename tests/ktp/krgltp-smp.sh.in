@@ -1741,6 +1741,8 @@ r cr_posix_shm02
 
 rsingle cr-post # fake test to clean results of C/R tests
 
+############################ RBT probes & tools checks
+
 
 ## Now, finish with the long running LTP tests.
 
