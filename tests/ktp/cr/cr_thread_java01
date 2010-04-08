@@ -67,6 +67,8 @@ cr_thread_java01()
 
     kill_group $PID $TESTCMD || return $?
 
+    restart_process_must_fail $PID 1 $TESTCMD || return $?
+
     mv /tmp/java_tmp_${USER}_${PID} /tmp/hsperfdata_$USER/$PID
 
     restart_process $PID 1 $TESTCMD || return $?
