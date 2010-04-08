@@ -57,9 +57,6 @@ cr_posix_shm02()
 
     runcommand +CHECKPOINTABLE 1 nosync || return $?
 
-    local cmd="ls -l /dev/shm|grep $FUNCNAME|wc -l"
-    wait_other_instances $FUNCNAME "$cmd" || return $?
-
     freeze_process $PID $TESTCMD || return $?
 
     checkpoint_frozen_process $PID $TESTCMD || return $?

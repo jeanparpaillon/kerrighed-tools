@@ -48,9 +48,6 @@ cr_posix_shm01()
     # create the shm and get its identifier
     create_posix_shm $shmname $written_msg || return $?
 
-    local cmd="ls -l /dev/shm|grep $FUNCNAME|wc -l"
-    wait_other_instances $FUNCNAME "$cmd" || return $?
-
     # dump it
     dump_posix_shm $shmname /var/chkpt/shm_${shmname}_v1.bin || return $?
 
