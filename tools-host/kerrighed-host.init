@@ -24,7 +24,7 @@ set -e
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 NAME=kerrighed-host
-DESC="Kerrighed container"
+DESC="Kerrighed host"
 
 CFG=/etc/default/$NAME
 SCRIPTNAME=/etc/init.d/$NAME
@@ -78,14 +78,12 @@ d_start() {
     log_progress_msg "cluster_init"
     echo -n $CLUSTER_INIT_HELPER > /sys/kerrighed/hotplug/cluster_init_helper || log_progress_msg "(failed)"
 
-    log_progress_msg "container"
     if test "$(cat /sys/kerrighed/node_id)" = "$BOOT_ID"; then
+	log_progress_msg "container"
 	if ! d_start_container; then
 	    log_progress_msg "(failed)"
 	    STATUS=1
 	fi
-    else
-	log_progress_msg "this node is not the initializer"
     fi
 
     return ${STATUS:-0}
