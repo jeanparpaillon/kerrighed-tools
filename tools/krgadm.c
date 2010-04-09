@@ -52,7 +52,7 @@ static struct option nodes_mode_options[] = {
 
 void version(char * program_name)
 {
-  printf("\
+	printf("\
 %s %s\n\
 Copyright (C) 2010 Kerlabs.\n\
 This is free software; see source for copying conditions. There is NO\n\
@@ -95,10 +95,10 @@ Node Status:\n\
 
 int check_kerrighed(void)
 {
-  if (krg_hotplug_init() == -1)
-    return -1;
-  else
-    return 0;
+	if (krg_hotplug_init() == -1)
+		return -1;
+	else
+		return 0;
 }
 
 char* node_set_str(struct krg_node_set* node_set)
@@ -599,8 +599,8 @@ int cluster(int argc, char* argv[], char* program_name)
 	int r;
 
 	if ( check_kerrighed() == -1 ) {
-	  perror("can not initialize libkerrighed");
-	  return EXIT_FAILURE;
+		perror("can not initialize libkerrighed");
+		return EXIT_FAILURE;
 	}
 
 	if(argc == 0 || ! strcmp(*argv, "status"))
@@ -694,8 +694,8 @@ int nodes(int argc, char* argv[], char* program_name)
 	int action = NONE;
 
 	if ( check_kerrighed() == -1 ) {
-	  perror("libkerrighed initialization failed");
-	  return EXIT_FAILURE;
+		perror("libkerrighed initialization failed");
+		return EXIT_FAILURE;
 	}
 
 	if(argc == 0 || !strcmp(*argv, "status")) {
@@ -805,7 +805,7 @@ int main(int argc, char* argv[])
 	else if (! strcmp(argv[1], "nodes"))
 		ret = nodes(count-1, arg+1, program_name);
 	else if (! strcmp(argv[1], "--version") )
-	  version(program_name);
+		version(program_name);
 	else
 		help(program_name);
 
