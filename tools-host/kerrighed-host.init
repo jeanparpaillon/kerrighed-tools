@@ -64,25 +64,34 @@ d_start_container() {
 #
 d_start() {
     log_progress_msg "isolate_uts"
-    d_set_isolate_ns "$ISOLATE_UTS" isolate_uts || log_progress_msg "(failed)"
+    if ! d_set_isolate_ns "$ISOLATE_UTS" isolate_uts; then
+	log_progress_msg "(failed)"; STATUS=1
+    fi
 
     log_progress_msg "isolate_mnt"
-    d_set_isolate_ns "$ISOLATE_MNT" isolate_mnt || log_progress_msg "(failed)"
+    if ! d_set_isolate_ns "$ISOLATE_MNT" isolate_mnt; then
+	log_progress_msg "(failed)"; STATUS=1
+    fi
 
     log_progress_msg "isolate_net"
-    d_set_isolate_ns "$ISOLATE_NET" isolate_net || log_progress_msg "(failed)"
+    if ! d_set_isolate_ns "$ISOLATE_NET" isolate_net; then
+	log_progress_msg "(failed)"; STATUS=1
+    fi
 
     log_progress_msg "isolate_user"
-    d_set_isolate_ns "$ISOLATE_USER" isolate_user || log_progress_msg "(failed)"
+    if ! d_set_isolate_ns "$ISOLATE_USER" isolate_user; then
+	log_progress_msg "(failed)"; STATUS=1
+    fi
 
     log_progress_msg "cluster_init"
-    echo -n $CLUSTER_INIT_HELPER > /sys/kerrighed/hotplug/cluster_init_helper || log_progress_msg "(failed)"
+    if ! echo -n $CLUSTER_INIT_HELPER > /sys/kerrighed/hotplug/cluster_init_helper; then
+	log_progress_msg "(failed)"; STATUS=1
+    fi
 
     if test "$(cat /sys/kerrighed/node_id)" = "$BOOT_ID"; then
 	log_progress_msg "container"
 	if ! d_start_container; then
-	    log_progress_msg "(failed)"
-	    STATUS=1
+	    log_progress_msg "(failed)"; STATUS=1
 	fi
     fi
 
@@ -92,17 +101,20 @@ d_start() {
 d_set_isolate_ns() {
     case "x$1" in
         xtrue)
-            echo 1 > /sys/kerrighed/hotplug/$2
+            echo 1 > /sys/kerrighed/hotplug/$2 || STATUS=1
             ;;
         xfalse)
-            echo 0 > /sys/kerrighed/hotplug/$2
+            echo 0 > /sys/kerrighed/hotplug/$2 || STATUS=1
             ;;
         x)
             ;;
         *)
             log_progress_msg "value of ISOLATE_xxx in $CFG must be either 'true' or 'false'"
+	    STATUS=1
             ;;
     esac
+
+    return ${STATUS:-0}
 }
 
 #
