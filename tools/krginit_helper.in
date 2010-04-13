@@ -28,4 +28,4 @@ cd  $KRG_ROOT
 if [ "$KRG_ROOT" != "/" ]; then
 	mount --move . /
 fi
-exec chroot . $KRGINIT -s $KRGINIT_ARGS "$@"
+eval exec chroot . $KRGINIT -s $KRGINIT_ARGS "$@"
