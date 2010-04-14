@@ -88,6 +88,14 @@ d_start() {
 	log_progress_msg "(failed)"; STATUS=1
     fi
 
+    log_progress_msg "net_devices"
+    for dev in $NET_DEVICES; do
+	log_progress_msg "$dev"
+	if ! echo $dev > /sys/kerrighed/net_devices; then
+	    log_progress_msg "(failed)"; STATUS=1
+	fi
+    done
+
     if test "$(cat /sys/kerrighed/node_id)" = "$BOOT_ID"; then
 	log_progress_msg "container"
 	if ! d_start_container; then

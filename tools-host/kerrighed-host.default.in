@@ -37,3 +37,10 @@ ISOLATE_USER=false
 # Something else may be used on the node starting the cluster.
 # krginit_helper has his configuration in /etc/kerrighed/krginit_helper.conf
 CLUSTER_INIT_HELPER=@sbindir@/krginit_helper
+
+# Net devices used by Kerrighed's internal RPC service
+# Format: ALL | dev1 [dev2 ...]
+# ALL is not recommended but is a conservative safe default
+NET_DEVICES=ALL
+#NET_DEVICES=eth1
+#NET_DEVICES=eth0 eth2
