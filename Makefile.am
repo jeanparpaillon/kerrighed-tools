@@ -63,8 +63,8 @@ distclean-local: kernel-distclean
 endif
 
 kernel: kernel-config
-	$(MAKE_KERNEL) bzImage
-	$(MAKE_KERNEL) modules
+	+$(MAKE_KERNEL) bzImage
+	+$(MAKE_KERNEL) modules
 
 kernel-prepare: $(kernel_builddir)-$(oosb)
 
@@ -86,7 +86,7 @@ kernel-config: $(kernel_builddir)/.config
 
 $(kernel_builddir)/.config: $(kernel_config_file)
 	$(MAKE) $(AM_MAKEFLAGS) kernel-prepare
-	@if test -n "$(kernel_config_file)"; then \
+	+@if test -n "$(kernel_config_file)"; then \
 	  $(AM_V_GEN)cp $(kernel_config_file) $@; \
 	else \
 	  $(MAKE_KERNEL) $(kernel_config); \
@@ -94,8 +94,8 @@ $(kernel_builddir)/.config: $(kernel_config_file)
 
 kernel-install:
 	$(MKDIR_P) $(DESTDIR)$(kerneldir)
-	$(MAKE_KERNEL) install
-	$(MAKE_KERNEL) modules_install
+	+$(MAKE_KERNEL) install
+	+$(MAKE_KERNEL) modules_install
 
 kernel-uninstall:
 	kernelrelease=$$($(MAKE) --quiet -C $(kernel_builddir) kernelrelease | sed '/^make/d'); \
