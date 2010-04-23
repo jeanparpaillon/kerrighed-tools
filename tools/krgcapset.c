@@ -12,6 +12,7 @@
 #include <getopt.h>
 
 #include <kerrighed.h>
+#include <config.h>
 
 #define CAP_DEF(cap) [CAP_##cap] = #cap
 
@@ -32,6 +33,7 @@ const char * cap_text[CAP_SIZE] = {
 
 static struct option long_options[] = {
   {"help", no_argument, NULL, 'h'},
+  {"version", no_argument, NULL, 'v'},
   {"show", no_argument, NULL, 's'},
   {"force", no_argument, NULL, 'f'},
   {"pid", required_argument, NULL, 'k'},
@@ -43,6 +45,16 @@ static struct option long_options[] = {
 };
 
 static int supported_caps;
+
+void version(char * program_name)
+{
+	printf("\
+%s %s\n\
+Copyright (C) 2010 Kerlabs.\n\
+This is free software; see source for copying conditions. There is NO\n\
+warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
+\n", program_name, VERSION);
+}
 
 int print_capability(int current_cap_vector)
 {
@@ -153,16 +165,16 @@ int update_capability(char* description, int oldcapability)
 
 int usage(char * argv[])
 {
-  printf("\
-Usage: %s -h|--help\n\
+	int res;
+
+	printf("\
+Usage: %s [-h|--help] [-v|--version]\n\
   or:  %s -s|--show\n\
   or:  %s [-f|--force] [-k|--pid <pid>] {SET {[+|-]CAPABILITY LIST | OCTAL VALUE}...}\n\
-", argv[0], argv[0], argv[0]);
-  fputs("\n\
- -h, --help                    display this help and exit\n\
- -s, --show                    show capabilities of calling process\n\
-", stdout);
-  fputs("\n\
+  -h, --help                   display this help and exit\n\
+  -v, --version                display version informations and exit\n\
+  -s, --show                   show capabilities of calling process\n\
+\n\
 Change capabilities of the calling (or designated) process.\n\
  SET is one of:\n\
   -e, --effective              set up effective capabilities\n\
@@ -170,14 +182,22 @@ Change capabilities of the calling (or designated) process.\n\
   -d, --inheritable-effective  set up inheritable effective capabilities\n\
   -i, --inheritable-permitted  set up inheritable permitted capabilities\n\
 \n\
- CAPABILITY LIST is a comma-separated list of capabilities amongst:\n\
-", stdout);
-  print_capability(supported_caps);
-  return 0 ;
+", argv[0], argv[0], argv[0]);
+
+	res = krg_cap_get_supported(&supported_caps);
+	if (res)
+		printf("\
+WARNING: Capability list not available. You may not be running a Kerrighed kernel.\n");
+	else {
+		printf("\
+CAPABILITY LIST is a comma-separated list of capabilities amongst:\n");
+		print_capability(supported_caps);
+	}
+	return 0;
 }
 
 int force = 0 ;
-int changed_father_cap = 0 ; 
+int changed_father_cap = 0 ;
 int main (int argc, char * argv[])
 {
   pid_t pid = -1 ;
@@ -207,9 +227,6 @@ int main (int argc, char * argv[])
       exit(res);
     }
 
-  //don't manage inheritable_effective at first
-  //initial_caps.krg_cap_inheritable_effective = ~0 ;
-
   if (argc == 1)
     {
       usage(argv);
@@ -219,7 +236,7 @@ int main (int argc, char * argv[])
   while (1)
     {
       int option_index = 0;
-      c = getopt_long(argc, argv, "hsfk:p:e:i:d:",
+      c = getopt_long(argc, argv, "hvsfk:p:e:i:d:",
 		      long_options, &option_index);
 
       if (c == -1)
@@ -231,6 +248,9 @@ int main (int argc, char * argv[])
 	case 'f':
 	  force = 1 ;
 	  break;
+	case 'v':
+		version(argv[0]);
+		exit(EXIT_SUCCESS);
 	case 's':
 	  print_capabilities(&initial_caps) ;
 	  break;
