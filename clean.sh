@@ -8,7 +8,7 @@
 #
 set -e
 
-AUTOGEN_FILES="aclocal.m4 autom4te.cache configure config.guess config.log config.sub config.status depcomp compile libtool ltmain.sh missing mkinstalldirs config.h config.h.in m4/*"
+AUTOGEN_FILES="aclocal.m4 autom4te.cache configure config.guess config.log config.sub config.status depcomp compile libtool ltmain.sh missing mkinstalldirs config.h config.h.in m4/* py-compile"
 
 echo "Clean autogen generated files"
 for file in $AUTOGEN_FILES; do
