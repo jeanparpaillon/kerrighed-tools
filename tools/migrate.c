@@ -1,5 +1,9 @@
 /*
  *  Copyright (C) 2001-2006, INRIA, Universite de Rennes 1, EDF.
+ *  Copyright (c) 2010, Kerlabs
+ *
+ * Authors:
+ *    Jean Parpaillon <jean.parpaillon@kerlabs.com>
  */
 
 #include <stdlib.h>
@@ -7,58 +11,76 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <errno.h>
+#include <getopt.h>
 
 #include <kerrighed.h>
+#include <config.h>
 
 int pid, nodeid ;
 
-void parse_args(int argc, char *argv[])
+void version(char * program_name)
 {
-  int c;
-  
-  while (1)
-    {
-      c = getopt(argc, argv, "h");
-      if (c == -1)
-	break;
-
-      switch (c)
-	{
-          default:
-	    printf("** unknown option\n");
-	  case 'h':
-	    goto err;
-        }
-    }
-  
-  if (optind != argc - 2)
-    goto err ;
-  
-  pid = atoi(argv[optind++]);
-  nodeid = atoi(argv[optind++]);
-    
-  return ;
-
-err:
-    printf ("usage: %s [-h] pid nodeid\n", argv[0]);
-    printf ("  -h : This help\n");
-    exit(1);
+	printf("\
+%s %s\n\
+Copyright (C) 2010 Kerlabs.\n\
+This is free software; see source for copying conditions. There is NO\n\
+warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
+\n", program_name, VERSION);
 }
 
+void help(char * program_name)
+{
+	printf("\
+Usage: %s [-h|--help] [-v|--version] <pid> <nodeid>\n",
+	       program_name);
+}
+
+void parse_args(int argc, char *argv[])
+{
+	char c;
+	int option_index =0;
+	char * short_options = "hv";
+	static struct option long_options[] = {
+		{"help", no_argument, 0, 'h'},
+		{"version", no_argument, 0, 'v'},
+		{0, 0, 0, 0}
+	};
+
+	while ((c = getopt_long(argc, argv, short_options,
+			  long_options, &option_index)) != -1) {
+		switch (c) {
+		case 'h':
+			help(argv[0]);
+			exit(EXIT_SUCCESS);
+		case 'v':
+			version(argv[0]);
+			exit(EXIT_SUCCESS);
+		default:
+			help(argv[0]);
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	if (optind != argc - 2) {
+		help(argv[0]);
+		exit(EXIT_FAILURE);
+	}
+	pid = atoi(argv[optind++]);
+	nodeid = atoi(argv[optind++]);
+}
 
 int main(int argc, char *argv[])
 {
-  int r ;
+	int r ;
 
-  parse_args(argc, argv);
- 
-  r = migrate (pid, nodeid);
+	parse_args(argc, argv);
 
-  if (r != 0)
-    {
-      perror("migrate");
-      return 1 ;
-    }
+	r = migrate (pid, nodeid);
 
-  return 0;
+	if (r != 0) {
+	    perror("migrate");
+	    return 1 ;
+	}
+
+	return 0;
 }
