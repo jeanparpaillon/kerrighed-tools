@@ -34,6 +34,8 @@
 #include <getopt.h>
 #include <kerrighed.h>
 
+#include <config.h>
+
 #define MAX_FILEPATH 256
 #define MAX_LEN_ARGS 512
 
@@ -44,13 +46,25 @@ short quiet = 0;
 char filepath[MAX_FILEPATH];
 pid_t pid;
 
+void version(char * program_name)
+{
+	printf("\
+%s %s\n\
+Copyright (C) 2010 Kerlabs.\n\
+This is free software; see source for copying conditions. There is NO\n\
+warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
+\n", program_name, VERSION);
+}
+
 void print_usage(char *cmd)
 {
 	fprintf(stderr,
-		"usage: %s [OPTIONS] -- program [arg ...]\n"
-		"\t -o file: write the session id in a file\n"
-		"\t -b: start the program in background (default: foreground)\n"
-		"\t -q: (quiet) do not show the Application idendifier\n"
+		"Usage: %s [OPTIONS] -- program [arg ...]\n"
+		"  -h          Show this information and exit\n"
+		"  -v          Show version informations and exit\n"
+		"  -o file     write the session id in a file\n"
+		"  -b          start the program in background (default: foreground)\n"
+		"  -q          (quiet) do not show the Application idendifier\n"
 		, cmd);
 
 	/* Option -s and -n are hidden, there exist only for tests */
@@ -84,10 +98,13 @@ void parse_args(int argc, char *argv[])
 	int c;
 
 	while (1) {
-		c = getopt(argc, argv, "hbo:qsn");
+		c = getopt(argc, argv, "vhbo:qsn");
 		if (c == -1)
 			break;
 		switch (c) {
+		case 'v':
+			version(argv[0]);
+			exit(EXIT_SUCCESS);
 		case 'b':
 			background = 1;
 			break;
