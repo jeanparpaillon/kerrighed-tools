@@ -52,6 +52,8 @@ K_V_ = $(AM_DEFAULT_VERBOSITY)
 K_V_0 = 0
 K_V_1 = 1
 
+MAKE_KERNEL=$(MAKE) -C $(kernel_builddir) V=$(K_V) EXTRAVERSION=-krg$(VERSION) INSTALL_PATH=$(DESTDIR)$(kerneldir) INSTALL_MOD_PATH=$(DESTDIR)$(modulesdir)
+
 if ENABLE_KERNEL
 all-local: kernel
 install-exec-local: kernel-install
@@ -61,8 +63,8 @@ distclean-local: kernel-distclean
 endif
 
 kernel: kernel-config
-	$(MAKE) -C $(kernel_builddir) bzImage V=$(K_V)
-	$(MAKE) -C $(kernel_builddir) modules V=$(K_V)
+	$(MAKE_KERNEL) bzImage
+	$(MAKE_KERNEL) modules
 
 kernel-prepare: $(kernel_builddir)-$(oosb)
 
@@ -70,6 +72,7 @@ $(kernel_builddir)-y: $(kernel_builddir)/Makefile.oosb
 
 $(kernel_builddir)/Makefile.oosb:
 	$(MAKE) $(AM_MAKEFLAGS) kernel-src
+	-$(MAKE_KERNEL) mrproper
 	$(MKDIR_P) $(@D)
 	$(MAKE) -C $(kernel_srcdir) outputmakefile O="$(abspath $(kernel_builddir))" V=$(K_V)
 	$(LN_S) Makefile $@
@@ -86,13 +89,13 @@ $(kernel_builddir)/.config: $(kernel_config_file)
 	@if test -n "$(kernel_config_file)"; then \
 	  $(AM_V_GEN)cp $(kernel_config_file) $@; \
 	else \
-	  $(MAKE) -C $(kernel_builddir) $(kernel_config) V=$(K_V); \
+	  $(MAKE_KERNEL) $(kernel_config); \
 	fi
 
 kernel-install:
 	$(MKDIR_P) $(DESTDIR)$(kerneldir)
-	$(MAKE) -C $(kernel_builddir) install INSTALL_PATH=$(DESTDIR)$(kerneldir) V=$(K_V)
-	$(MAKE) -C $(kernel_builddir) modules_install INSTALL_MOD_PATH=$(DESTDIR)$(modulesdir) V=$(K_V)
+	$(MAKE_KERNEL) install
+	$(MAKE_KERNEL) modules_install
 
 kernel-uninstall:
 	kernelrelease=$$($(MAKE) --quiet -C $(kernel_builddir) kernelrelease | sed '/^make/d'); \
@@ -103,10 +106,10 @@ kernel-uninstall:
 	  rm -rf $(DESTDIR)$(modulesdir)/lib/modules/$$kernelrelease
 
 kernel-clean:
-	$(MAKE) -C kernel clean  V=$(K_V) || true
+	-$(MAKE_KERNEL) clean
 
 kernel-distclean:
-	$(MAKE) -C kernel mrproper  V=$(K_V) || true
+	-$(MAKE_KERNEL) mrproper
 	if test ! "$(kernel_builddir)" = "$(kernel_srcdir)"; then \
 	  rm -f $(shell find kernel -name asm-offsets.h); \
 	  rm -f kernel/Makefile kernel/Makefile.oosb; \
