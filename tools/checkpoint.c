@@ -16,6 +16,8 @@
 #include <kerrighed.h>
 #include <libkrgcb.h>
 
+#include <config.h>
+
 #define CHKPT_DIR "/var/chkpt"
 
 typedef enum {
@@ -33,18 +35,37 @@ int flags = 0;
 char * description = NULL;
 app_action_t action = ALL;
 
-void show_help(void)
+void version(char * program_name)
 {
-	printf("Usage : \n"
-	       "checkpoint [-h]:\t print this help\n"
-	       "checkpoint [-b --no-callbacks] [(-d|--description) description] [(-k|--kill)[signal]] "
-	       "<pid> | -a <appid> :"
-	       "\t checkpoint a running application\n"
-	       "checkpoint  [-b --no-callbacks] -f|--freeze <pid>| -a <appid> :\t freeze an application\n"
-	       "checkpoint  [-b --no-callbacks] -u|--unfreeze[=signal] <pid>| -a <appid> :\t unfreeze an application\n"
-	       "checkpoint -c|--ckpt-only [(-d|--description) description] <pid> | -a <appid> :"
-	       "\t checkpoint a frozen application\n"
-	       );
+	printf("\
+%s %s\n\
+Copyright (C) 2010 Kerlabs.\n\
+This is free software; see source for copying conditions. There is NO\n\
+warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
+\n", program_name, VERSION);
+}
+
+void show_help(char * program_name)
+{
+	printf("Usage: %s [options] <pid>\n"
+	       "\n"
+	       "Mutually Exclusive Options:\n"
+	       "  Without any of these options, freeze and checkpoint the application.\n"
+	       "  -f|--freeze             Freeze the application\n"
+	       "  -u|--unfreeze [signal]  Unfreeze the application\n"
+	       "  -c|--ckpt-only          Checkpoint a frozen application\n"
+	       "  -k|--kill [signal]      Send a signal to the application, after checkpointing and before unfreezing\n"
+	       "\n"
+	       "General Options:\n"
+	       "  -h|--help               Display this information and exit\n"
+	       "  -v|--version            Display version informations and exit\n"
+	       "  -q|--quiet              Be less verbose\n"
+	       "  -b|--no-callbacks       Do not execute callbacks\n"
+	       "  -d|--description        Associate a description with the checkpoint\n"
+	       "  -a|--appid              Use <pid> as an application identifier rather than a process identifier\n"
+	       "  -i|--ignore-unsupported-files\n"
+	       "                          Allow to checkpoint application with open files of unsupported type\n",
+	       program_name);
 }
 
 void parse_args(int argc, char *argv[])
@@ -54,6 +75,7 @@ void parse_args(int argc, char *argv[])
 	char * short_options= "hqacd:bfu::k::i";
 	static struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
+		{"version", no_argument, 0, 'v'},
 		{"quiet", no_argument, 0, 'q'},
 		{"from-appid", no_argument, 0, 'a'},
 		{"ckpt-only", no_argument, 0, 'c'},
@@ -70,9 +92,11 @@ void parse_args(int argc, char *argv[])
 				long_options, &option_index)) != -1) {
 		switch (c) {
 		case 'h':
-			show_help();
+			show_help(argv[0]);
 			exit(EXIT_SUCCESS);
-			break;
+		case 'v':
+			version(argv[0]);
+			exit(EXIT_SUCCESS);
 		case 'q':
 			quiet=1;
 			break;
@@ -106,7 +130,7 @@ void parse_args(int argc, char *argv[])
 			flags |= CKPT_W_UNSUPPORTED_FILE;
 			break;
 		default:
-			show_help();
+			show_help(argv[0]);
 			exit(EXIT_FAILURE);
 			break;
 		}
@@ -374,16 +398,16 @@ int main(int argc, char *argv[])
 	int r = 0;
 	long pid = -1;
 
-	/* Check environment */
-	check_environment();
-
 	/* Manage options with getopt */
 	parse_args(argc, argv);
 
 	if (argc - optind != 1) {
-		show_help();
+		show_help(argv[0]);
 		exit(EXIT_FAILURE);
 	}
+
+	/* Check environment */
+	check_environment();
 
 	/* get the pid */
 	pid = atol( argv[optind] );
