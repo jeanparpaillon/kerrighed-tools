@@ -7,24 +7,49 @@
 #include <sys/wait.h>
 #include <hotplug.h>
 
+#include <config.h>
+
 int create_session = 0;
+
+void version(char * program_name)
+{
+	printf("\
+%s %s\n\
+Copyright (C) 2010 Kerlabs.\n\
+This is free software; see source for copying conditions. There is NO\n\
+warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
+\n", program_name, VERSION);
+}
+
+void help(char * program_name)
+{
+	fprintf(stderr,
+		"Usage: %s [-s] [-h] [-v] [<init_program> [<init_arg1> ...]]\n"
+		"Options:\n"
+		" -s  Create a process session\n"
+		" -h  Display these lines\n"
+		" -v  Display version informations\n",
+		program_name);
+}
 
 int get_config(int argc, char *argv[])
 {
 	int opt;
 
-	while ((opt = getopt(argc, argv, "s")) != -1) {
+	while ((opt = getopt(argc, argv, "svh")) != -1) {
 		switch (opt) {
 		case 's':
 			create_session = 1;
 			break;
+		case 'v':
+			version(argv[0]);
+			exit(EXIT_SUCCESS);
+		case 'h':
+			help(argv[0]);
+			exit(EXIT_SUCCESS);
 		default:
-			fprintf(stderr,
-				"Usage: %s [-s] [<init_program> [<init_arg1> ...]]\n"
-				"Options:\n"
-				" -s  Create a process session\n",
-				argv[0]);
-			exit(1);
+			help(argv[0]);
+			exit(EXIT_FAILURE);
 		}
 	}
 
