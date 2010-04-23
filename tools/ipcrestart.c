@@ -7,6 +7,8 @@
 #include <getopt.h>
 #include <kerrighed.h>
 
+#include <config.h>
+
 enum ipctype {
 	UNDEF,
 	MSG,
@@ -16,14 +18,25 @@ enum ipctype {
 
 enum ipctype ipc_type = UNDEF;
 
-void show_help()
+void version(char * program_name)
 {
-	printf("Usage:\n"
-	       "ipcrestart -q|-s|-m pathname\n"
-	       "\t -q\t for a message queue\n"
-	       "\t -s\t for a semaphore array\n"
-	       "\t -m\t for a shared memory segment\n"
-		);
+	printf("\
+%s %s\n\
+Copyright (C) 2010 Kerlabs.\n\
+This is free software; see source for copying conditions. There is NO\n\
+warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
+\n", program_name, VERSION);
+}
+
+void show_help(char * program_name)
+{
+	printf("Usage: %s [-h|--help] [-v|--version] {-q|-s|-m} pathname\n"
+	       "  -h|--help       Show this information and exit\n"
+	       "  -v|--version    Show version informations and exit\n"
+	       "  -q|--queue      for a message queue\n"
+	       "  -s|--semaphore  for a semaphore array\n"
+	       "  -m|--memory     for a shared memory segment\n",
+	       program_name);
 }
 
 void parse_args(int argc, char *argv[])
@@ -33,6 +46,7 @@ void parse_args(int argc, char *argv[])
 	char * short_options= "hqsm";
 	static struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
+		{"version", no_argument, 0, 'v'},
 		{"queue", no_argument, 0, 'q'},
 		{"semaphore", no_argument, 0, 's'},
 		{"memory", no_argument, 0, 'm'},
@@ -43,9 +57,11 @@ void parse_args(int argc, char *argv[])
 				long_options, &option_index)) != -1) {
 		switch (c) {
 		case 'h':
-			show_help();
+			show_help(argv[0]);
 			exit(EXIT_SUCCESS);
-			break;
+		case 'v':
+			version(argv[0]);
+			exit(EXIT_SUCCESS);
 		case 'q':
 			ipc_type = MSG;
 			break;
@@ -56,7 +72,7 @@ void parse_args(int argc, char *argv[])
 			ipc_type = SHM;
 			break;
 		default:
-			show_help();
+			show_help(argv[0]);
 			exit(EXIT_FAILURE);
 			break;
 		}
@@ -108,7 +124,7 @@ int main(int argc, char *argv[])
 
 	if (ipc_type == UNDEF
 	    || argc - optind != 1) {
-		show_help();
+		show_help(argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
@@ -131,7 +147,7 @@ int main(int argc, char *argv[])
 		r = shm_restart(fd);
 		break;
 	default:
-		show_help();
+		show_help(argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
