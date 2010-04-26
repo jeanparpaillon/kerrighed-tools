@@ -93,14 +93,6 @@ Node Status:\n\
 \n");
 }
 
-int check_kerrighed(void)
-{
-	if (krg_hotplug_init() == -1)
-		return -1;
-	else
-		return 0;
-}
-
 char* node_set_str(struct krg_node_set* node_set)
 {
 	char* str;
@@ -598,10 +590,12 @@ int cluster(int argc, char* argv[], char* program_name)
 	int ret = EXIT_SUCCESS;
 	int r;
 
-	if ( check_kerrighed() == -1 ) {
-		perror("can not initialize libkerrighed");
+	if ( krg_check_hotplug() ) {
+		perror("Kerrighed is not running");
 		return EXIT_FAILURE;
 	}
+
+	krg_hotplug_init();
 
 	if(argc == 0 || ! strcmp(*argv, "status"))
 		action = STATUS;
@@ -693,10 +687,12 @@ int nodes(int argc, char* argv[], char* program_name)
 	int nb_nodes = NB_NODES_UNSET;
 	int action = NONE;
 
-	if ( check_kerrighed() == -1 ) {
-		perror("libkerrighed initialization failed");
+	if ( krg_check_hotplug() ) {
+		perror("Kerrighed is not running");
 		return EXIT_FAILURE;
 	}
+
+	krg_hotplug_init();
 
 	if(argc == 0 || !strcmp(*argv, "status")) {
 		action = STATUS;
