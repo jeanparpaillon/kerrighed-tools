@@ -7,6 +7,17 @@
 #include "types.h"
 #include "checkpoint.h"
 
+#define CHKPT_DIR "/var/chkpt"
+
+/*
+ * krg_check_checkpoint
+ *
+ * Check if kerrighed support checkpoint
+ *
+ * Return 0 if ok, 1 otherwise
+ */
+int krg_check_checkpoint(void);
+
 int get_node_id(void);
 int get_nr_nodes(void);
 

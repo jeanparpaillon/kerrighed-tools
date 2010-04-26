@@ -11,6 +11,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include <types.h>
 #include <krgnodemask.h>
@@ -25,7 +26,19 @@
 /*                                                                           */
 /*****************************************************************************/
 
+int krg_check_checkpoint(void)
+{
+	struct stat buffer;
+	int status;
 
+	status = stat(CHKPT_DIR, &buffer);
+	if (status) {
+		errno = ENOENT;
+		return 1;
+	}
+
+	return 0;
+}
 
 /* Return the node id of the local machine */
 
