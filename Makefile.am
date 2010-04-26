@@ -110,9 +110,9 @@ kernel-clean:
 
 kernel-distclean:
 	-$(MAKE_KERNEL) mrproper
+	[ ! -d $(kernel_srcdir)/.git ] && rm -rf $(kernel_srcdir) || true
 	if test ! "$(kernel_builddir)" = "$(kernel_srcdir)"; then \
-	  rm -f $(shell find kernel -name asm-offsets.h); \
-	  rm -f kernel/Makefile kernel/Makefile.oosb; \
+	  rm -rf $(kernel_builddir); \
 	fi
 
 build-patch:
