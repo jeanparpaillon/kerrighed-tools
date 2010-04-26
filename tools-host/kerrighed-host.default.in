@@ -6,10 +6,6 @@
 # Start Kerrighed container on this node. If -1, does not start container.
 BOOT_ID=1
 
-# If true, Kerrighed container is run from a new VT
-NEWVT=true
-#NEWVT=false
-
 # Local namespaces to isolate Kerrighed from
 # Leaving unset won't change kernel's current settings
 

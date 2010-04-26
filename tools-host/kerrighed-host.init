@@ -48,13 +48,8 @@ d_check_kerrighed() {
 # Start the Kerrighed container
 #
 d_start_container() {
-    if test -n "$NEWVT"; then
-	CURVT=$(fgconsole 2> /dev/null || true)
-	test -n "$CURVT" && chvt $(fgconsole --next-available)
-    fi
     krgboot_helper
     ret=$?
-    test -n "$CURVT" && chvt $CURVT
 
     return $ret
 }
