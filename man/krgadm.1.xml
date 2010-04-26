@@ -1,5 +1,5 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-					"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+	  "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='krgadm.1'>
   <refmeta>
     <refentrytitle>krgadm</refentrytitle>
@@ -15,30 +15,23 @@
     <cmdsynopsis>
       <command>krgadm</command>
       <group choice="opt" >
-				<arg choice="plain">-h</arg>
-				<arg choice="plain">--help</arg>
+	<arg choice="plain">-h</arg>
+	<arg choice="plain">--help</arg>
+      </group>
+      <group choice="opt" >
+	<arg choice="plain">-v</arg>
+	<arg choice="plain">--version</arg>
       </group>
     </cmdsynopsis>
     <cmdsynopsis>
       <command>krgadm</command>
       <arg choice="plain" >cluster</arg>
       <group choice="req" >
-				<arg choice="plain">status</arg>
-				<arg choice="plain">wait_start</arg>
-				<arg choice="plain">poweroff</arg>
-				<arg choice="plain">reboot</arg>
-      </group>
-    </cmdsynopsis>
-    <cmdsynopsis>
-      <command>krgadm</command>
-      <arg choice="plain" >cluster start</arg>
-      <group choice="opt" >
-	<arg choice="plain" >-n</arg>
-	<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
-      </group>
-      <group choice="opt">
-	<arg choice="plain" >-c</arg>
-	<arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
+	<arg choice="plain">start</arg>
+	<arg choice="plain">status</arg>
+	<arg choice="plain">wait_start</arg>
+	<arg choice="plain">poweroff</arg>
+	<arg choice="plain">reboot</arg>
       </group>
     </cmdsynopsis>
     <cmdsynopsis>
@@ -88,13 +81,20 @@
     <title>General Options</title>
     <para>
       <variablelist>
-				<varlistentry>
-					<term>-h</term>
-					<term>--help</term>
-					<listitem>
-						<para>Print help and exit</para>
-					</listitem>
-				</varlistentry>
+	<varlistentry>
+	  <term>-h</term>
+	  <term>--help</term>
+	  <listitem>
+	    <para>Print help and exit</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>-v</term>
+	  <term>--version</term>
+	  <listitem>
+	    <para>Print version informations and exit</para>
+	  </listitem>
+	</varlistentry>
       </variablelist>
     </para>
   </refsect1>
@@ -103,18 +103,18 @@
     <title>Modes</title>
     <para>
       <variablelist>
-				<varlistentry>
-					<term>cluster</term>
-					<listitem>
-						<para>Manage the cluster.</para>
-					</listitem>
-				</varlistentry>
-				<varlistentry>
-					<term>nodes</term>
-					<listitem>
-						<para>Manage nodes inside the cluster.</para>
-					</listitem>
-				</varlistentry>
+	<varlistentry>
+	  <term>cluster</term>
+	  <listitem>
+	    <para>Manage the cluster.</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>nodes</term>
+	  <listitem>
+	    <para>Manage nodes inside the cluster.</para>
+	  </listitem>
+	</varlistentry>
       </variablelist>
     </para>
   </refsect1>
@@ -123,193 +123,172 @@
     <title>Cluster commands</title>
     <para>
       <variablelist>
-				<varlistentry>
-					<term>
-						<arg choice="plain" >start</arg>
-						<group choice="opt" >
-							<arg choice="plain" >-n</arg>
-							<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
-						</group>
-						<group choice="opt" >
-							<arg choice="plain" >-c</arg>
-							<arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
-						</group>
-					</term>
-					<listitem>
-						<para>
-							Start the cluster with all available nodes (state present).
-						</para>
-						<para>
-							With the <arg choice="plain" >--nodes</arg> option,
-							wait for a given list of nodes before starting.
-						</para>
-						<para>
-							With the <arg choice="plain" >--count</arg> option, wait
-							for the given number of nodes to be present before
-							starting.
-						</para>
-						<para>
-						  Options <arg choice="plain" >--nodes</arg> and <arg choice="plain" >--count</arg>
-						  are mutually exclusive.
-						</para>
-					</listitem>
-				</varlistentry>
-				<varlistentry>
-					<term>status</term>
-					<listitem>
-						<para>Print cluster status</para>
-					</listitem>
-				</varlistentry>
-				<varlistentry>
-					<term>wait_start</term>
-					<listitem>
-						<para>Return once cluster is started</para>
-					</listitem>
-				</varlistentry>
-				<varlistentry>
-					<term>poweroff</term>
-					<listitem>
-						<para>Power off all nodes belonging to the cluster</para>
-					</listitem>
-				</varlistentry>
-				<varlistentry>
-					<term>reboot</term>
-					<listitem>
-						<para>Reboot all nodes belonging to the cluster</para>
-					</listitem>
-				</varlistentry>
+	<varlistentry>
+	  <term>
+	    <arg choice="plain" >start</arg>
+	  </term>
+	  <listitem>
+	    <para>
+	      Start the cluster on the current node.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>status</term>
+	  <listitem>
+	    <para>Print cluster status</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>wait_start</term>
+	  <listitem>
+	    <para>Return once cluster is started</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>poweroff</term>
+	  <listitem>
+	    <para>Power off all nodes belonging to the cluster</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>reboot</term>
+	  <listitem>
+	    <para>Reboot all nodes belonging to the cluster</para>
+	  </listitem>
+	</varlistentry>
       </variablelist>
     </para>
   </refsect1>
 
-	<refsect1>
-		<title>nodes commands</title>
-		<para>
-			<variablelist>
-				<varlistentry>
-					<term>
-						<arg choice="plain" >status</arg>
-						<group choice="opt" >
-							<arg choice="plain" >-n</arg>
-							<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
-						</group>
-					</term>
-					<listitem>
-						<para>Prints nodes status.</para>
-						<para>
-							With the <arg choice="plain" >--nodes</arg> option,
-							prints only given nodes status.
-						</para>
-					</listitem>
-				</varlistentry>
-				<varlistentry>
-					<term>
-						<arg choice="plain" >add</arg>
-						<group choice="opt" >
-							<arg choice="plain" >-n</arg>
-							<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
-						</group>
-						<group choice="opt" >
-							<arg choice="plain" >-c</arg>
-							<arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
-						</group>
-						<group choice="opt" >
-							<arg choice="plain" >-a</arg>
-							<arg choice="plain" >--all</arg>
-						</group>
-					</term>
-					<listitem>
-						<para>
-							Add nodes to the running cluster.
-						</para>
-						<para>
-							With the <arg choice="plain" >--nodes</arg> option, wait
-							for given nodes to be present, then add them to the
-							running cluster.
-						</para>
-						<para>
-							With the <arg choice="plain" >--count</arg> option, wait
-							for the given number of nodes to be present, then add
-							them to the running cluster.
-						</para>
-						<para>
-							With the <arg choice="plain" >--all</arg> option, add
-							all the available node (state present) to the running
-							cluster.
-						</para>
-						<para>
-						  One of the options <arg choice="plain" >--nodes</arg>, <arg choice="plain" >--count</arg>
-						  or <arg choice="plain" >--all</arg> must be used.
-						</para>
-					</listitem>
-				</varlistentry>
-				<varlistentry>
-					<term>
-						<arg choice="plain" >del</arg>
-						<group choice="opt" >
-							<arg choice="plain" >-n</arg>
-							<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
-						</group>
-						<group choice="opt" >
-							<arg choice="plain" >-c</arg>
-							<arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
-						</group>
-						<group choice="opt" >
-							<arg choice="plain" >-a</arg>
-							<arg choice="plain" >--all</arg>
-						</group>
-					</term>
-					<listitem>
-						<para>
-							Remove nodes from the running cluster.
-						</para>
-						<para>
-							With the <arg choice="plain" >--nodes</arg> option,
-							remove the given list of nodes, if they are in the
-							cluster.
-						</para>
-						<para>
-							With the <arg choice="plain" >--count</arg> option,
-							remove the given number of nodes from the cluster. Fail
-							if there are no such nodes.
-						</para>
-						<para>
-							With the <arg choice="plain" >--all</arg> option, remove
-							all nodes of the cluster, except current one.
-						</para>
-						<para>
-						  One of the options <arg choice="plain" >--nodes</arg>, <arg choice="plain" >--count</arg>
-						  or <arg choice="plain" >--all</arg> must be used.
-						</para>
-					</listitem>
-				</varlistentry>
-			</variablelist>
-		</para>
-	</refsect1>
+  <refsect1>
+    <title>nodes commands</title>
+    <para>
+      <variablelist>
+	<varlistentry>
+	  <term>
+	    <arg choice="plain" >status</arg>
+	    <group choice="opt" >
+	      <arg choice="plain" >-n</arg>
+	      <arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
+	    </group>
+	  </term>
+	  <listitem>
+	    <para>Prints nodes status.</para>
+	    <para>
+	      With the <arg choice="plain" >--nodes</arg> option,
+	      prints only given nodes status.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>
+	    <arg choice="plain" >add</arg>
+	    <group choice="opt" >
+	      <arg choice="plain" >-n</arg>
+	      <arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
+	    </group>
+	    <group choice="opt" >
+	      <arg choice="plain" >-c</arg>
+	      <arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
+	    </group>
+	    <group choice="opt" >
+	      <arg choice="plain" >-a</arg>
+	      <arg choice="plain" >--all</arg>
+	    </group>
+	  </term>
+	  <listitem>
+	    <para>
+	      Add nodes to the running cluster.
+	    </para>
+	    <para>
+	      With the <arg choice="plain" >--nodes</arg> option, wait
+	      for given nodes to be present, then add them to the
+	      running cluster.
+	    </para>
+	    <para>
+	      With the <arg choice="plain" >--count</arg> option, wait
+	      for the given number of nodes to be present, then add
+	      them to the running cluster.
+	    </para>
+	    <para>
+	      With the <arg choice="plain" >--all</arg> option, add
+	      all the available node (state present) to the running
+	      cluster.
+	    </para>
+	    <para>
+	      One of the options <arg choice="plain" >--nodes</arg>, <arg choice="plain" >--count</arg>
+	      or <arg choice="plain" >--all</arg> must be used.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>
+	    <arg choice="plain" >del</arg>
+	    <group choice="opt" >
+	      <arg choice="plain" >-n</arg>
+	      <arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
+	    </group>
+	    <group choice="opt" >
+	      <arg choice="plain" >-c</arg>
+	      <arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
+	    </group>
+	    <group choice="opt" >
+	      <arg choice="plain" >-a</arg>
+	      <arg choice="plain" >--all</arg>
+	    </group>
+	  </term>
+	  <listitem>
+	    <para>
+	      Remove nodes from the running cluster.
+	    </para>
+	    <para>
+	      With the <arg choice="plain" >--nodes</arg> option,
+	      remove the given list of nodes, if they are in the
+	      cluster.
+	    </para>
+	    <para>
+	      With the <arg choice="plain" >--count</arg> option,
+	      remove the given number of nodes from the cluster. Fail
+	      if there are no such nodes.
+	    </para>
+	    <para>
+	      With the <arg choice="plain" >--all</arg> option, remove
+	      all nodes of the cluster, except current one.
+	    </para>
+	    <para>
+	      One of the options <arg choice="plain" >--nodes</arg>, <arg choice="plain" >--count</arg>
+	      or <arg choice="plain" >--all</arg> must be used.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </para>
+  </refsect1>
 
-	<refsect1>
-		<title>Nodes list syntax</title>
-		<para>
-			For all actions accepting a nodes list, syntax is the following:
-			<itemizedlist>
-				<listitem>
-					<para>
-						nodeslist ::= item(,item)+
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						item ::= (nodeid|noderange)
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						noderange ::= nodeid-nodeid
-					</para>
-				</listitem>
-			</itemizedlist>
-		</para>
-	</refsect1>
+  <refsect1>
+    <title>Nodes list syntax</title>
+    <para>
+      For all actions accepting a nodes list, syntax is the following:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    nodeslist ::= item(,item)+
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    item ::= (nodeid|noderange)
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    noderange ::= nodeid-nodeid
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+  </refsect1>
 
   <refsect1>
     <title>Author</title>
