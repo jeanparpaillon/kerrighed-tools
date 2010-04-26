@@ -9,7 +9,7 @@ ENABLE=true
 
 # krgadm cluster start options. Can be used to wait for some nodes.
 # See man krgadm(1)
-START_OPTS=""
+START_OPTS="--all"
 #START_OPTS="--count 4"
 #START_OPTS="--nodes 1-4"
 
