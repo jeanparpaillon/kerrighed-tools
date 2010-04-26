@@ -70,6 +70,14 @@
 	</varlistentry>
 
 	<varlistentry>
+	  <term><option>-v</option></term>
+	  <term><option>--version</option></term>
+	  <listitem>
+	    <para>Print version informations and exit.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
 	  <term><option>-a</option></term>
 	  <term><option>--from-appid</option></term>
 	  <listitem>
