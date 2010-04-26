@@ -18,6 +18,8 @@
 #include <kerrighed.h>
 #include <libkrgcb.h>
 
+#include <config.h>
+
 #define CHKPT_DIR "/var/chkpt"
 
 long appid;
@@ -35,12 +37,29 @@ struct cr_subst_files_array substitution;
 int array_size = 0;
 const int ARRAY_SIZE_INC = 32;
 
-void show_help()
+void show_version(char * program_name)
 {
-	printf ("Restart an application\nusage: restart [-h]"
-		" [-f|-t] [-q] [-d] [-p] id version\n");
-	printf ("  -h : This help\n");
-	exit(1);
+	printf("\
+%s %s\n\
+Copyright (C) 2010 Kerlabs.\n\
+This is free software; see source for copying conditions. There is NO\n\
+warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
+\n", program_name, VERSION);
+}
+
+void show_help(char * program_name)
+{
+	printf ("Usage: %s [options] appid version\n"
+		"\n"
+		"Options:\n"
+		"  -h|--help                Display this information and exit\n"
+		"  -v|--version             Display version information\n"
+		"  -t|--replace-tty         Replace application original terminal by the current one\n"
+		"  -f|--foreground          Restart the application in foreground\n"
+		"  -p|--pids                Replace application orphan pgrp and sid by the ones of restart\n"
+		"  -s|--substitute-file file_id,fd\n"
+		"                           Substitute application open files by restart parent fd\n",
+		program_name);
 }
 
 char *__get_returned_word(const char *toexec)
@@ -250,10 +269,11 @@ int parse_args(int argc, char *argv[])
 	char *checkpoint_dir;
 	char c;
 	int r, option_index = 0;
-	char * short_options= "hftps:qd";
+	char * short_options= "hvftps:qd";
 	static struct option long_options[] =
 		{
 			{"help", no_argument, 0, 'h'},
+			{"version", no_argument, 0, 'v'},
 			{"foreground", no_argument, 0, 'f'},
 			{"tty", no_argument, 0, 't'},
 			{"pids", no_argument, 0, 'p'},
@@ -270,9 +290,11 @@ int parse_args(int argc, char *argv[])
 		switch (c)
 		{
 		case 'h':
-			show_help();
+			show_help(argv[0]);
 			exit(EXIT_SUCCESS);
-			break;
+		case 'v':
+			show_version(argv[0]);
+			exit(EXIT_SUCCESS);
 		case 'f':
 			options |= (FOREGROUND | STDIN_OUT_ERR);
 			break;
@@ -292,7 +314,7 @@ int parse_args(int argc, char *argv[])
 			options |= DEBUG;
 			break;
 		default:
-			show_help();
+			show_help(argv[0]);
 			exit(EXIT_FAILURE);
 			break;
 		}
@@ -306,7 +328,7 @@ int parse_args(int argc, char *argv[])
 	}
 
 	if (argc - optind != 2) {
-		show_help();
+		show_help(argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
@@ -400,13 +422,13 @@ int main(int argc, char *argv[])
 {
 	int r = 0;
 
-	/* Check environment */
-	check_environment();
-
 	/* Manage options with getopt */
 	r = parse_args(argc, argv);
 	if (r)
 		goto exit;
+
+	/* Check environment */
+	check_environment();
 
 	if (!(options & QUIET))
 		printf("Restarting application %ld (v%d) ...\n",
