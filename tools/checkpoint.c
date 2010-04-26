@@ -1,13 +1,16 @@
 /*
  *  Copyright (C) 2001-2006, INRIA, Universite de Rennes 1, EDF.
+ *  Copyright (c) 2010, Kerlabs
+ *
+ * Authors:
+ *    Matthieu Fertre <matthieu.fertre@kerlabs.com>
+ *    Jean Parpaillon <jean.parpaillon@kerlabs.com>
  */
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/types.h>
 #include <signal.h>
 #include <errno.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
 #include <dirent.h>
@@ -17,8 +20,6 @@
 #include <libkrgcb.h>
 
 #include <config.h>
-
-#define CHKPT_DIR "/var/chkpt"
 
 typedef enum {
 	ALL,
@@ -140,21 +141,17 @@ void parse_args(int argc, char *argv[])
 
 void check_environment(void)
 {
-	struct stat buffer;
-	int status;
-
 	/* is Kerrighed launched ? */
-	if (get_nr_nodes() == -1)
+	if (krg_check_hotplug())
 	{
-		fprintf(stderr, "no kerrighed nodes found\n");
-		exit(-EPERM);
+		perror("Kerrighed is not started");
+		exit(EXIT_FAILURE);
 	}
 
-	/* /var/chkpt exists ? */
-	status = stat(CHKPT_DIR, &buffer);
-	if (status) {
-		perror(CHKPT_DIR);
-		exit(-ENOENT);
+	/* Is checkpoint available ? */
+	if (krg_check_checkpoint()) {
+		perror("Checkpointing is not available");
+		exit(EXIT_FAILURE);
 	}
 }
 
