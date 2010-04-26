@@ -7,7 +7,8 @@
 ENABLE=true
 #ENABLE=false
 
-# krgadm cluster start options. Can be used to wait for some nodes.
+# krgadm nodes add options. Can be used to wait for some nodes.
+# If empty, no nodes is added to the cluster.
 # See man krgadm(1)
 START_OPTS="--all"
 #START_OPTS="--count 4"

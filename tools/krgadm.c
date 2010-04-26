@@ -37,12 +37,6 @@ enum {
 #define COUNT_OPTION "count", required_argument, NULL, 'c'
 #define ALL_OPTION "all", no_argument, NULL, 'a'
 
-static struct option cluster_start_options[] = {
-	{NODES_OPTION},
-	{COUNT_OPTION},
-	{NULL, 0, NULL, 0}
-};
-
 static struct option nodes_mode_options[] = {
 	{NODES_OPTION},
 	{COUNT_OPTION},
@@ -505,15 +499,14 @@ exit:
 /*
  * Return 0 on success, -1 on failure
  */
-int cluster_start(int argc, char* argv[], char* program_name)
+int cluster_start(void)
 {
 	struct krg_node_set* node_set;
-	int c, option_index;
-	int nb_nodes = NB_NODES_UNSET;
-	char* endptr;
+	int ret = 0;
 
 	if (cluster_status() > 0) {
 		errno = EALREADY;
+		fprintf(stderr, "Kerrighed is already running.\n");
 		return -1;
 	}
 
@@ -524,61 +517,15 @@ int cluster_start(int argc, char* argv[], char* program_name)
 	/* Start cluster with current node */
 	krg_node_set_add(node_set, get_node_id());
 
-	printf("Starting cluster with node %d... ", get_node_id());
+	printf("Starting cluster... ");
 	fflush(stdout);
-	if (krg_cluster_start(node_set) == -1)
+	if (krg_cluster_start(node_set) == -1) {
 		printf("fail (%s)\n", strerror(errno));
-	else
+		ret = -1;
+	} else
 		printf("done\n");
 
-	krg_node_set_clear(node_set);
-
-	/* Add other nodes, if asked for */
-	while ((c = getopt_long(argc, argv, "n:c:",
-				cluster_start_options, &option_index)) != -1) {
-		switch (c) {
-		case 'n':
-			if (nb_nodes != NB_NODES_UNSET) {
-				printf("--nodes and --count are mutually exclusive. Aborting.\n");
-				return -1;
-			}
-
-			nb_nodes = NB_NODES_LIST;
-			if (parse_nodes(optarg, node_set) == -1)
-				return -1;
-
-			/* If only asked for current nodes, it's already done */
-			if (krg_node_set_weight(node_set) == 1 && krg_node_set_contains(node_set, get_node_id()))
-				return 0;
-			break;
-		case 'c':
-			if (nb_nodes != NB_NODES_UNSET) {
-				printf("--nodes and --count are mutually exclusive. Aborting.\n");
-				return -1;
-			}
-
-			nb_nodes = strtol(optarg, &endptr, 10);
-			if (endptr == optarg || *endptr || nb_nodes < 1) {
-				errno = EINVAL;
-				perror("nodes number");
-				return -1;
-			}
-
-			/* Remove 1 as cluster is already started with one node */
-			if (--nb_nodes == 0)
-				return 0;
-			break;
-		default:
-			help(program_name);
-			return 0;
-		}
-	}
-
-	/* Default for cluster start: start all available nodes */
-	if (nb_nodes == NB_NODES_UNSET)
-		nb_nodes = NB_NODES_ALL;
-
-	return nodes_add(node_set, nb_nodes);
+	return ret;
 }
 
 /*
@@ -625,7 +572,7 @@ int cluster(int argc, char* argv[], char* program_name)
 		}
 		break;
 	case START:
-		r = cluster_start(argc, argv, program_name);
+		r = cluster_start();
 		if (r == -1)
 			ret = EXIT_FAILURE;
 		break;

@@ -64,8 +64,12 @@ d_start() {
 	case "x$ENABLE" in
 	    xtrue)
 		log_progress_msg "cluster"
-		krgadm cluster start $START_OPTS > /dev/null 2>&1
+		krgadm cluster start > /dev/null
 		STATUS=$?
+		if [ "$STATUS" == 0 -a -n "$START_OPTS" ]; then
+		    krgadm nodes add $START_OPTS > /dev/null
+		    STATUS=$?
+		fi
 		;;
 	    xfalse)
 		log_progress_msg "disabled in $CFG"
