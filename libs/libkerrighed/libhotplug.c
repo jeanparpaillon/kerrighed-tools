@@ -359,6 +359,19 @@ int krg_hotplug_init(void)
 	return 0;
 }
 
+int krg_check_hotplug(void)
+{
+	int r, node_id;
+
+	r = call_kerrighed_services(KSYS_GET_NODE_ID, &node_id);
+	if (r != 0) {
+		errno = EAGAIN;
+		return 1;
+	}
+
+	return 0;
+}
+
 int krg_nodes_add(struct krg_node_set *krg_node_set)
 {
 	struct hotplug_node_set node_set;

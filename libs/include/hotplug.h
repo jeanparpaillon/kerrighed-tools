@@ -34,6 +34,15 @@ extern int kerrighed_max_clusters;
 int krg_hotplug_init(void);
 
 /*
+ * krg_check_hotplug
+ *
+ * Check if Kerrighed is up and running
+ *
+ * Return 0 if up, 1 otherwise
+ */
+int krg_check_hotplug(void);
+
+/*
  * krg_status_str
  *
  * Return the name of the status
