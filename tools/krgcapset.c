@@ -85,25 +85,33 @@ int print_capability(int current_cap_vector)
 	return 0 ;
 }
 
-
-int print_capabilities(krg_cap_t * current_caps)
+int print_capabilities(void)
 {
-	printf("Permitted Capabilities: 0%o\n", krg_cap_getpermitted(current_caps));
-	print_capability(krg_cap_getpermitted(current_caps)) ;
+	int res;
+	krg_cap_t caps;
 
-	printf("Effective Capabilities: 0%o\n", krg_cap_geteffective(current_caps));
-	print_capability(krg_cap_geteffective(current_caps)) ;
+	res = krg_father_capget(&caps) ;
+	if (res) {
+		fprintf (stderr,
+			 "Unable to get my father's capabilities res: %d, errno: %d\n",
+			 res, errno) ;
+		exit(res);
+	}
 
-	printf("Inheritable Permitted Capabilities: 0%o\n", krg_cap_getinheritable_permitted(current_caps));
-	print_capability(krg_cap_getinheritable_permitted(current_caps)) ;
+	printf("Permitted Capabilities: 0%o\n", krg_cap_getpermitted(&caps));
+	print_capability(krg_cap_getpermitted(&caps));
 
-	printf("Inheritable Effective Capabilities: 0%o\n", krg_cap_getinheritable_effective(current_caps));
-	print_capability(krg_cap_getinheritable_effective(current_caps)) ;
+	printf("Effective Capabilities: 0%o\n", krg_cap_geteffective(&caps));
+	print_capability(krg_cap_geteffective(&caps));
+
+	printf("Inheritable Permitted Capabilities: 0%o\n", krg_cap_getinheritable_permitted(&caps));
+	print_capability(krg_cap_getinheritable_permitted(&caps));
+
+	printf("Inheritable Effective Capabilities: 0%o\n", krg_cap_getinheritable_effective(&caps));
+	print_capability(krg_cap_getinheritable_effective(&caps));
 
 	return 0 ;
 }
-
-
 
 int construct_capability(char * description)
 {
@@ -123,15 +131,13 @@ int construct_capability(char * description)
 			}
 		}
 		if (!text_matched) {
-			printf("Unrecognized capability: %s\n", current_token) ;
-			printf("Authorized capability names are:\n") ;
+			fprintf(stderr, "Unrecognized capability: %s\n", current_token) ;
+			fprintf(stderr, "Authorized capability names are:\n") ;
 			print_capability(supported_caps) ;
 		}
 	}
 	return res ;
 }
-
-
 
 int update_capability(char* description, int oldcapability)
 {
@@ -195,6 +201,34 @@ int main (int argc, char * argv[])
 	long int cap_value;
 	char * ignored = NULL ;
 	krg_cap_t initial_caps ;
+	int option_index;
+
+	if (argc == 1) {
+		usage(argv);
+		exit(EXIT_SUCCESS);
+	}
+
+	/*
+	 * First pass on args for -h or -v
+	 */
+	option_index = 0;
+	while (1) {
+		c = getopt_long(argc, argv, "hvsfk:p:e:i:d:",
+				long_options, &option_index);
+
+		if (c == -1)
+			break;
+
+		cap_value = 0;
+		switch (c) {
+		case 'v':
+			version(argv[0]);
+			exit(EXIT_SUCCESS);
+		case 'h':
+			usage(argv);
+			exit(EXIT_SUCCESS);
+		}
+	}
 
 	res = krg_cap_get_supported(&supported_caps);
 	if (res) {
@@ -213,13 +247,8 @@ int main (int argc, char * argv[])
 		exit(res);
 	}
 
-	if (argc == 1) {
-		usage(argv);
-		exit(EXIT_SUCCESS);
-	}
-
+	option_index = 0;
 	while (1) {
-		int option_index = 0;
 		c = getopt_long(argc, argv, "hvsfk:p:e:i:d:",
 				long_options, &option_index);
 
@@ -231,11 +260,8 @@ int main (int argc, char * argv[])
 		case 'f':
 			force = 1 ;
 			break;
-		case 'v':
-			version(argv[0]);
-			exit(EXIT_SUCCESS);
 		case 's':
-			print_capabilities(&initial_caps) ;
+			print_capabilities();
 			break;
 		case 'e':
 			cap_value = strtol(optarg, &ignored, 0);
@@ -277,16 +303,13 @@ int main (int argc, char * argv[])
 				exit(res) ;
 			}
 			break;
-		case 'h':
-			usage(argv);
-			exit(EXIT_SUCCESS);
-			break;
 		default:
 			usage(argv);
 			exit(EXIT_FAILURE);
 			break;
 		}
 	}
+
 	if (changed_father_cap && (!force && (!cap_raised(initial_caps.krg_cap_permitted, CAP_CHANGE_KERRIGHED_CAP) ||
 					      !cap_raised(initial_caps.krg_cap_effective, CAP_CHANGE_KERRIGHED_CAP) ))) {
 		int answer ;
