@@ -28,7 +28,7 @@ warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 void print_usage(const char *name)
 {
 	fprintf(stderr,
-		"Usage: %s [-hv] [-uimpnU] [--] <container_bootstrop_helper> [<init_arg1> ...]\n"
+		"Usage: %s [-hv] [-uimpnU] [--] <container_bootstrap_helper> [<init_arg1> ...]\n"
 		"Options:\n"
 		" -h  Display this information and exit\n"
 		" -v  Display version information and exit\n"
@@ -116,15 +116,27 @@ int main(int argc, char *argv[])
 	exec_ind = get_config(argc, argv);
 	if (exec_ind == argc) {
 		print_usage(argv[0]);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
+
+	if (!krg_check_hotplug()) {
+		fprintf(stderr,
+			"Must be run from root container only\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if (!krg_check_container()) {
+		fprintf(stderr,
+			"Kerrighed container is already running\n");
+		exit(EXIT_FAILURE);
+	}	
 
 	ret = krg_set_cluster_creator(1);
 	if (ret) {
 		fprintf(stderr,
 			"%s krg_set_clutser_creator(1) failed! %s\n",
 			argv[0], strerror(errno));
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (ns_clone_flags)
