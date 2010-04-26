@@ -11,13 +11,27 @@
 #include <linux/sched.h>
 #include <hotplug.h>
 
+#include <config.h>
+
 int ns_clone_flags = 0;
+
+void version(char * program_name)
+{
+	printf("\
+%s %s\n\
+Copyright (C) 2010 Kerlabs.\n\
+This is free software; see source for copying conditions. There is NO\n\
+warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
+\n", program_name, VERSION);
+}
 
 void print_usage(const char *name)
 {
 	fprintf(stderr,
-		"Usage: %s [-uimpnU] [--] <container_bootstrop_helper> [<init_arg1> ...]\n"
+		"Usage: %s [-hv] [-uimpnU] [--] <container_bootstrop_helper> [<init_arg1> ...]\n"
 		"Options:\n"
+		" -h  Display this information and exit\n"
+		" -v  Display version information and exit\n"
 		" -u  Isolate UTSname namespace\n"
 		" -i  Isolate IPC namespace\n"
 		" -m  Isolate Mount namespace\n"
@@ -31,8 +45,14 @@ int get_config(int argc, char *argv[])
 {
 	int opt;
 
-	while ((opt = getopt(argc, argv, "uimpnU")) != -1) {
+	while ((opt = getopt(argc, argv, "hvuimpnU")) != -1) {
 		switch (opt) {
+		case 'h':
+			print_usage(argv[0]);
+			exit(EXIT_SUCCESS);
+		case 'v':
+			version(argv[0]);
+			exit(EXIT_SUCCESS);
 		case 'u':
 			ns_clone_flags |= CLONE_NEWUTS;
 			break;
@@ -53,7 +73,7 @@ int get_config(int argc, char *argv[])
 			break;
 		default:
 			print_usage(argv[0]);
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 	}
 
