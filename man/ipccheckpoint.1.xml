@@ -15,6 +15,14 @@
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>ipccheckpoint</command>
+      <group choice="opt" >
+	<arg choice="plain" >-h</arg>
+	<arg choice="plain" >--help</arg>
+      </group>
+      <group choice="opt" >
+	<arg choice="plain" >-v</arg>
+	<arg choice="plain" >--version</arg>
+      </group>
       <group choice="req" >
 	<arg choice="plain" ><replaceable>-q</replaceable></arg>
 	<arg choice="plain" ><replaceable>-m</replaceable></arg>
@@ -35,6 +43,20 @@
 
   <para>
     <variablelist>
+
+      <varlistentry>
+	<term><option>-h</option>,<option>--help</option></term>
+	<listitem>
+	  <para>Display help.</para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+	<term><option>-v</option>,<option>--version</option></term>
+	<listitem>
+	  <para>Display version informations.</para>
+	</listitem>
+      </varlistentry>
 
       <varlistentry>
 	<term><option>-q</option></term>
