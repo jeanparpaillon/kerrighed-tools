@@ -4,7 +4,8 @@
 #=====================================================
 
 # Start Kerrighed container on this node. If -1, does not start container.
-BOOT_ID=1
+BOOT_ID=-1
+#BOOT_ID=1
 
 # Local namespaces to isolate Kerrighed from
 # Leaving unset won't change kernel's current settings
