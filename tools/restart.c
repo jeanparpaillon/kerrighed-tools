@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 2001-2006, INRIA, Universite de Rennes 1, EDF.
+ *  Copyright (C) 2010 Kerlabs.
  */
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -41,6 +42,7 @@ void show_version(char * program_name)
 {
 	printf("\
 %s %s\n\
+Copyright (C) 2001-2006, INRIA, Universite de Rennes 1, EDF.\n\
 Copyright (C) 2010 Kerlabs.\n\
 This is free software; see source for copying conditions. There is NO\n\
 warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
