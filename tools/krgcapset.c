@@ -202,7 +202,6 @@ int main (int argc, char * argv[])
 	long int cap_value;
 	char * ignored = NULL ;
 	krg_cap_t initial_caps ;
-	int option_index;
 
 	if (argc == 1) {
 		usage(argv);
@@ -212,10 +211,9 @@ int main (int argc, char * argv[])
 	/*
 	 * First pass on args for -h or -v
 	 */
-	option_index = 0;
 	while (1) {
 		c = getopt_long(argc, argv, "hvsfk:p:e:i:d:",
-				long_options, &option_index);
+				long_options, NULL);
 
 		if (c == -1)
 			break;
@@ -248,10 +246,10 @@ int main (int argc, char * argv[])
 		exit(res);
 	}
 
-	option_index = 0;
+	optind = 1;
 	while (1) {
 		c = getopt_long(argc, argv, "hvsfk:p:e:i:d:",
-				long_options, &option_index);
+				long_options, NULL);
 
 		if (c == -1)
 			break;
