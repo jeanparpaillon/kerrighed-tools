@@ -86,32 +86,19 @@ int print_capability(int current_cap_vector)
 	return 0 ;
 }
 
-int print_capabilities(void)
+void print_capabilities(krg_cap_t *caps)
 {
-	int res;
-	krg_cap_t caps;
+	printf("Permitted Capabilities: 0%o\n", krg_cap_getpermitted(caps));
+	print_capability(krg_cap_getpermitted(caps));
 
-	res = krg_father_capget(&caps) ;
-	if (res) {
-		fprintf (stderr,
-			 "Unable to get my father's capabilities res: %d, errno: %d\n",
-			 res, errno) ;
-		exit(res);
-	}
+	printf("Effective Capabilities: 0%o\n", krg_cap_geteffective(caps));
+	print_capability(krg_cap_geteffective(caps));
 
-	printf("Permitted Capabilities: 0%o\n", krg_cap_getpermitted(&caps));
-	print_capability(krg_cap_getpermitted(&caps));
+	printf("Inheritable Permitted Capabilities: 0%o\n", krg_cap_getinheritable_permitted(caps));
+	print_capability(krg_cap_getinheritable_permitted(caps));
 
-	printf("Effective Capabilities: 0%o\n", krg_cap_geteffective(&caps));
-	print_capability(krg_cap_geteffective(&caps));
-
-	printf("Inheritable Permitted Capabilities: 0%o\n", krg_cap_getinheritable_permitted(&caps));
-	print_capability(krg_cap_getinheritable_permitted(&caps));
-
-	printf("Inheritable Effective Capabilities: 0%o\n", krg_cap_getinheritable_effective(&caps));
-	print_capability(krg_cap_getinheritable_effective(&caps));
-
-	return 0 ;
+	printf("Inheritable Effective Capabilities: 0%o\n", krg_cap_getinheritable_effective(caps));
+	print_capability(krg_cap_getinheritable_effective(caps));
 }
 
 int construct_capability(char * description)
@@ -165,13 +152,15 @@ int usage(char * argv[])
 
 	printf("\
 Usage: %s [-h|--help] [-v|--version]\n\
-  or:  %s -s|--show\n\
+  or:  %s [-k|--pid <pid>] -s|--show\n\
   or:  %s [-f|--force] [-k|--pid <pid>] {SET {[+|-]CAPABILITY LIST | OCTAL VALUE}...}\n\
   -h, --help                   display this help and exit\n\
   -v, --version                display version informations and exit\n\
-  -s, --show                   show capabilities of calling process\n\
+  -k, --pid <pid>              act on the task having pid <pid>\n\
+                               (default: calling process)\n\
+  -s, --show                   show the capabilities of the designated task\n\
 \n\
-Change capabilities of the calling (or designated) process.\n\
+Change capabilities of the designated task.\n\
  SET is one of:\n\
   -e, --effective              set up effective capabilities\n\
   -p, --permitted              set up permitted capabilities\n\
@@ -260,7 +249,7 @@ int main (int argc, char * argv[])
 			force = 1 ;
 			break;
 		case 's':
-			print_capabilities();
+			print_capabilities(&initial_caps);
 			break;
 		case 'e':
 			cap_value = strtol(optarg, &ignored, 0);
