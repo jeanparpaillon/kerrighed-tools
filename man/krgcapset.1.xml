@@ -21,7 +21,21 @@
     </cmdsynopsis>
     <cmdsynopsis>
       <command>krgcapset</command>
-      <group choice="opt" >
+      <group choice="plain" >
+	<arg choice="plain" >-v</arg>
+	<arg choice="plain" >--version</arg>
+      </group>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>krgcapset</command>
+      <arg choice="opt" >
+	<group choice="req">
+	  <arg choice="plain">-k</arg>
+	  <arg choice="plain">--pid</arg>
+	</group>
+	<replaceable>pid</replaceable>
+      </arg>
+      <group choice="req" >
 	<arg choice="plain" >-s</arg>
 	<arg choice="plain" >--show</arg>
       </group>
@@ -32,10 +46,13 @@
 	<arg choice="plain" >-f</arg>
 	<arg choice="plain" >--force</arg>
       </group>
-      <group choice="opt" >
-	<arg choice="plain" >-k</arg>
-	<arg choice="plain" >--pid</arg>
-      </group>
+      <arg choice="opt" >
+	<group choice="req">
+	  <arg choice="plain">-k</arg>
+	  <arg choice="plain">--pid</arg>
+	</group>
+	<replaceable>pid</replaceable>
+      </arg>
       <group choice="req" rep="repeat" >
 	<arg choice="plain" >SET</arg>
 	<group choice="req" >
@@ -129,10 +146,25 @@
 	  </listitem>
 	</varlistentry>
 	<varlistentry>
+	  <term>-v</term>
+	  <term>--version</term>
+	  <listitem>
+	    <para>Print version information and exit.</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>-k</term>
+	  <term>--pid <replaceable>pid</replaceable></term>
+	  <listitem>
+	    <para>Act on the task having pid <replaceable>pid</replaceable>.
+	       Default: act on calling process.</para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
 	  <term>-s</term>
 	  <term>--show</term>
 	  <listitem>
-	    <para>Show the capabilities of the calling process.</para>
+	    <para>Show the capabilities of the designated process.</para>
 	  </listitem>
 	</varlistentry>
 	<varlistentry>
