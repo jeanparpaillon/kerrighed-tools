@@ -27,10 +27,10 @@
 
 /** User interface to set capabilities for the current process */
 
-int krg_capset (krg_cap_t * new_caps)
+int krg_capset (const krg_cap_t * new_caps)
 {
   return call_kerrighed_services(KSYS_SET_CAP,
-				 new_caps) ;
+				 (void *)new_caps) ;
 }
 
 
@@ -45,11 +45,11 @@ int krg_capget (krg_cap_t * old_caps)
 
 
 /** User interface to set capabilities for a given process */
-int krg_pid_capset (pid_t pid, krg_cap_t * new_caps) 
+int krg_pid_capset (pid_t pid, const krg_cap_t * new_caps) 
 {
   krg_cap_pid_t desc ;
   desc.pid = pid ;
-  desc.caps = new_caps ;
+  desc.caps = (krg_cap_t *)new_caps ;
   return call_kerrighed_services(KSYS_SET_PID_CAP,
 				 &desc) ;
 }
@@ -69,22 +69,22 @@ int krg_pid_capget (pid_t pid, krg_cap_t * old_caps)
 /**
  * Functions to access krg_cap_t struct members
  */
-int krg_cap_geteffective (krg_cap_t * cap) 
+int krg_cap_geteffective (const krg_cap_t * cap) 
 {
   return cap->krg_cap_effective;
 }
 
-int krg_cap_getpermitted (krg_cap_t * cap)
+int krg_cap_getpermitted (const krg_cap_t * cap)
 {
   return cap->krg_cap_permitted;
 }
 
-int krg_cap_getinheritable_permitted (krg_cap_t * cap) 
+int krg_cap_getinheritable_permitted (const krg_cap_t * cap) 
 {
   return cap->krg_cap_inheritable_permitted;
 }
 
-int krg_cap_getinheritable_effective (krg_cap_t * cap) 
+int krg_cap_getinheritable_effective (const krg_cap_t * cap) 
 {
   return cap->krg_cap_inheritable_effective;
 }
@@ -105,10 +105,10 @@ int krg_cap_get_supported(int *set)
 
 /** User interface to set capabilities for the father process */
 
-int krg_father_capset (krg_cap_t * new_caps)
+int krg_father_capset (const krg_cap_t * new_caps)
 {
   return call_kerrighed_services(KSYS_SET_FATHER_CAP,
-				 new_caps) ;
+				 (void *)new_caps) ;
 }
 
 
