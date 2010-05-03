@@ -86,7 +86,7 @@ int print_capability(int current_cap_vector)
 	return 0 ;
 }
 
-void print_capabilities(krg_cap_t *caps)
+void print_capabilities(const krg_cap_t *caps)
 {
 	printf("Permitted Capabilities: 0%o\n", krg_cap_getpermitted(caps));
 	print_capability(krg_cap_getpermitted(caps));
