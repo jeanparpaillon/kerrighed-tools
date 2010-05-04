@@ -23,10 +23,12 @@ enum {
 	REBOOT,
 };
 
-enum {
-	NB_NODES_UNSET = -2,
-	NB_NODES_ALL   = -1,
-	NB_NODES_LIST  = 0,
+enum mode_t {
+	NODES_MODE_UNSET,
+	NODES_MODE_ALL,
+	NODES_MODE_COUNT,
+	NODES_MODE_TOTAL,
+	NODES_MODE_LIST,
 };
 
 #define NODE_SEP ','
@@ -34,11 +36,16 @@ enum {
 #define POLL_NODES 1
 #define NODES_OPTION "nodes", required_argument, NULL, 'n'
 #define COUNT_OPTION "count", required_argument, NULL, 'c'
+#define TOTAL_OPTION "total", required_argument, NULL, 't'
 #define ALL_OPTION "all", no_argument, NULL, 'a'
+
+#define MSG_EXCLUSIVE_OPTIONS "Only one of --all, --count, --total or --nodes option is\n\
+supported. Aborting.\n"
 
 static struct option nodes_mode_options[] = {
 	{NODES_OPTION},
 	{COUNT_OPTION},
+	{TOTAL_OPTION},
 	{ALL_OPTION},
 	{NULL, 0, NULL, 0}
 };
@@ -59,7 +66,7 @@ void help(char * program_name)
 Usage: %s [-h|--help] [--version]\n\
   or:  %s cluster {status|wait_start|poweroff|reboot}\n\
   or:  %s nodes status [-n|--nodes]\n\
-  or:  %s nodes {add|del} {(-n|--nodes node_list) | (-c|--count node_count) | (-a|--all)}\n",
+  or:  %s nodes {add|del} {(-n|--nodes node_list) | (-c|--count node_count) | (-t|--total node_count) |(-a|--all)}\n",
 	       program_name, program_name, program_name, program_name);
 	printf("\n\
 Cluster Mode:\n\
@@ -74,9 +81,10 @@ Nodes Mode:\n\
   del               remove nodes from the running cluster\n\
 \n\
 Options:\n\
-  -n, --nodes       list of nodes to apply action to\n\
+  -n, --nodes       list of nodes to add/del\n\
                     ie: 2,3,6-10,42-45\n\
-  -c, --count       number of nodes to apply action to\n\
+  -c, --count       number of nodes to add/del\n\
+  -t, --total       number of nodes in resulting cluster\n\
   -a, --all         apply to all nodes\n\
 \n\
 Node Status:\n\
@@ -192,8 +200,11 @@ int wait_for_nodes_count(int i, struct krg_node_set* node_set)
 	int cur, r = 0;
 	int nodes_count;
 
-	printf("Waiting for %d nodes to join... ", i);
-	fflush(stdout);
+	if (i > 0) {
+		printf("Waiting for %d nodes to join... ", i);
+		fflush(stdout);
+	} else
+		return 0;
 
 	if (i < 1 || i > kerrighed_max_nodes) {
 		r = -1;
@@ -249,8 +260,11 @@ int wait_for_nodes(struct krg_node_set* node_set)
 	struct krg_nodes* status;
 	int bcl, r = 0, done, node_count;
 
-	printf("Waiting for nodes to join... ");
-	fflush(stdout);
+	if (krg_node_set_weight(node_set) > 0) {
+		printf("Waiting for nodes to join... ");
+		fflush(stdout);
+	} else
+		return 0;
 
 	node_count = krg_node_set_weight(node_set);
 	do {
@@ -285,7 +299,7 @@ int wait_for_nodes(struct krg_node_set* node_set)
 	} while (! done);
 
 exit:
-	if (r == 1)
+	if (r == 0)
 		printf(" done\n");
 	else
 		printf(" fail (%s)\n", strerror(errno));
@@ -296,11 +310,11 @@ exit:
 /*
  * nodes_status
  *
- * Print status of nodes in node_set, or all nodes if nb_nodes == -1
+ * Print status of nodes in node_set, or all nodes if mode == NODES_MODE_ALL
  *
  * Return 0 on success, -1 on failure
  */
-int nodes_status(struct krg_node_set* node_set, int nb_nodes)
+int nodes_status(struct krg_node_set* node_set, enum mode_t mode)
 {
 	struct krg_nodes* status;
 	int bcl, node;
@@ -312,8 +326,8 @@ int nodes_status(struct krg_node_set* node_set, int nb_nodes)
 		return -1;
 	}
 
-	if (nb_nodes == -1) {
-		/* If not specified add all nodes with status PRESENT or ONLINE */
+	if (mode == NODES_MODE_ALL) {
+		/* Add all nodes with status PRESENT or ONLINE */
 		node_set = krg_node_set_create();
 		for (bcl = 0; bcl < kerrighed_max_nodes; bcl++) {
 			if (status->nodes[bcl] > HOTPLUG_NODE_POSSIBLE)
@@ -340,16 +354,18 @@ int nodes_status(struct krg_node_set* node_set, int nb_nodes)
 /*
  * nodes_add
  *
- * If nb_nodes == NB_NODES_ALL, add all PRESENT nodes
- * If nb_nodes == NB_NODES_LIST, add nodes in node_set
- * If nb_nodes > 0, wait for nb_nodes nodes to be PRESENT, then add them
+ * If mode == NODES_MODE_ALL, add all PRESENT nodes
+ * If mode == NODES_MODE_LIST, add nodes in node_set
+ * If mode == NODES_MODE_COUNT, wait for n nodes to be PRESENT, then add them
+ * If mode == NODES_MODE_TOTAL, wait for n nodes to be PRESENT or ONLINE,
+ * then add PRESENT nodes.
  *
  * Return 0 on success, -1 on failure
  */
-int nodes_add(struct krg_node_set* node_set, int nb_nodes)
+int nodes_add(struct krg_node_set* node_set, int n, enum mode_t mode)
 {
 	struct krg_nodes* status;
-	int r = 0;
+	int node, r = 0;
 
 	status = krg_nodes_status();
 	if (! status) {
@@ -357,8 +373,8 @@ int nodes_add(struct krg_node_set* node_set, int nb_nodes)
 		return -1;
 	}
 
-	switch (nb_nodes) {
-	case NB_NODES_ALL:
+	switch (mode) {
+	case NODES_MODE_ALL:
 		/* add all PRESENT nodes */
 		node_set = krg_nodes_get_present(status);
 		if (! node_set) {
@@ -368,18 +384,27 @@ int nodes_add(struct krg_node_set* node_set, int nb_nodes)
 			return -1;
 		}
 		break;
-	case NB_NODES_LIST:
+	case NODES_MODE_LIST:
+		/* Remove online nodes from node_set */
+		node = krg_node_set_next(node_set, -1);
+		while (node != -1) {
+			if (krg_nodes_is_online(status, node))
+				krg_node_set_remove(node_set, node);
+			node = krg_node_set_next(node_set, node);
+		}
+
 		if (wait_for_nodes(node_set) == -1)
 			return -1;
 		break;
-	default:
-		/* If 'count' specified, wait for nodes to be present */
-		if (nb_nodes < 1)
-			return -1;
-
+	case NODES_MODE_TOTAL:
+		n -= krg_nodes_num_online(status);
+	case NODES_MODE_COUNT:
 		node_set = krg_node_set_create();
-		if (wait_for_nodes_count(nb_nodes, node_set) == -1)
+		if (wait_for_nodes_count(n, node_set) == -1)
 			return -1;
+		break;
+	default:
+		return -1;
 	}
 
 	if (krg_node_set_weight(node_set) > 0) {
@@ -398,13 +423,14 @@ int nodes_add(struct krg_node_set* node_set, int nb_nodes)
 /*
  * nodes_remove
  *
- * If nb_nodes == NB_NODES_ALL, remove all ONLINE nodes except current one
- * If nb_nodes == NB_NODES_LIST, remove nodes in node_set
- * If nb_nodes > 0, remove nb_nodes ONLINE nodes
+ * If mode == NODES_MODE_ALL, remove all PRESENT nodes except current one
+ * If mode == NODES_MODE_LIST, remove nodes in node_set
+ * If mode == NODES_MODE_COUNT, remove n ONLINE nodes
+ * If mode == NODES_MODE_TOTAL, remove enough nodes for the cluster to contains n nodes
  *
  * Return 0 on success, -1 on failure
  */
-int nodes_remove(struct krg_node_set* node_set, int nb_nodes)
+int nodes_remove(struct krg_node_set* node_set, int n, enum mode_t mode)
 {
 	struct krg_nodes* status;
 	int bcl, node, r = 0;
@@ -415,15 +441,17 @@ int nodes_remove(struct krg_node_set* node_set, int nb_nodes)
 		return -1;
 	}
 
-	if (nb_nodes == NB_NODES_ALL) {
+	switch (mode) {
+	case NODES_MODE_ALL:
 		/* remove all nodes except current */
 		node_set = krg_node_set_create();
 		for (bcl = 0; bcl < kerrighed_max_nodes; bcl++) {
 			if (krg_nodes_is_online(status, bcl) && get_node_id() != bcl)
 				krg_node_set_add(node_set, bcl);
 		}
-	} else if (nb_nodes == NB_NODES_LIST) {
-		/* If list of nodes specified, check they are 'online', and not the current one */
+		break;
+	case NODES_MODE_LIST:
+		/* check given nodes are 'online', and not the current one */
 		node = krg_node_set_next(node_set, -1);
 		while (node != -1) {
 			if (! krg_nodes_is_online(status, node)) {
@@ -435,14 +463,17 @@ int nodes_remove(struct krg_node_set* node_set, int nb_nodes)
 			}
 			node = krg_node_set_next(node_set, node);
 		}
-	} else if (nb_nodes > 0) {
-		/* If 'count' specified, remove 'nb_nodes' first online nodes */
+		break;
+	case NODES_MODE_TOTAL:
+		n = krg_nodes_num_online(status) - n;
+	case NODES_MODE_COUNT:
+		/* remove 'n' first online nodes */
 		node_set = krg_nodes_get_online(status);
-		if (nb_nodes < krg_node_set_weight(node_set)) {
+		if (n < krg_node_set_weight(node_set)) {
 			bcl = 0;
 			node = krg_node_set_next(node_set, -1);
 			while (node != -1) {
-				if (bcl < nb_nodes)
+				if (bcl < n)
 					if (get_node_id() == node)
 						krg_node_set_remove(node_set, node);
 					else
@@ -452,11 +483,13 @@ int nodes_remove(struct krg_node_set* node_set, int nb_nodes)
 				node = krg_node_set_next(node_set, node);
 			}
 		} else {
-			printf("Can not remove so much nodes. Aborting.\n");
+			printf("Not enough nodes to remove. Aborting.\n");
 			return -1;
 		}
-	} else
+		break;
+	default:
 		return -1;
+	}
 
 	if (krg_node_set_weight(node_set) > 0) {
 		printf("Removing nodes %s... ", node_set_str(node_set));
@@ -590,7 +623,8 @@ int nodes(int argc, char* argv[], char* program_name)
 	struct krg_node_set* node_set = NULL;
 	char* endptr;
 	int c, option_index;
-	int nb_nodes = NB_NODES_UNSET;
+	enum mode_t mode = NODES_MODE_UNSET;
+	int nb_nodes = -1;
 	int action = NONE;
 
 	if ( krg_check_hotplug() ) {
@@ -607,27 +641,29 @@ int nodes(int argc, char* argv[], char* program_name)
 	else if(! strcmp(*argv, "del"))
 		action = DEL;
 
-	while ((c = getopt_long(argc, argv, "n:c:a",
+	while ((c = getopt_long(argc, argv, "n:c:t:a",
 				nodes_mode_options, &option_index)) != -1) {
-		switch (c) {
-		case 'n':
-			if (nb_nodes != NB_NODES_UNSET) {
-				printf("--nodes, --count and --all are mutually exclusive. Aborting.\n");
+		if ( 'n' == c ) {
+			if (mode != NODES_MODE_UNSET) {
+				printf(MSG_EXCLUSIVE_OPTIONS);
 				return EXIT_FAILURE;
 			}
+			mode = NODES_MODE_LIST;
 
-			nb_nodes = NB_NODES_LIST;
 			node_set = krg_node_set_create();
 			if (! node_set)
 				return EXIT_FAILURE;
 			if (parse_nodes(optarg, node_set) == -1)
 				return EXIT_FAILURE;
-			break;
-		case 'c':
-			if (nb_nodes != NB_NODES_UNSET) {
-				printf("--nodes, --count and --all are mutually exclusive. Aborting.\n");
+		} else if ( 'c' == c || 't' == c ) {
+			if (mode != NODES_MODE_UNSET) {
+				printf(MSG_EXCLUSIVE_OPTIONS);
 				return EXIT_FAILURE;
 			}
+			if ( 'c' == c )
+				mode = NODES_MODE_COUNT;
+			else
+				mode = NODES_MODE_TOTAL;
 
 			if (action == STATUS) {
 				help(program_name);
@@ -639,39 +675,37 @@ int nodes(int argc, char* argv[], char* program_name)
 				perror("nodes number");
 				return EXIT_FAILURE;
 			}
-			break;
-		case 'a':
-			if (nb_nodes != NB_NODES_UNSET) {
-				printf("--nodes, --count and --all are mutually exclusive. Aborting.\n");
+		} else if ( 'a' == c ) {
+			if (mode != NODES_MODE_UNSET) {
+				printf(MSG_EXCLUSIVE_OPTIONS);
 				return EXIT_FAILURE;
 			}
-			nb_nodes = NB_NODES_ALL;
-			break;
-		default:
+			mode = NODES_MODE_ALL;
+		} else {
 			help(program_name);
 			return EXIT_FAILURE;
 		}
 	}
 
-	if (action == STATUS && nb_nodes == NB_NODES_UNSET)
-		nb_nodes = NB_NODES_ALL;
-
-	if (nb_nodes == NB_NODES_UNSET) {
+	if ( (action == ADD || action == DEL) && mode == NODES_MODE_UNSET ) {
+		/* ADD and DEL actions requires a mode */
 		help(program_name);
 		return EXIT_FAILURE;
 	}
 
 	switch (action) {
 	case STATUS:
-		if (nodes_status(node_set, nb_nodes) == -1)
+		if (mode == NODES_MODE_UNSET)
+			mode = NODES_MODE_ALL;
+		if (nodes_status(node_set, mode) == -1)
 			return EXIT_FAILURE;
 		break;
 	case ADD:
-		if (nodes_add(node_set, nb_nodes) == -1)
+		if (nodes_add(node_set, nb_nodes, mode) == -1)
 			return EXIT_FAILURE;
 		break;
 	case DEL:
-		if (nodes_remove(node_set, nb_nodes) == -1)
+		if (nodes_remove(node_set, nb_nodes, mode) == -1)
 			return EXIT_FAILURE;
 		break;
 	default:
