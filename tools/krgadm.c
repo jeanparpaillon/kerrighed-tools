@@ -16,7 +16,6 @@
 enum {
 	NONE,
 	STATUS,
-	WAIT_START,
 	ADD,
 	DEL,
 	POWEROFF,
@@ -64,14 +63,13 @@ void help(char * program_name)
 {
 	printf("\
 Usage: %s [-h|--help] [--version]\n\
-  or:  %s cluster {status|wait_start|poweroff|reboot}\n\
+  or:  %s cluster {status|poweroff|reboot}\n\
   or:  %s nodes status [-n|--nodes]\n\
   or:  %s nodes {add|del} {(-n|--nodes node_list) | (-c|--count node_count) | (-t|--total node_count) |(-a|--all)}\n",
 	       program_name, program_name, program_name, program_name);
 	printf("\n\
 Cluster Mode:\n\
   status            print cluster status\n\
-  wait_start        return when cluster is started\n\
   poweroff          poweroff all nodes in the cluster\n\
   reboot            restart all nodes in the cluster\n\
 \n\
@@ -325,7 +323,7 @@ int nodes_status(struct krg_node_set* node_set, enum mode_t mode)
 		perror("Error adding nodes");
 		return -1;
 	}
-
+	
 	if (mode == NODES_MODE_ALL) {
 		/* Add all nodes with status PRESENT or ONLINE */
 		node_set = krg_node_set_create();
@@ -545,8 +543,6 @@ int cluster(int argc, char* argv[], char* program_name)
 
 	if(argc == 0 || ! strcmp(*argv, "status"))
 		action = STATUS;
-	else if(! strcmp(*argv, "wait_start"))
-		action = WAIT_START;
 	else if(! strcmp(*argv, "poweroff"))
 		action = POWEROFF;
 	else if(! strcmp(*argv, "reboot"))
@@ -567,16 +563,6 @@ int cluster(int argc, char* argv[], char* program_name)
 		default:
 			printf("up on %d nodes\n", r);
 		}
-		break;
-	case WAIT_START:
-		printf("Waiting for cluster to start... ");
-		fflush(stdout);
-		r = krg_cluster_wait_for_start();
-		if (r == -1) {
-			printf("fail (%s)\n", strerror(errno));
-			ret = EXIT_FAILURE;
-		} else
-			printf("done\n");
 		break;
 	case POWEROFF:
 		printf("Shutting down cluster... ");
