@@ -19,7 +19,6 @@
 	<arg choice="plain">--help</arg>
       </group>
       <group choice="opt" >
-	<arg choice="plain">-v</arg>
 	<arg choice="plain">--version</arg>
       </group>
     </cmdsynopsis>
@@ -27,9 +26,7 @@
       <command>krgadm</command>
       <arg choice="plain" >cluster</arg>
       <group choice="req" >
-	<arg choice="plain">start</arg>
 	<arg choice="plain">status</arg>
-	<arg choice="plain">wait_start</arg>
 	<arg choice="plain">poweroff</arg>
 	<arg choice="plain">reboot</arg>
       </group>
@@ -37,10 +34,13 @@
     <cmdsynopsis>
       <command>krgadm</command>
       <arg choice="plain">nodes status</arg>
-      <group choice="opt" >
-	<arg choice="plain" >-n</arg>
-	<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
-      </group>
+      <arg choice="opt" >
+	<group choice="plain" >
+	  <arg choice="plain" >-n</arg>
+	  <arg choice="plain" >--nodes</arg>
+	</group>
+	<replaceable>node_list</replaceable>
+      </arg>
     </cmdsynopsis>
     <cmdsynopsis>
       <command>krgadm</command>
@@ -49,14 +49,27 @@
 	<arg choice="plain">add</arg>
 	<arg choice="plain">del</arg>
       </group>
-      <group choice="opt" >
-	<arg choice="plain" >-n</arg>
-	<arg choice="plain" >--nodes <replaceable>node_list</replaceable></arg>
-      </group>
-      <group choice="opt" >
-	<arg choice="plain" >-c</arg>
-	<arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
-      </group>
+      <arg choice="opt" >
+	<group choice="plain" >
+	  <arg choice="plain" >-n</arg>
+	  <arg choice="plain" >--nodes</arg>
+	</group>
+	<replaceable>node_list</replaceable>
+      </arg>
+      <arg choice="opt" >
+	<group choice="plain" >
+	  <arg choice="plain" >-c</arg>
+	  <arg choice="plain" >--count</arg>
+	</group>
+	<replaceable>node_count</replaceable>
+      </arg>
+      <arg choice="opt" >
+	<group choice="plain" >
+	  <arg choice="plain" >-t</arg>
+	  <arg choice="plain" >--total</arg>
+	</group>
+	<replaceable>node_count</replaceable>
+      </arg>
       <group choice="opt" >
 	<arg choice="plain" >-a</arg>
 	<arg choice="plain" >--all</arg>
@@ -67,13 +80,13 @@
   <refsect1>
     <title>Description</title>
     <para>
-      <command>krgadm</command> allows the user to manage a Kerrighed
-      cluster by starting or stopping the cluster.
+      <command>krgadm</command> allows the user to manage Kerrighed
+      nodes.
     </para>
-    
+
     <para>
-      Each <command>krgadm</command> invocation is followed by a command and some options
-      relative to this mode.
+      Each <command>krgadm</command> invocation is followed by a
+      command and some options relative to this mode.
     </para>
   </refsect1>
 
@@ -89,7 +102,6 @@
 	  </listitem>
 	</varlistentry>
 	<varlistentry>
-	  <term>-v</term>
 	  <term>--version</term>
 	  <listitem>
 	    <para>Print version informations and exit</para>
@@ -124,25 +136,9 @@
     <para>
       <variablelist>
 	<varlistentry>
-	  <term>
-	    <arg choice="plain" >start</arg>
-	  </term>
-	  <listitem>
-	    <para>
-	      Start the cluster on the current node.
-	    </para>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
 	  <term>status</term>
 	  <listitem>
 	    <para>Print cluster status</para>
-	  </listitem>
-	</varlistentry>
-	<varlistentry>
-	  <term>wait_start</term>
-	  <listitem>
-	    <para>Return once cluster is started</para>
 	  </listitem>
 	</varlistentry>
 	<varlistentry>
@@ -193,6 +189,10 @@
 	      <arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
 	    </group>
 	    <group choice="opt" >
+	      <arg choice="plain" >-t</arg>
+	      <arg choice="plain" >--total <replaceable>node_count</replaceable></arg>
+	    </group>
+	    <group choice="opt" >
 	      <arg choice="plain" >-a</arg>
 	      <arg choice="plain" >--all</arg>
 	    </group>
@@ -212,12 +212,20 @@
 	      them to the running cluster.
 	    </para>
 	    <para>
+	      With the <arg choice="plain" >--total</arg> option, add
+	      enough nodes to get the given number of nodes in the
+	      resulting cluster. Wait for nodes to be present if
+	      necessary.
+	    </para>
+	    <para>
 	      With the <arg choice="plain" >--all</arg> option, add
 	      all the available node (state present) to the running
 	      cluster.
 	    </para>
 	    <para>
-	      One of the options <arg choice="plain" >--nodes</arg>, <arg choice="plain" >--count</arg>
+	      One and only one of the
+	      options <arg choice="plain">--nodes</arg>, <arg choice="plain">--count</arg>,
+	      <arg choice="plain">--total</arg>
 	      or <arg choice="plain" >--all</arg> must be used.
 	    </para>
 	  </listitem>
@@ -232,6 +240,10 @@
 	    <group choice="opt" >
 	      <arg choice="plain" >-c</arg>
 	      <arg choice="plain" >--count <replaceable>node_count</replaceable></arg>
+	    </group>
+	    <group choice="opt" >
+	      <arg choice="plain" >-t</arg>
+	      <arg choice="plain" >--total <replaceable>node_count</replaceable></arg>
 	    </group>
 	    <group choice="opt" >
 	      <arg choice="plain" >-a</arg>
@@ -253,11 +265,17 @@
 	      if there are no such nodes.
 	    </para>
 	    <para>
+	      With the <arg choice="plain" >--total</arg> option,
+	      remove enough nodes to get given number of nodes in the
+	      resulting cluster. Fail if there are no such nodes.
+	    </para>
+	    <para>
 	      With the <arg choice="plain" >--all</arg> option, remove
 	      all nodes of the cluster, except current one.
 	    </para>
 	    <para>
-	      One of the options <arg choice="plain" >--nodes</arg>, <arg choice="plain" >--count</arg>
+	      One and only one of the
+	      options <arg choice="plain">--nodes</arg>, <arg choice="plain">--count</arg>, <arg choice="plain">--total</arg>
 	      or <arg choice="plain" >--all</arg> must be used.
 	    </para>
 	  </listitem>
