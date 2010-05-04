@@ -16,7 +16,6 @@
 enum {
 	NONE,
 	STATUS,
-	START,
 	WAIT_START,
 	ADD,
 	DEL,
@@ -58,13 +57,12 @@ void help(char * program_name)
 {
 	printf("\
 Usage: %s [-h|--help] [--version]\n\
-  or:  %s cluster {start|status|wait_start|poweroff|reboot}\n\
+  or:  %s cluster {status|wait_start|poweroff|reboot}\n\
   or:  %s nodes status [-n|--nodes]\n\
   or:  %s nodes {add|del} {(-n|--nodes node_list) | (-c|--count node_count) | (-a|--all)}\n",
 	       program_name, program_name, program_name, program_name);
 	printf("\n\
 Cluster Mode:\n\
-  start             start the cluster\n\
   status            print cluster status\n\
   wait_start        return when cluster is started\n\
   poweroff          poweroff all nodes in the cluster\n\
@@ -497,38 +495,6 @@ exit:
 }
 
 /*
- * Return 0 on success, -1 on failure
- */
-int cluster_start(void)
-{
-	struct krg_node_set* node_set;
-	int ret = 0;
-
-	if (cluster_status() > 0) {
-		errno = EALREADY;
-		fprintf(stderr, "Kerrighed is already running.\n");
-		return -1;
-	}
-
-	node_set = krg_node_set_create();
-	if (! node_set)
-		return -1;
-
-	/* Start cluster with current node */
-	krg_node_set_add(node_set, get_node_id());
-
-	printf("Starting cluster... ");
-	fflush(stdout);
-	if (krg_cluster_start(node_set) == -1) {
-		printf("fail (%s)\n", strerror(errno));
-		ret = -1;
-	} else
-		printf("done\n");
-
-	return ret;
-}
-
-/*
  * Return EXIT_SUCCESS on success, EXIT_FAILURE on failure.
  */
 int cluster(int argc, char* argv[], char* program_name)
@@ -546,8 +512,6 @@ int cluster(int argc, char* argv[], char* program_name)
 
 	if(argc == 0 || ! strcmp(*argv, "status"))
 		action = STATUS;
-	else if(! strcmp(*argv, "start"))
-		action = START;
 	else if(! strcmp(*argv, "wait_start"))
 		action = WAIT_START;
 	else if(! strcmp(*argv, "poweroff"))
@@ -570,11 +534,6 @@ int cluster(int argc, char* argv[], char* program_name)
 		default:
 			printf("up on %d nodes\n", r);
 		}
-		break;
-	case START:
-		r = cluster_start();
-		if (r == -1)
-			ret = EXIT_FAILURE;
 		break;
 	case WAIT_START:
 		printf("Waiting for cluster to start... ");
