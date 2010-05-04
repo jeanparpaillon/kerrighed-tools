@@ -59,11 +59,11 @@ _krgadm()
     local cur=$2 prev=$3
 
     local modes='cluster nodes'
-    local cluster_actions='status start wait_start poweroff reboot'
+    local cluster_actions='status poweroff reboot'
     local nodes_actions='status add del'
-    local nodes_status_opts='-n --nodes'
-    local nodes_opts='-n --nodes -c --count -a --all'
-    local options='--help -h'
+    local nodes_status_opts='-n --nodes -a --all'
+    local nodes_opts='-n --nodes -c --count -t --total -a --all'
+    local options='--help -h --version'
 
     COMPREPLY=()
 
@@ -87,8 +87,16 @@ _krgadm()
 	    return 0
 	    ;;
 	-n|--nodes)
-	    _nodes 'possible'
-	    return 0
+	    case "${COMP_WORDS[COMP_CWORD-2]}" in
+		"add"|"status")
+		    _nodes 'possible'
+		    return 0
+		    ;;
+		"del")
+		    _nodes 'online'
+		    return 0
+		    ;;
+	    esac
 	    ;;
 	*)
 	    case "${COMP_WORDS[1]}" in
@@ -98,17 +106,11 @@ _krgadm()
 		nodes)
 		    return 0
 		    ;;
+		*)
+		    COMPREPLY=( $(compgen -W "${options} ${modes}" -- ${cur} ) )
 	    esac
 	    ;;
     esac
-
-    if [[ "${cur}" == -* ]]; then
-       	# return one of the possible options
-	COMPREPLY=( $(compgen -W "${options}" -- ${cur} ) )
-    else
-        # return one of the possible modes
-	COMPREPLY=( $(compgen -W "${modes}" -- ${cur}) )
-    fi
 
     return 0
 }
