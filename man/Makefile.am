@@ -9,7 +9,6 @@
 man_MANS = \
 	krgadm.1 \
 	kerrighed.7 \
-	kerrighed_nodes.5 \
 	kerrighed_capabilities.7 \
 	krgcapset.1 \
 	krgcapset.2 \

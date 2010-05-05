@@ -63,23 +63,6 @@
   </refsect1>
 
   <refsect1>
-    <title>Files</title>
-    <para>
-      <variablelist>
-	<varlistentry>
-	  <term><filename>/etc/kerrighed_nodes</filename></term>
-	  <listitem>
-	    <para>
-	      This file contains the list of nodes used in the Kerrighed cluster. 
-	      See <command>kerrighed_nodes</command>(5) for further details.
-	    </para>
-	  </listitem>
-	</varlistentry>
-      </variablelist>
-    </para>
-  </refsect1>
-
-  <refsect1>
     <title>Author</title>
     <para>
       Renaud Lottiaux <email>renaud.lottiaux@kerlabs.com</email>

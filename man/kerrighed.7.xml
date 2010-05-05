@@ -95,9 +95,7 @@
   <refsect1>
     <title>Configuration</title>
     <para>
-      Kerrighed kernel can be setup
-      with <filename>/etc/kerrighed_nodes</filename>(5) or with kernel
-      boot parameters.
+      Kerrighed kernel is setup through boot parameters.
     </para>
 
     <refsect2>
@@ -116,9 +114,7 @@
 		Valid range is 1..9999.
 	      </para>
 	      <para>
-		This parameter is mandatory, unless specified
-		through <filename>/etc/kerrighed_nodes</filename>(5). There
-		is no default.
+		This parameter is mandatory.
 	      </para>
 	    </listitem>
 	  </varlistentry>
@@ -132,9 +128,8 @@
 		Valid range is 0..255.
 	      </para>
 	      <para>
-		Unless <varname>autonodeid</varname> is activated or
-		<filename>/etc/kerrighed_nodes</filename>(5) file is complete,
-		this parameter is mandatory.
+		Unless <varname>autonodeid</varname> is activated this
+		parameter is mandatory.
 	      </para>
 	    </listitem>
 	  </varlistentry>
@@ -151,21 +146,6 @@
 	      </para>
 	      <para>
 		Default is 1 (activated).
-	      </para>
-	    </listitem>
-	  </varlistentry>
-	  <varlistentry>
-	    <term>nb_nodes_min=N</term>
-	    <listitem>
-	      <para>
-		The <varname>nb_nodes_min</varname> controls the
-		autostart feature of Kerrighed. If set to an integer,
-		kernel waits for this amount of nodes to be present
-		before starting Kerrighed cluster.
-	      </para>
-	      <para>
-		If not specified, Kerrighed cluster is not started
-		automatically.
 	      </para>
 	    </listitem>
 	  </varlistentry>
@@ -187,7 +167,6 @@
   <refsect1>
     <title>See also</title>
     <para>
-      <ulink url="kerrighed_nodes.5.html" ><command>kerrighed_nodes</command> (5)</ulink>, 
       <ulink url="kerrighed_capabilities.7.html" ><command>kerrighed_capabilities</command> (7)</ulink>, 
       <ulink url="migrate.1.html" ><command>migrate</command> (1)</ulink>, 
       <ulink url="krgcapset.1.html" ><command>krgcapset</command> (1)</ulink>, 
