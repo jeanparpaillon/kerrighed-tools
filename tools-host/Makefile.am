@@ -11,6 +11,7 @@ sbin_PROGRAMS = krgboot
 
 INCLUDES = -I@top_srcdir@/libs/include
 LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la @top_builddir@/libs/libkrgcb/libkrgcb.la
+AM_LDFLAGS=-Wl,--as-needed -static
 
 krgboot_SOURCES = krgboot.c
 

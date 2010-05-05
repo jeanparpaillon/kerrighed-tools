@@ -12,7 +12,7 @@ sbin_PROGRAMS = krgadm krginit
 
 INCLUDES = -I@top_srcdir@/libs/include
 LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la @top_builddir@/libs/libkrgcb/libkrgcb.la
-AM_LDFLAGS = -Wl,--as-needed
+AM_LDFLAGS = -Wl,--as-needed -static
 
 migrate_SOURCES = migrate.c
 checkpoint_SOURCES = checkpoint.c
