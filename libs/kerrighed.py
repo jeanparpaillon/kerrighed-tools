@@ -89,9 +89,6 @@ libkerrighed.krg_node_set_next.restype = c_int
 libkerrighed.krg_status_str.restype = c_char_p
 libkerrighed.krg_nodes_status.restype = krg_nodes_ptr_t
 libkerrighed.krg_cluster_status.restype = krg_clusters_ptr_t
-libkerrighed.krg_cluster_start.restype = krg_error_handler(libkerrighed.krg_cluster_start)
-libkerrighed.krg_cluster_start_all.restype = krg_error_handler(libkerrighed.krg_cluster_start_all)
-libkerrighed.krg_cluster_wait_for_start.restype = krg_error_handler(libkerrighed.krg_cluster_wait_for_start)
 libkerrighed.krg_cluster_shutdown.restype = krg_error_handler(libkerrighed.krg_cluster_shutdown)
 libkerrighed.krg_cluster_reboot.restype = krg_error_handler(libkerrighed.krg_cluster_reboot)
 
@@ -281,18 +278,6 @@ def krg_cluster_status():
     return: krg_clusters object
     """
     return krg_clusters(libkerrighed.krg_cluster_status())
-
-def krg_cluster_start(node_set):
-    """
-    node_set: krg_node_set object
-    """
-    libkerrighed.krg_cluster_start(node_set.c)==0
-
-def krg_cluster_start_all():
-    libkerrighed.krg_cluster_start_all()
-
-def krg_cluster_wait_for_start():
-    libkerrighed.krg_cluster_wait_for_start()
 
 def krg_cluster_shutdown(subclusterid=0):
     """

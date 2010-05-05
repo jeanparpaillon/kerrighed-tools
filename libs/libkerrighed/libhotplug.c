@@ -499,57 +499,6 @@ int krg_set_cluster_creator(int enable)
 				       enable ? (void *)1 : NULL);
 }
 
-int krg_cluster_start(struct krg_node_set *krg_node_set){
-	struct hotplug_node_set node_set;
-	struct krg_clusters* clusters;
-	int i;
-
-	clusters = krg_cluster_status();
-	if (krg_clusters_is_up(clusters, 0)) {
-		errno = EALREADY;
-		return -1;
-	}
-
-	node_set.subclusterid = krg_node_set->subclusterid;
-
-	krgnodes_clear(node_set.v);
-	
-	for (i = 0; i < kerrighed_max_nodes; i++) {
-		if (krg_node_set->v[i]) {
-			krgnode_set(i, node_set.v);
-		}
-	}
-	
-	return call_kerrighed_services(KSYS_HOTPLUG_START, &node_set);
-}
-
-int krg_cluster_start_all(void)
-{
-	struct krg_nodes* status;
-	struct krg_node_set* nodes;
-	int r = -1;
-
-	status = krg_nodes_status();
-	if(! status)
-		return r;
-
-	nodes = krg_nodes_get_present(status);
-	if (! nodes)
-		krg_nodes_destroy(status);
-		return r;
-	r = krg_cluster_start(nodes);
-
-	krg_nodes_destroy(status);
-	krg_node_set_destroy(nodes);
-
-	return r;
-}
-
-int krg_cluster_wait_for_start(void)
-{
-	return call_kerrighed_services(KSYS_HOTPLUG_WAIT_FOR_START, NULL);
-}
-
 int krg_node_ready(int setup_ok)
 {
 	return call_kerrighed_services(KSYS_HOTPLUG_READY,
