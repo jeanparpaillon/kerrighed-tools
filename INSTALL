@@ -9,14 +9,19 @@ Table of contents
 =================
 
 1/ Pre-requisites
-2/ Quick install
-3/ Detailed configuration
-3.1/ Generic configure options
+2/ Quick Install
+3/ Detailed Configuration
+3.1/ Generic Configure Options
 3.2/ Installation Names
 3.3/ Operation Controls
-3.4/ Specific configure options
-3.5/ Build from outside of source dir
+3.4/ Specific Configure Options
+3.5/ Build from Outside of Source Dir
+3.6/ Developer Tips
+3.7/ Kernel Options Hints
 4/ Starting Kerrighed
+4.1/ New Kerrighed Architecture
+4.2/ Quick Setup
+4.3/ Kernel Configuration
 
 1/ Pre-requisites
 =================
@@ -36,33 +41,54 @@ Table of contents
 
    Optional features requires the following:
 
-- xsltproc      : allow to create documentation in various formats (only needed by
-  		  maintainer.
-- Python (>= 2.5) : Python interface is provided to libkerrighed (hotplug part)
+- xsltproc        : allow to create documentation in various formats (only needed by
+    		    maintainer).
+- Python (>= 2.5) : to allow installation of the libkerrighed Python wrapper.
 
 2/ Quick install
 ================
 
-Type the following in the base directory of the Kerrighed
-distribution:
+- Let's say this tarball have been uncompressed in '/usr/src/kerrighed-src'
 
-	% ./configure
-	% make
-	% make install
+- Optionally, download linux-2.6.30 sources tarball into
+  '/usr/src'. If not 'configure' script will do it for you each and
+  every time.
 
-3/ Detailed configuration
+- Configure the sources:
+  % cd /usr/src/kerrighed-src && ./configure --sysconfdir=/etc
+
+- Configure the kernel. `./configure' setup the kernel with a default
+  configuration which may not suit your need but gives you a running
+  Kerrighed configuration.
+
+  `configure' --with-kernel-* options can be given to configure kernel
+  sources, either with a `.config' file either with one of kernel's
+  *config targets.
+
+  Type `./configure --help' for possible options.
+
+  For some hints on kernel options, have a look at 'Kernel options'
+  section below.
+
+- Build the sources:
+  % make
+
+- Install all, as user root:
+  % make install
+
+3/ Detailed Configuration
 =========================
 
    Kerrighed is made of several parts which can be built and installed
-independently:
+   independently:
 
-- kerrighed kernel (modified Linux kernel)
-- libs
-- tools
-- scripts
-- tests
+   - kerrighed kernel (modified Linux kernel)
+   - libs
+   - tools
+   - scripts
+   - tests
 
-3.1/ Generic configure options
+3.1/ Generic Configure Options
 ==============================
 
    The `configure' shell script attempts to guess correct values for
@@ -70,8 +96,8 @@ various system-dependent variables used during compilation.  It uses
 those values to create a `Makefile' in each directory of the package.
 It may also create one or more `.h' files containing system-dependent
 definitions.  Finally, it creates a shell script `config.status' that
-you can run in the future to recreate the current configuration, a file
-`config.cache' that saves the results of its tests to speed up
+you can run in the future to recreate the current configuration, a
+file `config.cache' that saves the results of its tests to speed up
 reconfiguring, and a file `config.log' containing compiler output
 (useful mainly for debugging `configure').
 
@@ -120,7 +146,13 @@ operates.
      Print the version of Autoconf used to generate the `configure'
      script, and exit.
 
-3.4/ Specific configure options
+`--enable-silent-rules'
+     Less verbose build output (undo: `make V=1')
+
+`--disable-silent-rules'
+     verbose build output (undo: `make V=0')
+
+3.4/ Specific Configure Options
 =====================================
 
    Following options can be passed to the configure script:
@@ -130,7 +162,8 @@ operates.
    --disable-libkerrighed  Disable libkerrighed [default=enable]
    --disable-python	   Disable Python code [default=enable]
    --disable-tools	   Disable tools [default=enable]
-   --enable-host-tools      Enable Kerrighed host service [default=disable]
+   --disable-host-tools    Disable Kerrighed host service [default=enable]
+   --enable-preserve-conf  Preserve configuration files if exist [default=disable]
    --enable-tests	   Globally enable tests [default=disable]
    --disable-tests-ktp	   Disable 'ktp' tests
    --disable-tests-apps	   Disable 'apps' tests
@@ -149,10 +182,119 @@ operates.
 			   [default=none]
    --with-ltp-base	   Path to ltp base dir [default=DATAROOTDIR/ltp]
 
-3.5/ Build from outside of source tree
+3.5/ Build From Outside of Source Tree
 ======================================
 
  Compilation and installation can be done from outside of source dir.
- Just create a new directory where you want to build and cd into it. Call
- configure script from this dir.
- All make targets can be used as usual.
+ Just create a new directory where you want to build and cd into
+ it. Call configure script from this dir.  All make targets can be
+ used as usual.
+
+3.6/ Developer Tips
+===================
+
+Kernel source dir is '_kernel'. If not present, 'configure' script
+creates it from Linux vanilla sources and the kerrighed patch. If
+present when running 'configure', this dir will be used as is.
+
+3.7/ Kernel Options Hints
+===========================
+
+If you want to edit kernel options, note that the following are
+currently *broken* with Kerrighed:
+
+  - Processor type and features -> Preemption Model -> Voluntary
+    Kernel Preemption (CONFIG_PREEMPT_NONE=y,
+    CONFIG_PREEMPT_VOLUNTARY=n, CONFIG_PREEMPT=n)
+  - Exectuble file formats / Emulations -> IA32 Emulation (CONFIG_IA32_EMULATION)
+  - Security options -> Enable access key retention support (CONFIG_KEYS=n)
+
+4/ Starting Kerrighed
+=====================
+
+4.1/ New Kerrighed Architecture
+===============================
+
+Kerrighed is now isolated inside a Linux container on all nodes. For
+information about Linux containers, please refer to technical articles
+available on the web, for instance from [1].
+
+These changes the way userspace has to setup and start a
+cluster.
+
+In a few words, each Kerrighed node starts a 'root' container in which
+only local resources are available. To access resources globally, one
+must start the Kerrighed container on one node then add other nodes in
+the Kerrighed container.
+
+4.2/ Quick Setup
+================
+
+As many different use cases are possible with this new architecture,
+we define the default one as:
+
+- the root container and the Kerrighed container are running on the
+  same filesystem,
+
+- the root container runs a complete distribution,
+
+- the Kerrighed container runs sshd on a non-standard port (2222) to
+  allow user login.
+
+  Note: for root container sshd on port 2222 and Kerrighed container
+  sshd on (standard) port 22, edit respectively files `/etc/default/ssh'
+  and `/etc/kerrighed/krginit_helper.conf'.
+
+- we know the number of nodes we want to start on boot and their
+  respective node_id.
+
+Now, we suppose you followed instructions in section 2 'Quick
+Installation'.
+
+- Edit `/etc/default/kerrighed-host'.
+  Set BOOT_ID to the node_id of the node starting the container.
+
+- Edit `/etc/default/kerrighed'.
+  Set ADD_OPTS to "--total N" where N is the number of nodes you want
+  in the cluster at boot time. You will be able to add other nodes
+  later if you want with the krgadm(1) tool.
+
+- Add `kerrighed-host' init script to your default runlevel.
+  On Debian system, this can be done with:
+
+  % update-rc.d kerrighed-host defaults 99
+
+4.3/ Kernel Configuration
+=========================
+
+The Kerrighed kernel is configured through kernel boot parameters.
+
+- session_id=X
+
+  The session_id contains identifier of the cluster. When several
+  Kerrighed clusters have to share the same ethernet switch, each
+  cluster should define a different session identifier to avoid
+  collisions.
+
+  A session identifier is a simple integer. Valid range is
+  1..9999.
+
+  This parameter is mandatory.
+
+- node_id=X
+
+  The node_id contains identifier of the node. It is an integer. It
+  must be unique over the Kerrighed cluster. Valid range is 0..255.
+
+  Unless autonodeid is activated, this parameter is mandatory.
+
+- autonodeid=0|1
+
+  When autonodeid value is 1, node_id is the last digit of the IP
+  address. This requires the NIC driver to be compiled into the kernel
+  and IP address to be set really early, either by DHCP or as kernel
+  boot parameters (see bootparam(7)).
+
+  Default is 1 (activated).
+
+[1] http://lxc.sf.net
