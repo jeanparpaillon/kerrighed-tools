@@ -3,16 +3,12 @@
 #
 #=====================================================
 
-# Start kerrighed cluster
-ENABLE=true
-#ENABLE=false
-
 # krgadm nodes add options. Can be used to wait for some nodes.
 # If empty, no nodes is added to the cluster.
 # See man krgadm(1)
-START_OPTS="--all"
-#START_OPTS="--count 4"
-#START_OPTS="--nodes 1-4"
+ADD_OPTS="--all"
+#ADD_OPTS="--total 4"
+#ADD_OPTS="--nodes 1-4"
 
 # Enable/Disable legacy scheduler behaviour
 LEGACY_SCHED=true
