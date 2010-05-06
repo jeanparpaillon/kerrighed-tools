@@ -1837,12 +1837,6 @@ fi
 
 slab-check
 
-# Use the distant fork feature
-if [ -z "$localonly" ]; then
-	echo "* Waiting for the cluster to start"
-	krgadm cluster wait_start
-fi
-
 export KTP_NR_PS=$nr_ps
 export KTP_ROOT_PID=$$
 
