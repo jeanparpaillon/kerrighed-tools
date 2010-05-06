@@ -6,6 +6,9 @@
    * Split tools dir into scripts/ man/ and tools/
    * Create patched kernel source dir in kernel/, no need for --with-kernel option
    * Check architecture compatibility
+   Checkpoint/restart
+   * Add various options to checkpoint and restart
+   * Add tools ipccheckpoint and ipcrestart to help checkpoint/restart of applications using IPC objects
 
 Kerrighed version 2.3.1
    Fixes:
