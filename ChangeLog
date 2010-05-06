@@ -2,6 +2,22 @@
    Checkpoint/restart
    * Add various options to checkpoint and restart
    * Add tools ipccheckpoint and ipcrestart to help checkpoint/restart of applications using IPC objects
+   Kerrighed containerization
+   * [kernel] Run Kerrighed in a Linux container
+   * New tools krgboot[_helper] and krginit[_helper] to run Kerrighed in a Linux container
+   * Fully automatic cluster boot
+   Kerrighed hotplug
+   * [kernel] Experimental support for adding nodes to a live cluster
+   * New krgadm semantics:
+     * kill commands 'cluster start' and 'wait_start',
+     * make command 'nodes add' the default way to build a cluster
+
+   Fixes:
+   * [kernel] Support migration of X connections
+   * [kernel] Many bugfixes in socket migration
+   * [kernel] Support migration / remote fork of chrooted applications
+   * [kernel] Many migration fixes
+   * Remove limitation on number of concurrent executions in KTP
 
 Kerrighed version 2.4.4
    Features:
