@@ -10,13 +10,62 @@
    * Add various options to checkpoint and restart
    * Add tools ipccheckpoint and ipcrestart to help checkpoint/restart of applications using IPC objects
 
-Kerrighed version 2.3.1
+Kerrighed version 2.4.4
+   Features:
+   * Port driver for Realtek R8169 (present on some Atom platforms)
+   * Update tg3 driver from Broadcom website. Add support for BCM5784 for instance
+   * Upgrade krgadm
    Fixes:
+   * Check for admin right for cluster start/shutdown/restart
+
+Kerrighed version 2.4.2
+   Fixes:
+   * Fix crashes when doing CTRL-C on a process doing memory injection.
+   * Fix some random memory incoherence in process distant fork.
+   * Fix OOM in injection mechanism on large memory systems.
+   * Avoid migration of pages from processes without USE_REMOTE_MEMORY.
+   * Fix some crashes during distant fork or migration on loaded memory system.
+
+Kerrighed version 2.4.1
+   Fixes:
+   * Major performance improvement
+   * Fix crashes during migration or distant fork using Lustre.
+   * Fix crashes with distributed system V memory segments.
+   * Fix dead-lock in the MM sub-system
+   * Fix issues in system V message queue identifiers
+   * Fix deadlock on 32bit platforms in the RPC layer
+   * Fix forgotten processes in /proc/<pid> directories
+   * Fix OOM issue using injection mechanism
+   * Fix memory allocation failure when big buffers are passed to read or write
+   * Various memory leak fixes.
+   * Various fixes in the checkpoint/restart sub-system
+   * Various other fixes.
+
+Kerrighed version 2.4.0
+   Features:
+   * Remote memory injection
+   * Configuration scheduler
+   * Application check-pointing
+   * Remote vfork()
+   * New RPC transmission engine that highly increases performance
+
+   Fixes:
+   * Fix random seg-fault during process migration on 64bits machines.
    * Fix incompatibilities with IPv6 tunnels and other special net devices
    * Various bugfixes in RPCs
+   * Fix a strong memory leak
    * Fix wrong attempts to migrate threads when this is not supported
    * Fix random userspace memory access when using fcntl on files remotely open
+   * Fix random userspace memory access when using ioctl on files remotely open
    * Fix BUG when the parent of an exiting multi-threaded process is/was remote
+   * Fix many socket related bugs in the context of migrated processes
+   * Fix many bugs in krgadm (seg-fault, etc)
+
+   Build system:
+   * Remove sub-configures
+   * Split tools dir into scripts/ man/ and tools/
+   * Create patched kernel source dir in kernel/, no need for --with-kernel option
+   * Check architecture compatibility
 
 Kerrighed version 2.3.0
    Fixes:
