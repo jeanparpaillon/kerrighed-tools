@@ -1,3 +1,4 @@
+   * [kernel] Port to linux 2.6.30
    Features:
    Checkpoint/restart
    * Add various options to checkpoint and restart
