@@ -142,15 +142,19 @@ void parse_args(int argc, char *argv[])
 
 void check_environment(void)
 {
+	int ret;
+
 	/* is Kerrighed launched ? */
-	if (krg_check_hotplug())
+	ret = krg_check_hotplug();
+	if (ret)
 	{
 		perror("Kerrighed is not started");
 		exit(EXIT_FAILURE);
 	}
 
 	/* Is checkpoint available ? */
-	if (krg_check_checkpoint()) {
+	ret = krg_check_checkpoint();
+	if (ret) {
 		perror("Checkpointing is not available");
 		exit(EXIT_FAILURE);
 	}

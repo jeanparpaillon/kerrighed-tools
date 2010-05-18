@@ -534,7 +534,8 @@ int cluster(int argc, char* argv[], char* program_name)
 	int ret = EXIT_SUCCESS;
 	int r;
 
-	if ( krg_check_hotplug() ) {
+	r = krg_check_hotplug();
+	if (r) {
 		perror("Kerrighed is not running");
 		return EXIT_FAILURE;
 	}
@@ -612,8 +613,10 @@ int nodes(int argc, char* argv[], char* program_name)
 	enum mode_t mode = NODES_MODE_UNSET;
 	int nb_nodes = -1;
 	int action = NONE;
+	int ret;
 
-	if ( krg_check_hotplug() ) {
+	ret = krg_check_hotplug();
+	if (ret) {
 		perror("Kerrighed is not running");
 		return EXIT_FAILURE;
 	}

@@ -367,7 +367,7 @@ int krg_check_hotplug(void)
 	r = call_kerrighed_services(KSYS_GET_NODE_ID, &node_id);
 	if (r != 0) {
 		errno = EAGAIN;
-		return 1;
+		return -1;
 	}
 
 	return 0;
@@ -378,7 +378,7 @@ int krg_check_container(void)
 	struct stat buf;
 
 	if ( stat("/proc/nodes/self", &buf) != 0 ) {
-		return 1;
+		return -1;
 	}
 
 	return 0;

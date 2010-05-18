@@ -119,13 +119,15 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	if (!krg_check_hotplug()) {
+	ret = krg_check_hotplug();
+	if (!ret) {
 		fprintf(stderr,
 			"Must be run from root container only\n");
 		exit(EXIT_FAILURE);
 	}
 
-	if (!krg_check_container()) {
+	ret = krg_check_container();
+	if (!ret) {
 		fprintf(stderr,
 			"Kerrighed container is already running\n");
 		exit(EXIT_FAILURE);

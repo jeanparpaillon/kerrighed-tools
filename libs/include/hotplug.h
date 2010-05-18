@@ -38,7 +38,7 @@ int krg_hotplug_init(void);
  *
  * Check if we are in a running Kerrighed container
  *
- * Return 0 if ok, 1 otherwise
+ * Return 0 if ok, -1 otherwise
  */
 int krg_check_hotplug(void);
 
@@ -47,7 +47,7 @@ int krg_check_hotplug(void);
  *
  * Check if Kerrighed container is already running
  *
- * Return 0 if running, 1 otherwise
+ * Return 0 if running, -1 otherwise
  */
 int krg_check_container(void);
 

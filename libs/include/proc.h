@@ -14,7 +14,7 @@
  *
  * Check if kerrighed support checkpoint
  *
- * Return 0 if ok, 1 otherwise
+ * Return 0 if ok, -1 otherwise
  */
 int krg_check_checkpoint(void);
 

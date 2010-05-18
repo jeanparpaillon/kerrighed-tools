@@ -34,7 +34,7 @@ int krg_check_checkpoint(void)
 	status = stat(CHKPT_DIR, &buffer);
 	if (status) {
 		errno = ENOENT;
-		return 1;
+		return -1;
 	}
 
 	return 0;
