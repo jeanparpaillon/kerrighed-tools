@@ -71,12 +71,12 @@ d_start_scheduler() {
 d_start() {
     log_daemon_msg "Starting $DESC"
 
+    d_start_scheduler
     if [ -n "$ADD_OPTS" ]; then
 	log_daemon_msg "nodes"
 	krgadm nodes add $ADD_OPTS > /dev/null
-	STATUS=$?
+	: ${STATUS:=$?}
     fi
-    d_start_scheduler
 
     log_end_msg ${STATUS:-0}
     return $?
