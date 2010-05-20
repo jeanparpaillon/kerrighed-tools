@@ -1667,7 +1667,9 @@ rcrash waitpid13              # User level dead-lock
 ############################ Waitid
 
 r waitid01
-rfail waitid02                # Unknown issue.
+rcrash waitid02               # User level dead-lock
+                              # WSTOPPED and WCONTINUED not supported for remote
+                              # children
 
 ############################ Write
 
