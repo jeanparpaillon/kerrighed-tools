@@ -20,8 +20,6 @@
 # Description:       Kerrighed services
 ### END INIT INFO
 
-set -e
-
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 NAME=kerrighed
@@ -52,17 +50,17 @@ d_start_scheduler() {
     case "x$LEGACY_SCHED" in
 	xtrue)
 	    krg_legacy_scheduler > /dev/null 2>&1
+	    return $?
 	    ;;
 	xfalse)
 	    log_progress_msg "disabled in $CFG"
+	    return 0
 	    ;;
 	*)
 	    log_progress_msg "value of LEGACY_SCHED in $CFG must be either 'true' or 'false'"
-	    STATUS=1
+	    return 1
 	    ;;
     esac
-
-    return ${STATUS:-0}
 }
 
 #
@@ -71,11 +69,10 @@ d_start_scheduler() {
 d_start() {
     log_daemon_msg "Starting $DESC"
 
-    d_start_scheduler
+    d_start_scheduler || STATUS=1
     if [ -n "$ADD_OPTS" ]; then
 	log_daemon_msg "nodes"
-	krgadm nodes add $ADD_OPTS > /dev/null
-	: ${STATUS:=$?}
+	krgadm nodes add $ADD_OPTS > /dev/null || STATUS=1
     fi
 
     log_end_msg ${STATUS:-0}
