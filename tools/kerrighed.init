@@ -44,6 +44,13 @@ d_check_kerrighed() {
     return $?
 }
 
+#
+# Check if running on the boot node of the cluster, before adding other nodes
+#
+d_check_boot_node() {
+    [ "`krgadm nodes | grep -c online`" = "1" ]
+}
+
 d_start_scheduler() {
     log_progress_msg "scheduler"
 
@@ -69,10 +76,14 @@ d_start_scheduler() {
 d_start() {
     log_daemon_msg "Starting $DESC"
 
-    d_start_scheduler || STATUS=1
-    if [ -n "$ADD_OPTS" ]; then
-	log_progress_msg "nodes"
-	krgadm nodes add $ADD_OPTS > /dev/null || STATUS=1
+    if d_check_boot_node; then
+	log_progress_msg "boot node"
+
+	d_start_scheduler || STATUS=1
+	if [ -n "$ADD_OPTS" ]; then
+	    log_progress_msg "nodes"
+	    krgadm nodes add $ADD_OPTS > /dev/null || STATUS=1
+	fi
     fi
 
     log_end_msg ${STATUS:-0}
