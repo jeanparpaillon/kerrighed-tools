@@ -9,8 +9,9 @@ dnl autoconf version
 AC_PREREQ(2.59)
 
 dnl mandatory stuff
-define([gitversion], esyscmd([sh -c "which git > /dev/null && git describe | sed -e 's/kerrighed-\([^-]\+\)//' | tr -d '\n' || true"]))dnl
-AC_INIT([Kerrighed], [3.0rc1]gitversion, [kerrighed.users@irisa.fr])
+define([project], [kerrighed])
+define([gitversion], esyscmd([sh -c "which git > /dev/null && git describe | sed -e 's/]project[-\([^-]\+\)//' | tr -d '\n' || true"]))dnl
+AC_INIT(project, [3.0rc1]gitversion, [kerrighed.users@irisa.fr])
 AC_DEFINE(GITVERSION, "gitversion", [GIT version])
 
 dnl check host and target
