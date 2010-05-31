@@ -141,7 +141,7 @@ d_status() {
     return $ret
 }
 
-if ! d_check_kerrighed; then
+if ! [ d_check_kerrighed ]; then
     log_failure_msg "Not running a Kerrighed kernel"
     exit 0
 else
