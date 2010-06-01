@@ -133,7 +133,7 @@ d_stop() {
 d_status() {
     d_check_kerrighed
     ret=$?
-    if $ret; then
+    if [ $ret -eq 0 ]; then
 	log_progress_msg "running Kerrighed kernel"
     else
 	log_progress_msg "not running Kerrighed kernel"
