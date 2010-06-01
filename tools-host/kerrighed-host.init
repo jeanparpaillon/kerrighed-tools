@@ -19,8 +19,6 @@
 # Description:       Initialize the Kerrighed container
 ### END INIT INFO
 
-set -e
-
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 NAME=kerrighed-host
@@ -41,7 +39,6 @@ fi
 #
 d_check_kerrighed() {
     test -d /sys/kerrighed
-    return $?
 }
 
 #
@@ -49,9 +46,6 @@ d_check_kerrighed() {
 #
 d_start_container() {
     krgboot_helper
-    ret=$?
-
-    return $ret
 }
 
 #
@@ -93,7 +87,9 @@ d_start() {
 
     if test "$(cat /sys/kerrighed/node_id)" = "$BOOT_ID"; then
 	log_progress_msg "container"
-	if ! d_start_container; then
+	if [ "$STATUS" = "1" ]; then
+	    log_progress_msg "not starting due to previous errors"
+	elif ! d_start_container; then
 	    log_progress_msg "(failed)"; STATUS=1
 	fi
     fi
