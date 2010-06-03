@@ -1,23 +1,40 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ipc.h>
+#include <sys/mman.h>
 #include <sys/shm.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include "libbi.h"
 
 #define KTP_TEST 1
 
-#define SHM_SIZE 1024
+#define DEFAULT_SHM_SIZE 1024
 
-int create = 0;
 int use_id = 0;
 int quiet = 0;
 int nb_loops = 0;
-char msg[SHM_SIZE];
+size_t shm_size = DEFAULT_SHM_SIZE;
+
+typedef enum {
+	NONE,
+	CREATE,
+	CREATE_FROM_FILE,
+	DELETE,
+	READ,
+	WRITE,
+	WRITE_FROM_FILE
+} action_t;
+
+action_t action;
+
+char *msg = NULL;
+char *path_msg = NULL;
 
 key_t get_key(const char* path)
 {
@@ -39,7 +56,7 @@ int create_shm(const char* path)
 	if (key == -1)
 		return -1;
 
-	shmid = shmget(key, SHM_SIZE, 0644 | IPC_CREAT | IPC_EXCL);
+	shmid = shmget(key, shm_size, 0644 | IPC_CREAT | IPC_EXCL);
 	if (shmid == -1)
 		fprintf(stderr, "create_shm(%s)::shmget: %s\n", path,
 			strerror(errno));
@@ -51,16 +68,27 @@ int create_shm(const char* path)
 int get_shm(const char* path)
 {
 	key_t key;
-	int shmid = -1;
+	struct shmid_ds buf;
+	int shmid = -1, r;
 
 	key = get_key(path);
 	if (key == -1)
 		return -1;
 
 	shmid = shmget(key, 0, 0);
-	if (shmid == -1)
+	if (shmid == -1) {
 		fprintf(stderr, "get_shm(%s)::shmget: %s\n", path,
 			strerror(errno));
+		return shmid;
+	}
+
+	r = shmctl(shmid, IPC_STAT, &buf);
+	if (r) {
+		fprintf(stderr, "get_shm(%s)::shmctl: %s\n", path,
+			strerror(errno));
+		return r;
+	}
+	shm_size = buf.shm_segsz;
 
 	return shmid;
 }
@@ -89,6 +117,9 @@ void print_usage(const char* cmd)
 	printf("%s -c\"message\" /path/to/shm:"
 	       " initialiaze a shm\n", cmd);
 
+	printf("%s -C\"/path/to/file/containing/message\" /path/to/shm:"
+	       " initialiaze a shm\n", cmd);
+
 	printf("%s -d {/path/to/shm | -i <shmid>}:"
 	       " delete a shm\n", cmd);
 
@@ -98,6 +129,9 @@ void print_usage(const char* cmd)
 
 	printf("%s -w\"message\" {/path/to/shm | -i <shmid>}:"
 	       " write to a shm\n", cmd);
+
+	printf("%s -W\"/path/to/file/containing/message\" {/path/to/shm | -i <shmid>}:"
+	       " write to a shm\n", cmd);
 }
 
 void parse_args(int argc, char *argv[])
@@ -106,12 +140,13 @@ void parse_args(int argc, char *argv[])
 
 	while (1) {
 
-		c = getopt(argc, argv, "c:w:r:diqh");
+		c = getopt(argc, argv, "c:C:w:W:r:diqh");
 		if (c == -1)
 			break;
 
 		switch (c) {
 		case 'r':
+			action = READ;
 			nb_loops = atoi(optarg);
 			if (nb_loops <= 0) {
 				fprintf(stderr, "Invalid value for -r options\n");
@@ -119,14 +154,24 @@ void parse_args(int argc, char *argv[])
 			}
 			break;
 		case 'c':
-			create = 1;
-			strncpy(msg, optarg, SHM_SIZE);
+			action = CREATE;
+			shm_size = strlen(optarg)+1;
+			msg = optarg;
+			break;
+		case 'C':
+			action = CREATE_FROM_FILE;
+			path_msg = optarg;
 			break;
 		case 'w':
-			strncpy(msg, optarg, SHM_SIZE);
+			action = WRITE;
+			msg = optarg;
+			break;
+		case 'W':
+			action = WRITE_FROM_FILE;
+			path_msg = optarg;
 			break;
 		case 'd':
-			create = -1;
+			action = DELETE;
 			break;
 		case 'i':
 			use_id = 1;
@@ -157,7 +202,7 @@ void print_msg(const char *format, ...)
 
 int main(int argc, char* argv[])
 {
-	int shmid;
+	int shmid, r;
 	char *data;
 
 	if (argc < 3) {
@@ -167,32 +212,49 @@ int main(int argc, char* argv[])
 
 	parse_args(argc, argv);
 
-	if (use_id && create == 1) {
-		fprintf(stderr, "** incompatible options used: -c and -i\n");
+	if (action == NONE) {
+		print_usage(argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	if (create == 1) {
-		shmid = create_shm(argv[argc-1]);
-	} else {
+	if (action == CREATE || action == CREATE_FROM_FILE) {
+
 		if (use_id) {
-			shmid = atoi(argv[argc-1]);
-		} else {
-			shmid = get_shm(argv[argc-1]);
+			fprintf(stderr, "** incompatible options used: -c|-C and -i\n");
+			exit(EXIT_FAILURE);
 		}
 
-		if (create == -1) { /* user wants to remove the SHM object */
-			int r;
-			r = delete_shm(shmid);
-			if (r)
+		if (action == CREATE)
+			shm_size = strlen(msg) + 1;
+		else {
+			/* CREATE_FROM_FILE */
+			struct stat buf;
+			r = stat(path_msg, &buf);
+			if (r) {
+				perror("stat");
 				exit(EXIT_FAILURE);
-
-			exit(EXIT_SUCCESS);
+			}
+			shm_size = buf.st_size;
+			print_msg("%d: size: %zd\n", shmid, shm_size);
 		}
+
+		shmid = create_shm(argv[argc-1]);
+
+	} else if (use_id) {
+		shmid = atoi(argv[argc-1]);
+	} else {
+		shmid = get_shm(argv[argc-1]);
 	}
 
 	if (shmid == -1)
 		exit(EXIT_FAILURE);
+
+	if (action == DELETE) {
+		r = delete_shm(shmid);
+		if (r)
+			exit(EXIT_FAILURE);
+		exit(EXIT_SUCCESS);
+	}
 
 	data = shmat(shmid, (void *)0, 0);
 	if (data == (char *)(-1)) {
@@ -200,10 +262,31 @@ int main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	if (nb_loops == 0) {
-		strncpy(data, msg, SHM_SIZE);
+	if (action == CREATE || action == WRITE) {
+		memcpy(data, msg, shm_size);
 		print_msg("%d:%s\n", shmid, msg);
+	} else if (action == CREATE_FROM_FILE || action == WRITE_FROM_FILE) {
+		r = open(path_msg, O_RDONLY);
+		if (r == -1) {
+			perror("open");
+			exit(EXIT_FAILURE);
+		}
+
+		msg = mmap(NULL, shm_size, PROT_READ, MAP_PRIVATE, r, 0);
+		if (msg == MAP_FAILED)  {
+			perror("mmap");
+			exit(EXIT_FAILURE);
+		}
+
+		memcpy(data, msg, shm_size);
+
+		munmap(msg, shm_size);
+
+		close(r);
+
+		print_msg("%d:%s\n", shmid, data);
 	} else {
+		/* action == READ */
 		int i;
 
 		for (i = 0; i < nb_loops; i++) {
@@ -213,10 +296,11 @@ int main(int argc, char* argv[])
 			do_one_loop(i, &n);
 #ifdef KTP_TEST
 			if (strncmp(data, "KTP REQ CHANGE", 15) == 0)
-				strncpy(data, "KTP CHANGE DONE", SHM_SIZE);
+				strncpy(data, "KTP CHANGE DONE", shm_size);
 #endif
 		}
 	}
+
 
 	if (shmdt(data) == -1) {
 		perror("shmdt");
