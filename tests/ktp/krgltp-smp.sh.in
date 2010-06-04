@@ -1709,6 +1709,7 @@ rsingle cr21
 rsingle cr22
 rsingle cr23
 rsingle cr24
+r cr_freeze_unfreeze
 r cr_abort01
 r cr_abort02
 r cr_tree01

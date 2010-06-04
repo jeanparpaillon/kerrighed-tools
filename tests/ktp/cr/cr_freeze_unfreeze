@@ -1,0 +1,86 @@
+#!/bin/bash
+###############################################################################
+##
+## Copyright (c) Kerlabs, 2010
+##
+## This program is free software;  you can redistribute it and#or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+## or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+## for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program;  if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+##
+###############################################################################
+#
+# Description:  Test program for Kerrighed checkpoint with options to freeze
+#               unfreeze, and checkpoint process.
+#
+# Author:       Matthieu Fertré, matthieu.fertre@kerlabs.com
+#
+
+source `dirname $0`/lib_cr.sh
+
+description="Freeze/unfreeze: Run, F, U, F, C, U, F, C, C, U, F, F(fail), U, U(fail)..."
+
+cr_freeze_unfreeze()
+{
+    TCID="$FUNCNAME"               # Identifier of this testcase.
+    TST_COUNT=$[$TST_COUNT+1]      # Test case number.
+
+    runcommand +CHECKPOINTABLE || return $?
+
+    freeze_process $PID $TESTCMD || return $?
+
+    unfreeze_process $PID $TESTCMD || return $?
+
+
+    freeze_process $PID $TESTCMD || return $?
+
+    checkpoint_frozen_process $PID $TESTCMD || return $?
+
+    unfreeze_process $PID $TESTCMD || return $?
+
+
+    freeze_process $PID $TESTCMD || return $?
+
+    checkpoint_frozen_process $PID $TESTCMD || return $?
+
+    checkpoint_frozen_process $PID $TESTCMD || return $?
+
+    unfreeze_process $PID $TESTCMD || return $?
+
+
+    freeze_process $PID $TESTCMD || return $?
+
+    freeze_process_must_fail $PID $TESTCMD || return $?
+
+    unfreeze_process $PID $TESTCMD || return $?
+
+    unfreeze_process_must_fail $PID $TESTCMD || return $?
+
+    checkpoint_frozen_process_must_fail $PID $TESTCMD || return $?
+
+
+    freeze_process $PID $TESTCMD || return $?
+
+    checkpoint_process_must_fail $PID $TESTCMD || return $?
+
+    unfreeze_process $PID $TESTCMD || return $?
+
+
+    kill_group $PID $TESTCMD || return $?
+
+    print_success $?
+    return $?
+}
+
+CR_setup $@ || exit $?
+
+cr_freeze_unfreeze || exit $?

@@ -207,7 +207,6 @@ checkpoint_process_must_fail()
     return $r
 }
 
-
 freeze_process()
 {
     local _pid=$1
@@ -225,6 +224,29 @@ freeze_process()
 
     LTP_print_step_info "freeze $_pid ($_name): $r"
 
+    return $r
+}
+
+freeze_process_must_fail()
+{
+    local _pid=$1
+    local _name=$2
+    local r=0
+
+    checkpoint -f $_pid > /dev/null 2>&1
+
+    r=$?
+    if [ $r -eq 0 ]; then
+	tst_brkm TFAIL NULL \
+	    "freeze_process_must_fail: freeze process $_pid ($_name) should have failed"
+	r=1
+	return $r
+    fi
+
+    LTP_print_step_info \
+	"freeze_must_fail: PID: $_pid, error: $r"
+
+    r=0
     return $r
 }
 
@@ -256,6 +278,27 @@ checkpoint_frozen_process()
     return $r
 }
 
+checkpoint_frozen_process_must_fail()
+{
+    local _pid=$1
+    local _name=$2
+    local r=0
+
+    checkpoint -c $_pid > /tmp/chkpt_result${_pid} 2>&1
+
+    r=$?
+    if [ $r -eq 0 ]; then
+	tst_brkm TFAIL NULL "checkpoint_frozen_must_fail: checkpoint $_pid ($_name) should have failed"
+	r = 1
+	return $r
+    fi
+
+    LTP_print_step_info \
+	"checkpoint_frozen_must_fail: PID: $_pid, error: $r"
+
+    r=0
+    return $r
+}
 
 unfreeze_process()
 {
@@ -274,6 +317,29 @@ unfreeze_process()
 
     LTP_print_step_info "unfreeze $_pid ($_name): $r"
 
+    return $r
+}
+
+unfreeze_process_must_fail()
+{
+    local _pid=$1
+    local _name=$2
+    local r=0
+
+    checkpoint -u $_pid > /dev/null 2>&1
+
+    r=$?
+    if [ $r -eq 0 ]; then
+	tst_brkm TFAIL NULL \
+	    "unfreeze_process_must_fail: unfreeze process $_pid ($_name) should have failed"
+	r=1
+	return $r
+    fi
+
+    LTP_print_step_info \
+	"unfreeze_must_fail: PID: $_pid, error: $r"
+
+    r=0
     return $r
 }
 

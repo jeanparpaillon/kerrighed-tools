@@ -36,6 +36,7 @@ tests_SCRIPTS = \
 	cr_clone_files01 \
 	cr_clone_fs01 \
 	cr_clone_semundo01 \
+	cr_freeze_unfreeze \
 	cr_stress \
 	cr_tree01 \
 	cr_tree02 \
