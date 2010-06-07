@@ -26,20 +26,6 @@
 /*                                                                           */
 /*****************************************************************************/
 
-int krg_check_checkpoint(void)
-{
-	struct stat buffer;
-	int status;
-
-	status = stat(CHKPT_DIR, &buffer);
-	if (status) {
-		errno = ENOENT;
-		return -1;
-	}
-
-	return 0;
-}
-
 /* Return the node id of the local machine */
 
 int get_node_id (void)

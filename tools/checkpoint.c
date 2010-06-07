@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
+#include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -142,20 +143,20 @@ void parse_args(int argc, char *argv[])
 
 void check_environment(void)
 {
+	struct stat buffer;
 	int ret;
 
 	/* is Kerrighed launched ? */
 	ret = krg_check_hotplug();
-	if (ret)
-	{
+	if (ret) {
 		perror("Kerrighed is not started");
 		exit(EXIT_FAILURE);
 	}
 
-	/* Is checkpoint available ? */
-	ret = krg_check_checkpoint();
+	/* Does /var/chkpt exist ? */
+	ret = stat(CHKPT_DIR, &buffer);
 	if (ret) {
-		perror("Checkpointing is not available");
+		perror(CHKPT_DIR);
 		exit(EXIT_FAILURE);
 	}
 }

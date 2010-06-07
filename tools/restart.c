@@ -21,8 +21,6 @@
 
 #include <config.h>
 
-#define CHKPT_DIR "/var/chkpt"
-
 long appid;
 int version;
 int flags = 0;
@@ -403,20 +401,20 @@ void wait_application_exits()
 void check_environment(void)
 {
 	struct stat buffer;
-	int status;
+	int ret;
 
 	/* is Kerrighed launched ? */
-	if (get_nr_nodes() == -1)
-	{
-		fprintf(stderr, "no kerrighed nodes found\n");
-		exit(-EPERM);
+	ret = krg_check_hotplug();
+	if (ret) {
+		perror("Kerrighed is not started");
+		exit(EXIT_FAILURE);
 	}
 
-	/* /var/chkpt exists ? */
-	status = stat(CHKPT_DIR, &buffer);
-	if (status) {
+	/* Does /var/chkpt exist ? */
+	ret = stat(CHKPT_DIR, &buffer);
+	if (ret) {
 		perror(CHKPT_DIR);
-		exit(-ENOENT);
+		exit(EXIT_FAILURE);
 	}
 }
 
