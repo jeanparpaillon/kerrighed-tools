@@ -32,6 +32,7 @@ typedef enum {
 short from_appid = 0;
 short quiet = 0;
 short no_callbacks = 0;
+short interrupted_by_signal = 0;
 int sig = 0;
 int flags = 0;
 char * description = NULL;
@@ -278,8 +279,16 @@ void clean_checkpoint_dir(struct checkpoint_info *info)
 int checkpoint_app(long pid, int flags, short _quiet)
 {
 	int r;
-
 	struct checkpoint_info info;
+
+	if (interrupted_by_signal) {
+		fprintf(stderr,
+			"checkpoint: interrupted by signal before "
+			"checkpointing\n");
+		r = -1;
+		goto err;
+	}
+
 	if (from_appid) {
 		if (!_quiet)
 			printf("Checkpointing application %ld...\n", pid);
@@ -301,12 +310,20 @@ int checkpoint_app(long pid, int flags, short _quiet)
 		clean_checkpoint_dir(&info);
 	}
 
+err:
 	return r;
 }
 
 int freeze_app(long pid, int _quiet)
 {
 	int r;
+
+	if (interrupted_by_signal) {
+		fprintf(stderr,
+			"checkpoint: interrupted by signal before freezing\n");
+		r = -1;
+		goto err;
+	}
 
 	if (!no_callbacks) {
 		r = cr_execute_chkpt_callbacks(pid, from_appid);
@@ -340,6 +357,19 @@ err:
 int unfreeze_app(long pid, int signal, short _quiet)
 {
 	int r;
+
+	if (interrupted_by_signal) {
+		if (action == ALL) {
+			fprintf(stderr,
+				"checkpoint: ignoring interruption signal\n");
+		} else {
+			fprintf(stderr,
+				"checkpoint: interrupted by signal before "
+				"unfreezing\n");
+			r = -1;
+			goto err;
+		}
+	}
 
 	if (!no_callbacks) {
 		r = cr_execute_continue_callbacks(pid, from_appid);
@@ -396,10 +426,17 @@ err_chkpt:
 	return r;
 }
 
+
+void handle_signal(int signum)
+{
+	interrupted_by_signal = 1;
+}
+
 int main(int argc, char *argv[])
 {
 	int r = 0;
 	long pid = -1;
+	struct sigaction sigh;
 
 	/* Manage options with getopt */
 	parse_args(argc, argv);
@@ -418,6 +455,18 @@ int main(int argc, char *argv[])
 		r = -EINVAL;
 		goto exit;
 	}
+
+	/*
+	 * put a signal handler to avoid, for instance, exiting
+	 * without unfreezing the application.
+	 */
+	sigh.sa_handler = &handle_signal;
+	r = sigaction(SIGINT, &sigh, NULL);
+	if (r)
+		perror("sigaction");
+	r = sigaction(SIGTERM, &sigh, NULL);
+	if (r)
+		perror("sigaction");
 
 	switch (action) {
 	case CHECKPOINT:
