@@ -60,6 +60,17 @@ wait_other_instances()
 # SYSTEM V SHM
 ###########################################################################
 
+generate_fixed_size_random_msg()
+{
+    local length=10
+    local msg=""
+    for i in `seq 1 $length`; do
+	msg="$RANDOM$msg"
+    done
+    msg=`echo $msg|cut -b 10`
+    echo $msg
+}
+
 create_sysv_shm()
 {
     local shm_path=$1

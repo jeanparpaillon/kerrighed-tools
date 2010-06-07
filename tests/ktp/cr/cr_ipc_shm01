@@ -35,7 +35,7 @@ cr_ipc_shm01()
     TST_COUNT=$[$TST_COUNT+1]      # Test case number.
 
     local shmpath=`mktemp -d`
-    local written_msg="$RANDOM"
+    local written_msg=`generate_fixed_size_random_msg`
 
     # create the shm and get its identifier
     create_sysv_shm $shmpath $written_msg || return $?
@@ -59,14 +59,14 @@ cr_ipc_shm01()
 
     check_sysv_shm_value $SHMID $shmpath "$written_msg" || return $?
 
-    written_msg="$RANDOM"
+    written_msg=`generate_fixed_size_random_msg`
     write_sysv_shm_value $SHMID $shmpath "$written_msg" || return $?
 
     check_sysv_shm_value $SHMID $shmpath "$written_msg" || return $?
 
     dump_sysv_shm $SHMID $shmpath $shmpath/shm_v2.bin || return $?
 
-    written_msg="$RANDOM"
+    written_msg=`generate_fixed_size_random_msg`
     write_sysv_shm_value $SHMID $shmpath "$written_msg" || return $?
 
     dump_sysv_shm $SHMID $shmpath $shmpath/shm_v3.bin || return $?
