@@ -1,4 +1,6 @@
+Kerrighed version 3.0.0
    * [kernel] Port to linux 2.6.30
+
    Features:
    Checkpoint/restart
    * Add various options to checkpoint and restart
@@ -18,6 +20,7 @@
    * [kernel] Many bugfixes in socket migration
    * [kernel] Support migration / remote fork of chrooted applications
    * [kernel] Many migration fixes
+   * [kernel] Support migration/distant fork of swapping processes.
    * Remove limitation on number of concurrent executions in KTP
 
 Kerrighed version 2.4.4
