@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
 				exit(EXIT_FAILURE);
 			}
 			shm_size = buf.st_size;
-			print_msg("%d: size: %zd\n", shmid, shm_size);
+			print_msg("size: %zd\n", shm_size);
 		}
 
 		shmid = create_shm(argv[argc-1]);
