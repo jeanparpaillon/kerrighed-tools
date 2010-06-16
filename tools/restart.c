@@ -30,6 +30,7 @@ int options = 0;
 #define STDIN_OUT_ERR	2
 #define QUIET		4
 #define DEBUG		8
+#define NOUNFREEZE	16
 
 struct cr_subst_files_array substitution;
 
@@ -54,6 +55,7 @@ void show_help(char * program_name)
 		"Options:\n"
 		"  -h|--help                Display this information and exit\n"
 		"  -v|--version             Display version information\n"
+		"  -U|--no-unfreeze         Leave the application frozen after the restart\n"
 		"  -t|--replace-tty         Replace application original terminal by the current one\n"
 		"  -f|--foreground          Restart the application in foreground\n"
 		"  -p|--pids                Replace application orphan pgrp and sid by the ones of restart\n"
@@ -269,7 +271,7 @@ int parse_args(int argc, char *argv[])
 	char *checkpoint_dir;
 	char c;
 	int r, option_index = 0;
-	char * short_options= "hvftps:qd";
+	char * short_options= "hvftps:Uqd";
 	static struct option long_options[] =
 		{
 			{"help", no_argument, 0, 'h'},
@@ -278,6 +280,7 @@ int parse_args(int argc, char *argv[])
 			{"tty", no_argument, 0, 't'},
 			{"pids", no_argument, 0, 'p'},
 			{"substitute-file", required_argument, 0, 's'},
+			{"no-unfreeze", no_argument, 0, 'U'},
 			{"quiet", no_argument, 0, 'q'},
 			{"debug", no_argument, 0, 'd'},
 			{0, 0, 0, 0}
@@ -312,6 +315,9 @@ int parse_args(int argc, char *argv[])
 			break;
 		case 'd':
 			options |= DEBUG;
+			break;
+		case 'U':
+			options |= NOUNFREEZE;
 			break;
 		default:
 			show_help(argv[0]);
@@ -449,16 +455,24 @@ int main(int argc, char *argv[])
 		goto exit;
 	}
 
-	r = application_unfreeze_from_appid(appid, 0);
-	if (r) {
-		fprintf(stderr, "restart: fail to unfreeze application %ld: "
-			"%s\n", appid, strerror(errno));
-		goto exit;
-	}
+	if (!(options & NOUNFREEZE)) {
+		r = application_unfreeze_from_appid(appid, 0);
+		if (r) {
+			fprintf(stderr, "restart: fail to unfreeze application %ld: "
+				"%s\n", appid, strerror(errno));
+			goto exit;
+		}
 
-	if (!(options & QUIET))
-		printf("Application %ld has been successfully restarted\n",
-		       appid);
+		if (!(options & QUIET))
+			printf("Application %ld has been successfully restarted\n",
+			       appid);
+	} else {
+		if (!(options & QUIET))
+			printf("Application %ld has been successfully restored "
+			       "in *FROZEN* state. You can unfreeze it using "
+			       "'checkpoint -u'\n",
+			       appid);
+	}
 
 	if (options & FOREGROUND)
 		wait_application_exits();

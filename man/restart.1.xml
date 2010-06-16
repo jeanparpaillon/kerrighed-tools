@@ -55,6 +55,17 @@
 	</varlistentry>
 
 	<varlistentry>
+	  <term><option>-U</option></term>
+	  <term><option>--no-unfreeze</option></term>
+	  <listitem>
+	    <para>Restore the application in FROZEN state. Application can then
+	      be unfrozen using <command>checkpoint</command> with the
+	      appropriate option.
+	    </para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
 	  <term><option>-t</option></term>
 	  <term><option>--replace-tty</option></term>
 	  <listitem>
