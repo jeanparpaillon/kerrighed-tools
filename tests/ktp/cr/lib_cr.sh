@@ -498,6 +498,29 @@ restart_process_must_fail()
     return $r
 }
 
+restart_foreground_process()
+{
+    local _pid=$1
+    local _version=$2
+    local _name=$3
+    local r=0
+
+    # Restart process
+    restart -q -f $_pid $_version
+
+    r=$?
+    if [ $r -ne 0 ]; then
+	tst_brkm TFAIL NULL \
+	    "restart_foreground: failed to restart $_pid $version"
+	return $r
+    fi
+
+    LTP_print_step_info \
+	"restart_foreground $_pid $_name: $r"
+
+    return $r
+}
+
 ###############################################################################
 
 skip_test_if_only_one_node()

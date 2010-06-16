@@ -53,9 +53,14 @@ tests_SCRIPTS = \
 	cr_pipe01 \
 	cr_pipe02 \
 	cr_exclude_mm01 \
+	cr_blender \
 	lib_cr.sh \
 	lib_cr_ipc.sh
 
+tests_DATA = \
+	duck11_peaking.blend \
+	duck11_peaking_render_1.png
+
 testsdir = @ltpbase@/testcases/bin
 
-EXTRA_DIST = $(tests_SCRIPTS)
+EXTRA_DIST = $(tests_SCRIPTS) $(tests_DATA)
