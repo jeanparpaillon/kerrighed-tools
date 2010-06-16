@@ -31,6 +31,7 @@
 TESTCMD="bi-cr"
 TESTCMD_OPTIONS="-q"
 TEST_STEP=0
+CHKPTDIR="/var/chkpt"
 
 LTP_print_info()
 {
@@ -68,7 +69,7 @@ move_task_file_to_make_restart_fail()
     local r=0
 
     local version=`awk '$1=="Version:" {print $2}' /tmp/chkpt_result${_pid}`
-    local filechkpt=/var/chkpt/${_pid}/v${version}/task_${_pid}.bin
+    local filechkpt=$CHKPTDIR/${_pid}/v${version}/task_${_pid}.bin
 
     mv $filechkpt $filechkpt.old
     r=$?
@@ -82,7 +83,7 @@ move_task_back_file_to_make_restart_ok()
     local r=0
 
     local version=`awk '$1=="Version:" {print $2}' /tmp/chkpt_result${_pid}`
-    local filechkpt=/var/chkpt/${_pid}/v${version}/task_${_pid}.bin
+    local filechkpt=$CHKPTDIR/${_pid}/v${version}/task_${_pid}.bin
 
     mv $filechkpt.old $filechkpt
     r=$?
@@ -98,7 +99,7 @@ check_written_files()
     # check if checkpoint is really written on disk
     # TODO: factorize(1)
     local version=`awk '$1=="Version:" {print $2}' /tmp/chkpt_result${_pid}`
-    local filechkpt=/var/chkpt/${_pid}/v${version}/task_${_pid}.bin
+    local filechkpt=$CHKPTDIR/${_pid}/v${version}/task_${_pid}.bin
     stat $filechkpt > /dev/null 2>&1
 
     r=$?
@@ -835,7 +836,7 @@ CR_internal_cleanup()
 CR_cleanup()
 {
     killall `echo "$TESTCMD" | cut -f1 -d" "` > /dev/null 2>&1
-    rm -rf /var/chkpt/* > /dev/null 2>&1
+    rm -rf $CHKPTDIR/* > /dev/null 2>&1
     rm -rf /tmp/chkpt_result* > /dev/null 2>&1
     rm -rf /tmp/ps_* > /dev/null 2>&1
     rm -rf /tmp/ktp_sync_* > /dev/null 2>&1
