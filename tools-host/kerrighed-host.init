@@ -52,49 +52,34 @@ d_start_container() {
 # Function that starts the daemon/service.
 #
 d_start() {
-    log_progress_msg "isolate_uts"
-    if ! d_set_isolate_ns "$ISOLATE_UTS" isolate_uts; then
-	log_progress_msg "(failed)"; STATUS=1
-    fi
+    d_set_isolate_ns "$ISOLATE_UTS" isolate_uts || return 1
 
-    log_progress_msg "isolate_mnt"
-    if ! d_set_isolate_ns "$ISOLATE_MNT" isolate_mnt; then
-	log_progress_msg "(failed)"; STATUS=1
-    fi
+    d_set_isolate_ns "$ISOLATE_MNT" isolate_mnt || return 1
 
-    log_progress_msg "isolate_net"
-    if ! d_set_isolate_ns "$ISOLATE_NET" isolate_net; then
-	log_progress_msg "(failed)"; STATUS=1
-    fi
+    d_set_isolate_ns "$ISOLATE_NET" isolate_net || return 1
 
-    log_progress_msg "isolate_user"
-    if ! d_set_isolate_ns "$ISOLATE_USER" isolate_user; then
-	log_progress_msg "(failed)"; STATUS=1
-    fi
+    d_set_isolate_ns "$ISOLATE_USER" isolate_user || return 1
 
-    log_progress_msg "cluster_init"
     if ! echo -n $CLUSTER_INIT_HELPER > /sys/kerrighed/hotplug/cluster_init_helper; then
-	log_progress_msg "(failed)"; STATUS=1
+	log_failure_msg "cluster_init"
+	return 1
     fi
 
-    log_progress_msg "net_devices"
     for dev in $NET_DEVICES; do
-	log_progress_msg "$dev"
 	if ! echo $dev > /sys/kerrighed/net_devices; then
-	    log_progress_msg "(failed)"; STATUS=1
+	    log_failure_msg "setup of $dev";
+	    return 1
 	fi
     done
 
     if test "$(cat /sys/kerrighed/node_id)" = "$BOOT_ID"; then
-	log_progress_msg "container"
-	if [ "$STATUS" = "1" ]; then
-	    log_progress_msg "not starting due to previous errors"
-	elif ! d_start_container; then
-	    log_progress_msg "(failed)"; STATUS=1
+	if ! d_start_container; then
+	    log_failure_msg "start of the container";
+	    return 1
 	fi
     fi
 
-    return ${STATUS:-0}
+    return 0
 }
 
 d_set_isolate_ns() {
@@ -108,7 +93,7 @@ d_set_isolate_ns() {
         x)
             ;;
         *)
-            log_progress_msg "value of ISOLATE_xxx in $CFG must be either 'true' or 'false'"
+            log_failure_msg "value of ISOLATE_xxx in $CFG must be either 'true' or 'false'"
 	    STATUS=1
             ;;
     esac
@@ -144,8 +129,7 @@ else
     case "$1" in
 	start)
 	    log_daemon_msg "Starting $DESC"
-	    d_start || log_end_msg 1
-	    log_end_msg 0
+	    d_start && log_progress_msg "done" && log_end_msg 0
 	    ;;
 	stop)
 	    log_daemon_msg "Stopping $DESC"
