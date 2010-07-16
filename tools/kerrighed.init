@@ -110,8 +110,8 @@ d_status() {
 }
 
 if ! d_check_kerrighed; then
-    log_failure_msg "Must be run inside Kerrighed container"
-    STATUS=1
+    log_warning_msg "Must be run inside Kerrighed container"
+    STATUS=0
 else
     case "$1" in
 	start)
