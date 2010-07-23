@@ -211,12 +211,14 @@ function rsingle(){
 
 	echo "*** $@ *** SINGLE run"
 
-	# Load any background pipe in its own pgrp
-	set -m
-	check_krgcap
-	$BASETEST/$@ || exit 1
-	# Restore default behavior in non-interactive shell
-	set +m
+	# Add capabilities only in a sub shell, so that status fifos are always
+	# written to from the same node
+	(
+		# Load any background pipe in its own pgrp
+		set -m
+		check_krgcap
+		$BASETEST/$@
+	) || exit 1
 	let nbpassed=nbpassed+1
 }
 
