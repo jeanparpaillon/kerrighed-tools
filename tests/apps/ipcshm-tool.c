@@ -64,12 +64,28 @@ int create_shm(const char* path)
 	return shmid;
 }
 
+int get_shm_size(int shmid)
+{
+	struct shmid_ds buf;
+	int r;
+
+	r = shmctl(shmid, IPC_STAT, &buf);
+	if (r) {
+		fprintf(stderr, "get_shm_size(%d)::shmctl: %s\n", shmid,
+			strerror(errno));
+		return r;
+	}
+
+	shm_size = buf.shm_segsz;
+
+	return 0;
+}
+
 /* return -1 in case of error */
 int get_shm(const char* path)
 {
 	key_t key;
-	struct shmid_ds buf;
-	int shmid = -1, r;
+	int shmid = -1;
 
 	key = get_key(path);
 	if (key == -1)
@@ -81,14 +97,6 @@ int get_shm(const char* path)
 			strerror(errno));
 		return shmid;
 	}
-
-	r = shmctl(shmid, IPC_STAT, &buf);
-	if (r) {
-		fprintf(stderr, "get_shm(%s)::shmctl: %s\n", path,
-			strerror(errno));
-		return r;
-	}
-	shm_size = buf.shm_segsz;
 
 	return shmid;
 }
@@ -155,7 +163,6 @@ void parse_args(int argc, char *argv[])
 			break;
 		case 'c':
 			action = CREATE;
-			shm_size = strlen(optarg)+1;
 			msg = optarg;
 			break;
 		case 'C':
@@ -203,6 +210,7 @@ void print_msg(const char *format, ...)
 int main(int argc, char* argv[])
 {
 	int shmid, r;
+	size_t msg_size = 0; /* Quiet gcc */
 	char *data;
 
 	if (argc < 3) {
@@ -217,6 +225,29 @@ int main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
+	/* Compute msg_size */
+	switch (action) {
+	case CREATE:
+	case WRITE:
+		msg_size = strlen(msg) + 1;
+		break;
+	case CREATE_FROM_FILE:
+	case WRITE_FROM_FILE: {
+		struct stat buf;
+
+		r = stat(path_msg, &buf);
+		if (r) {
+			perror("stat");
+			exit(EXIT_FAILURE);
+		}
+		msg_size = buf.st_size;
+		print_msg("size: %zd\n", msg_size);
+		break;
+	} default:
+		/* READ: the whole shm is read */
+		break;
+	}
+
 	if (action == CREATE || action == CREATE_FROM_FILE) {
 
 		if (use_id) {
@@ -224,20 +255,7 @@ int main(int argc, char* argv[])
 			exit(EXIT_FAILURE);
 		}
 
-		if (action == CREATE)
-			shm_size = strlen(msg) + 1;
-		else {
-			/* CREATE_FROM_FILE */
-			struct stat buf;
-			r = stat(path_msg, &buf);
-			if (r) {
-				perror("stat");
-				exit(EXIT_FAILURE);
-			}
-			shm_size = buf.st_size;
-			print_msg("size: %zd\n", shm_size);
-		}
-
+		shm_size = msg_size;
 		shmid = create_shm(argv[argc-1]);
 
 	} else if (use_id) {
@@ -262,8 +280,17 @@ int main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
+	/* Truncate too long messages */
+	if (action == WRITE || action == WRITE_FROM_FILE) {
+		r = get_shm_size(shmid);
+		if (r)
+			exit(EXIT_FAILURE);
+		if (msg_size > shm_size)
+			msg_size = shm_size;
+	}
+
 	if (action == CREATE || action == WRITE) {
-		memcpy(data, msg, shm_size);
+		memcpy(data, msg, msg_size);
 		print_msg("%d:%s\n", shmid, msg);
 	} else if (action == CREATE_FROM_FILE || action == WRITE_FROM_FILE) {
 		r = open(path_msg, O_RDONLY);
@@ -272,15 +299,15 @@ int main(int argc, char* argv[])
 			exit(EXIT_FAILURE);
 		}
 
-		msg = mmap(NULL, shm_size, PROT_READ, MAP_PRIVATE, r, 0);
+		msg = mmap(NULL, msg_size, PROT_READ, MAP_PRIVATE, r, 0);
 		if (msg == MAP_FAILED)  {
 			perror("mmap");
 			exit(EXIT_FAILURE);
 		}
 
-		memcpy(data, msg, shm_size);
+		memcpy(data, msg, msg_size);
 
-		munmap(msg, shm_size);
+		munmap(msg, msg_size);
 
 		close(r);
 
@@ -288,6 +315,10 @@ int main(int argc, char* argv[])
 	} else {
 		/* action == READ */
 		int i;
+
+		r = get_shm_size(shmid);
+		if (r)
+			exit(EXIT_FAILURE);
 
 		for (i = 0; i < nb_loops; i++) {
 			int n = 0;
