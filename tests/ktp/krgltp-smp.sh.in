@@ -120,19 +120,23 @@ function run_all_instances() {
 
 	shift
 
-	for i in `seq 1 $nr_ps`; do
-		status_fifo=${STATUS_FIFO}-$i
+	# Run background jobs in a sub shell to avoid interrupting later shell
+	# commands with SIGCHLD
+	(
+		for i in `seq 1 $nr_ps`; do
+			status_fifo=${STATUS_FIFO}-$i
 
-		(
 			(
-				check_krgcap
-				# Run the test in its own pgrp
-				set -m
-				$BASETEST/$@
-			)
-			echo $? > $status_fifo || echo "Could not write status fifo ${status_fifo}!"
-		) &
-	done
+				(
+					check_krgcap
+					# Run the test in its own pgrp
+					set -m
+					$BASETEST/$@
+				)
+				echo $? > $status_fifo || echo "Could not write status fifo ${status_fifo}!"
+			) &
+		done
+	)
 
 	for i in `seq 1 $nr_ps`; do
 		$check_fun $i
