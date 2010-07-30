@@ -3,7 +3,8 @@
 ### Copyright 2009 Polytech'Tours
 ###                     Alexandre Lissy <alexandre.lissy@etu.univ-tours.fr>
 ###
-testsuser_SCRIPTS =
+testsuser_SCRIPTS = \
+	cpuspeed_probe.sh
 
 testsuserdir = @ltpbase@/testcases/bin
 
