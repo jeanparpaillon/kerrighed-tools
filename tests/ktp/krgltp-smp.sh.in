@@ -1745,6 +1745,8 @@ rsingle cr-post # fake test to clean results of C/R tests
 rsingle cpuspeed_probe.sh
 rsingle load_probe.sh
 rsingle processsize_probe.sh
+rsingle local_user_presence.sh
+rsingle user_probe.sh
 
 ## Now, finish with the long running LTP tests.
 
