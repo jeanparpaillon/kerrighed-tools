@@ -5,7 +5,8 @@
 ###
 testsuser_SCRIPTS = \
 	cpuspeed_probe.sh \
-	load_probe.sh
+	load_probe.sh \
+	processsize_probe.sh
 
 testsuserdir = @ltpbase@/testcases/bin
 
