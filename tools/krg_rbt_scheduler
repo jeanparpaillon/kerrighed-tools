@@ -1,0 +1,205 @@
+#!/bin/sh
+
+set -e
+
+PROBEDIR=/config/krg_scheduler/probes
+POLICIESDIR=/config/krg_scheduler/schedulers
+ACTION=$1
+
+is_configfs_dir() {
+    [ "`/usr/bin/stat -f -c %t $1`" = 62656570 ]
+}
+
+# Make sure configfs is mounted on /config.
+if ! is_configfs_dir /config; then
+    echo "configfs is not mounted on /config, aborting."
+    echo
+    echo "configfs has to be mounted on /config."
+    echo
+    echo "To do so:"
+    echo "  1. mkdir /config (as root)"
+    echo "  2. Have the following line in /etc/fstab (reboot, or mount it"
+    echo "     manually on each node once it has just been addded):"
+    echo "        configfs /config configfs defaults 0 0"
+    echo
+    echo "Aborting, please adjust your system configuration and try again."
+    exit 1
+fi
+
+# Make sure Kerrighed is loaded.
+if ! is_configfs_dir /config/krg_scheduler; then
+    echo "Kerrighed does not seem to be loaded,"
+    echo "or the configurable scheduler framework looks disabled,"
+    echo "aborting."
+    exit 1
+fi
+
+# We start everything
+start() {
+	start_user
+	start_load
+	start_cpuspeed
+	start_mattload
+	start_processsize
+	start_rbt
+}
+
+# Stopping and unloading modules
+stop() {
+	stop_rbt
+	stop_processsize
+	stop_mattload
+	stop_cpuspeed
+	stop_load
+	stop_user
+}
+
+######################
+######################
+
+# Each of the following function will load the corresponding
+# kernel module, thanks to ConfigFS and SchedConfig.
+start_user() {
+	mkdir $PROBEDIR/user_probe
+}
+
+start_load() {
+	mkdir $PROBEDIR/load_probe
+}
+
+start_cpuspeed() {
+	mkdir $PROBEDIR/cpuspeed_probe
+}
+
+start_mattload() {
+	mkdir $PROBEDIR/mattload_probe
+
+	# Now, we plug the probe's ports so that it can grab values !
+	ln -s $PROBEDIR/cpuspeed_probe/speed/ $PROBEDIR/mattload_probe/cpu_speed/speed && \
+		ln -s $PROBEDIR/cpuspeed_probe/connected/ $PROBEDIR/mattload_probe/cpu_connected/connected  && \
+		ln -s $PROBEDIR/load_probe/active_tasks/ $PROBEDIR/mattload_probe/active_tasks/active_tasks && \
+		ln -s $PROBEDIR/user_probe/connected/ $PROBEDIR/mattload_probe/user_connected/connected
+}
+
+start_processsize() {
+	mkdir $PROBEDIR/processsize_probe
+}
+
+######################
+######################
+
+# While mkdir handles the loading of the module,
+# we have to manually remove each after removing the
+# SchedConfig directory corresponding.
+stop_user() {
+	rmdir $PROBEDIR/user_probe && \
+		rmmod user_probe
+}
+
+stop_load() {
+	rmdir $PROBEDIR/load_probe && \
+		rmmod load_probe
+}
+
+stop_cpuspeed() {
+	rmdir $PROBEDIR/cpuspeed_probe && \
+		rmmod cpuspeed_probe
+}
+
+stop_mattload() {
+	# Unplugging the ports
+	rm $PROBEDIR/mattload_probe/cpu_speed/speed && \
+		rm $PROBEDIR/mattload_probe/cpu_connected/connected && \
+		rm $PROBEDIR/mattload_probe/active_tasks/active_tasks && \
+		rm $PROBEDIR/mattload_probe/user_connected/connected
+
+	# Unloading the probe!
+	rmdir $PROBEDIR/mattload_probe && \
+		rmmod mattload_probe
+}
+
+stop_processsize() {
+	rmdir $PROBEDIR/processsize_probe && \
+		rmmod processsize_probe
+}
+
+######################
+######################
+
+start_rbt() {
+	if [ ! -d $PROBEDIR/mattload_probe ]; then
+		echo "No mattload probe loaded."
+		exit 1;
+	fi
+
+	if [ ! -d $PROBEDIR/load_probe ]; then
+		echo "No load probe loaded."
+		exit 1;
+	fi
+
+	if [ ! -d $PROBEDIR/processsize_probe ]; then
+		echo "No processsize probe loaded."
+		exit 1;
+	fi
+
+	# Loading the RBT policy and then plugin the ports
+	mkdir -p $POLICIESDIR/rbt/rbt_policy && \
+		ln -s $PROBEDIR/load_probe/process_jiffies/ $POLICIESDIR/rbt/rbt_policy/process_jiffies/process_jiffies && \
+		ln -s $PROBEDIR/processsize_probe/total_vm/ $POLICIESDIR/rbt/rbt_policy/process_size/process_size
+
+	# Loading the rbt cache filter and plug it into the policy
+	mkdir $POLICIESDIR/rbt/rbt_policy/mattload/rbt_cache_filter && \
+		echo 1000 > $POLICIESDIR/rbt/rbt_policy/mattload/rbt_cache_filter/polling_period && \
+		ln -s $PROBEDIR/mattload_probe/mattload/ $POLICIESDIR/rbt/rbt_policy/mattload/rbt_cache_filter/mattload
+
+	mkdir $POLICIESDIR/rbt/rbt_policy/loadinc/rbt_cache_filter && \
+		echo 1000 > $POLICIESDIR/rbt/rbt_policy/loadinc/rbt_cache_filter/polling_period && \
+		ln -s $PROBEDIR/mattload_probe/load_increment/ $POLICIESDIR/rbt/rbt_policy/loadinc/rbt_cache_filter/loadinc
+
+	mkdir $POLICIESDIR/rbt/rbt_policy/active_tasks/remote_cache_filter && \
+		echo 1000 > $POLICIESDIR/rbt/rbt_policy/active_tasks/remote_cache_filter/polling_period && \
+		ln -s $PROBEDIR/load_probe/active_tasks/ $POLICIESDIR/rbt/rbt_policy/active_tasks/remote_cache_filter/active_tasks
+
+	# Enable both DISTANT_FORK and MIGRATE.
+	echo 1 > $POLICIESDIR/rbt/process_set/handle_all
+}
+
+######################
+######################
+
+stop_rbt() {
+	rm $POLICIESDIR/rbt/rbt_policy/mattload/rbt_cache_filter/mattload && \
+		rmdir $POLICIESDIR/rbt/rbt_policy/mattload/rbt_cache_filter
+
+	rm $POLICIESDIR/rbt/rbt_policy/loadinc/rbt_cache_filter/loadinc && \
+		rmdir $POLICIESDIR/rbt/rbt_policy/loadinc/rbt_cache_filter
+
+	rm $POLICIESDIR/rbt/rbt_policy/active_tasks/remote_cache_filter/active_tasks && \
+		rmdir $POLICIESDIR/rbt/rbt_policy/active_tasks/remote_cache_filter
+
+	rm $POLICIESDIR/rbt/rbt_policy/process_jiffies/process_jiffies
+	rm $POLICIESDIR/rbt/rbt_policy/process_size/process_size
+
+	rmdir $POLICIESDIR/rbt/rbt_policy
+
+	rmmod rbt_cache_filter
+	rmmod rbt_policy
+}
+
+case "$ACTION" in
+	start)
+		echo "Starting RBT Scheduler ..."
+		start
+		echo "RBT Scheduler started."
+	;;
+
+	stop)
+		echo "Stopping RBT Scheduler ..."
+		stop
+		echo "RBT Scheduler stopped."
+	;;
+
+	*)
+		echo "Usage; $0 (start|stop)"
+	;;
+esac;
