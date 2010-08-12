@@ -294,9 +294,9 @@ def krg_cluster_reboot(subclusterid=0):
 def krg_nodes_add(node_set):
     """
     """
-    libkerrighed.krg_nodes_add(node_set)
+    libkerrighed.krg_nodes_add(node_set.c)
 
 def krg_nodes_remove(node_set):
     """
     """
-    libkerrighed.krg_nodes_remove(node_set)
+    libkerrighed.krg_nodes_remove(node_set.c)
