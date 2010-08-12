@@ -10,7 +10,7 @@ bin_PROGRAMS = bi bi-cr bi-cr-static bi-file bi-signal bi-double \
 	bi-clone-files bi-clone-fs bi-clone-semundo bi-thread bi-server-socket \
 	bi-pipe bi-exclude-mm bi-cr-disable \
 	ipcshm-tool ipcmsg-tool ipcsem-tool \
-	posixshm-tool
+	posixshm-tool futex-shm-tool
 
 lib_LTLIBRARIES = libbi.la
 include_HEADERS = libbi.h
@@ -88,3 +88,5 @@ ipcsem_tool_DEPENDENCIES = libbi.la
 posixshm_tool_SOURCES = posixshm-tool.c
 posixshm_tool_LDADD = -lbi -lrt
 posixshm_tool_DEPENDENCIES = libbi.la
+
+futex_shm_tool_SOURCES = futex-shm-tool.c
