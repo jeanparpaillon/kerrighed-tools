@@ -84,9 +84,9 @@ setup()
 cleanup()
 {
 	## Clean up code goes here
-	rm $LTPTMP/tst_config.out
-	rm $LTPTMP/tst_ls.out
-	rm $LTPTMP/tst_proc.out
+	rm -f $LTPTMP/tst_config.out
+	rm -f $LTPTMP/tst_ls.out
+	rm -f $LTPTMP/tst_proc.out
 }
 
 # Function:	test_init_process

@@ -108,7 +108,7 @@ setup()
 cleanup()
 {
 	## Clean up code goes here
-	rm \
+	rm -f \
 		$LTPTMP/tst_config_presence.out \
 		$LTPTMP/tst_config_notifier.out \
 		$LTPTMP/tst_mod_presence.out \

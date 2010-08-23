@@ -90,11 +90,11 @@ setup()
 cleanup()
 {
 	## Clean up code goes here
-	rm $LTPTMP/tst_config.out
-	rm $LTPTMP/tst_ls.out
-	rm $LTPTMP/tst_locproc.out
-	rm $LTPTMP/tst_connected.out
-	rm $LTPTMP/tst_speed.out
+	rm -f $LTPTMP/tst_config.out
+	rm -f $LTPTMP/tst_ls.out
+	rm -f $LTPTMP/tst_locproc.out
+	rm -f $LTPTMP/tst_connected.out
+	rm -f $LTPTMP/tst_speed.out
 }
 
 # Function:	num_cpus
