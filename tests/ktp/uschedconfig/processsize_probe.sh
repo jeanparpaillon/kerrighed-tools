@@ -60,17 +60,16 @@ setup()
 	#####
 
 	# Silently "normal" fail if the probe isn't enabled
-	RC=0
 	grep "CONFIG_KRG_SCHED_PROCESSSIZE_PROBE=m" /boot/config-$(uname -r) >$LTPTMP/tst_config.out; RC=$?
 	if [ $RC -ne 0 ]; then
 		tst_brk TCONF $LTPTMP/tst_config.out NULL "processsize_probe module isn't enabled."
-		return $RC
+		exit 0
 	fi
 
-	RC=0
 	ls /config/krg_scheduler/probes/processsize_probe >$LTPTMP/tst_ls.out; RC=$?
 	if [ $RC -ne 0 ]; then
 		tst_brk TBROK $LTPTMP/tst_ls.out NULL "processsize_probe isn't loaded."
+		return $RC
 	fi
 
 	return $RC
@@ -117,6 +116,7 @@ test_init_process()
 			tst_resm TPASS "Test #$TST_COUNT: correct init VmSize."
 		else
 			tst_resm TFAIL "Test #$TST_COUNT: error. init VmSize:$PAGES. probe:$PROBE"
+			RC=1
 			return $RC
 		fi
 	fi

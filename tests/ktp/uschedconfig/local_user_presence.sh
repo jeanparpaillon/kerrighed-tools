@@ -60,17 +60,16 @@ setup()
 	grep "CONFIG_KRG_SCHED_LOCAL_USER_PRESENCE=m" /boot/config-$(uname -r) >$LTPTMP/tst_config_presence.out; RC=$?
 	if [ $RC -ne 0 ]; then
 		tst_brk TCONF $LTPTMP/tst_config_presence.out NULL "local_user_presence module isn't enabled."
-		return $RC
+		exit 0
 	fi
 
 	grep "CONFIG_KRG_SCHED_LOCAL_USER_NOTIFIER=m" /boot/config-$(uname -r) >$LTPTMP/tst_config_notifier.out; RC=$?
 	if [ $RC -ne 0 ]; then
 		tst_brk TCONF $LTPTMP/tst_config_notifier.out NULL "local_user_notifier module isn't enabled."
-		return $RC
+		exit 0
 	fi
 
 	# Load kerrighed-user-local-presence module
-	RC=0
 	tst_resm TINFO "INIT: Loading local_user_presence kernel module"
 	modprobe local_user_presence >$LTPTMP/tst_mod_presence.out; RC=$?
 	if [ $RC -ne 0 ]
@@ -80,7 +79,6 @@ setup()
 	fi
 
 	# Load local_user_notifier module
-	RC=0
 	tst_resm TINFO "INIT: Loading local_user_notifier kernel module"
 	modprobe local_user_notifier >$LTPTMP/tst_mod_notifier.out; RC=$?
 	if [ $RC -ne 0 ]
@@ -90,7 +88,6 @@ setup()
 	fi
 
 	# Check if $MODROOT exists
-	RC=0
 	tst_resm TINFO "INIT: Checking for kernel module /proc entry : $MODROOT"
 	ls $MODROOT >$LTPTMP/tst_ls.out; RC=$?
 	if [ $RC -ne 0 ]
@@ -135,7 +132,6 @@ read_entry()
 {
 	ENTRYNAME=$1
 	OUTPUT=$2
-	RC=0
 	RC=`(cat $MODROOT/$ENTRYNAME) 2>$OUTPUT`
 	return $RC
 }
@@ -199,10 +195,12 @@ local_user_isfree()
 	then
 		tst_res TFAIL $LTPTMP/tst_isfree.out \
 		"Test #$TST_COUNT: Cannot get 1 from $MODROOT/isfree Reason:"
+		RC=1
 		return $RC
 	else
 		tst_resm TPASS \
 		"Test #$TST_COUNT: Reading /isfree works."
+		RC=0
 	fi
 	return 0
 }
@@ -256,10 +254,12 @@ local_user_simpleconnection()
 	then
 		tst_res TFAIL $LTPTMP/tst_simpleconnection2.out \
 		"Test #$TST_COUNT: Cannot get 1 from $MODROOT/get Reason:"
+		RC=1
 		return $RC
 	else
 		tst_resm TPASS \
 		"Test #$TST_COUNT: User is counted."
+		RC=0
 	fi
 	return 0
 }
@@ -310,10 +310,12 @@ local_user_simpleused()
 	then
 		tst_res TFAIL $LTPTMP/tst_simpleused.out \
 		"Test #$TST_COUNT: Cannot get 1 from $MODROOT/isused Reason:"
+		RC=1
 		return $RC
 	else
 		tst_resm TPASS \
 		"Test #$TST_COUNT: Node is used."
+		RC=0
 	fi
 	return 0
 }
@@ -372,10 +374,12 @@ local_user_complexconnection()
 	then
 		tst_res TFAIL $LTPTMP/tst_complexconnection_get.out \
 		"Test #$TST_COUNT: Cannot get 3 from $MODROOT/get Reason:"
+		RC=1
 		return $RC
 	else
 		tst_resm TPASS \
 		"Test #$TST_COUNT: We can count 3 connected users."
+		RC=0
 	fi
 	return 0
 }

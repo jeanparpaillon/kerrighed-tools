@@ -63,11 +63,10 @@ setup()
 	grep "CONFIG_KRG_SCHED_USER_PROBE=m" /boot/config-$(uname -r) >$LTPTMP/tst_config.out; RC=$?
 	if [ $RC -ne 0 ]; then
 		tst_brk TCONF $LTPTMP/tst_config.out NULL "user_probe module isn't enabled."
-		return $RC
+		exit 0
 	fi
 
         # Check if $MODROOT exists
-        RC=0
         tst_resm TINFO "INIT: Checking for kernel module /proc entry : $MODROOT"
         ls $MODROOT >$LTPTMP/tst_ls.out; RC=$?
         if [ $RC -ne 0 ]
@@ -76,10 +75,10 @@ setup()
                 return $RC
         fi
 
-        RC=0
         ls /config/krg_scheduler/probes/user_probe >$LTPTMP/tst_ls.out; RC=$?
         if [ $RC -ne 0 ]; then
                 tst_brk TBROK $LTPTMP/tst_ls.out NULL "user_probe isn't loaded."
+		return $RC
         fi
 
         return $RC
@@ -126,6 +125,7 @@ test_connected()
 		then
 			tst_resm TFAIL $LTPTMP/tst_connected.out \
 			"Test #$TST_COUNT: incoherent values"
+			RC=1
 			return $RC
 		else
 			tst_resm TPASS \

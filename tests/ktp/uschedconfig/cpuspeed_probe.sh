@@ -60,23 +60,22 @@ setup()
 	#####
 
 	# Silently "normal" fail if the probe isn't enabled
-	RC=0
 	grep "CONFIG_KRG_SCHED_CPUSPEED_PROBE=m" /boot/config-$(uname -r) >$LTPTMP/tst_config.out; RC=$?
 	if [ $RC -ne 0 ]; then
 		tst_brk TCONF $LTPTMP/tst_config.out NULL "cpuspeed_probe module isn't enabled."
-		return $RC
+		exit 0
 	fi
 
-	RC=0
 	ls /config/krg_scheduler/probes/cpuspeed_probe >$LTPTMP/tst_ls.out; RC=$?
 	if [ $RC -ne 0 ]; then
 		tst_brk TBROK $LTPTMP/tst_ls.out NULL "cpuspeed_probe isn't loaded."
+		return $RC
 	fi
 
-	RC=0
 	krgcapset -d +SEE_LOCAL_PROC_STAT >$LTPTMP/tst_locproc.out; RC=$?
 	if [ $RC -ne 0 ]; then
 		tst_brk TBROK $LTPTMP/tst_locproc.out NULL "Cannot set +SEE_LOCAL_PROC_STAT capability."
+		return $RC
 	fi
 
 	return $RC
@@ -131,6 +130,7 @@ test_connected()
 		if [ $VALUE -ne $CPUS ]
 		then
 			tst_resm TFAIL "Test #$TST_COUNT: failure: bad numer of CPUs"
+			RC=1
 		else
 			tst_resm TPASS "Test #$TST_COUNT: ok"
 		fi
@@ -163,6 +163,7 @@ test_cpu_speed()
 
 		if [ "$CPUKHZ" != "$CPUMHZ" ]; then
 			tst_resm TFAIL "Test #$TST_COUNT: CPU ($count) speed doesn't match: probe=$CPUKHZ and cpuinfo=$CPUMHZ"
+			RC=1
 			return $RC
 		else
 			tst_resm TPASS "Test #$TST_COUNT: CPU ($count) speed match."
