@@ -260,7 +260,7 @@ AC_CONFIG_FILES([tools/Makefile])
 AC_CONFIG_FILES([tools-host/Makefile])
 AC_CONFIG_FILES([man/Makefile])
 AC_CONFIG_FILES([tests/Makefile tests/include/Makefile tests/apps/Makefile tests/proc/Makefile])
-AC_CONFIG_FILES([tests/ktp/Makefile tests/ktp/cr/Makefile tests/benchmark/Makefile])
+AC_CONFIG_FILES([tests/ktp/Makefile tests/ktp/cr/Makefile tests/ktp/futex/Makefile tests/benchmark/Makefile])
 
 dnl write all stuff
 AC_OUTPUT

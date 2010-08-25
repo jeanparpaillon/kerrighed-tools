@@ -1,0 +1,171 @@
+#!/bin/bash
+###############################################################################
+##
+## Copyright (c) Kerlabs, 2010
+##
+## This program is free software;  you can redistribute it and#or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+## or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+## for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program;  if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+##
+###############################################################################
+#
+# File :        futex_shm01
+#
+# Description:  Test basic operations on some futexes stored on SHM
+#
+# Author:       Matthieu Fertré, matthieu.fertre@kerlabs.com
+#
+
+source `dirname $0`/lib_futex.sh
+
+futex_shm01()
+{
+    TCID="$FUNCNAME"		# Identifier of this testcase.
+    TST_COUNT=$[$TST_COUNT+1]	# Test case number.
+
+    key1=$$
+    key2=$(($$*2))
+    bits=4
+    wrongbits=2
+
+    # wait f1, wake f1
+    futex_wait $key1 $bits
+
+    sleep 4
+
+    futex_wake $key1 $bits 1 1 || return $?
+
+    futex_wake $key1 $bits 1 0 || return $?
+
+    # wait f1, wake f1 with wrong bits, wake f1
+    futex_wait $key1 $bits
+
+    sleep 4
+
+    futex_wake $key1 $wrongbits 1 0 || return $?
+
+    futex_wake $key1 $bits 1 1 || return $?
+
+    futex_wake $key1 $bits 1 0 || return $?
+
+    # wait f1, wait f1, wake 2x f1
+    futex_wait $key1 $bits
+    futex_wait $key1 $bits
+
+    sleep 4
+
+    futex_wake $key1 $bits 2 2 || return $?
+
+    futex_wake $key1 $bits 1 0 || return $?
+
+    # wait f1, wait f1, wake f1, wake f1
+    futex_wait $key1 $bits
+    futex_wait $key1 $bits
+
+    sleep 4
+
+    futex_wake $key1 $bits 1 1 || return $?
+    futex_wake $key1 $bits 1 1 || return $?
+
+    futex_wake $key1 $bits 1 0 || return $?
+
+    # wait f1, wait f1, wake 3x f1 (returns 2)
+    futex_wait $key1 $bits
+    futex_wait $key1 $bits
+
+    sleep 4
+
+    futex_wake $key1 $bits 3 2 || return $?
+
+    futex_wake $key1 $bits 1 0 || return $?
+
+    # wait f1, requeue f1 f2, wake f2
+    futex_wait $key1 $bits
+
+    sleep 4
+
+    futex_requeue $key1 $key2 0 1 1 || return $?
+
+    futex_wake $key2 $bits 1 1 || return $?
+
+    futex_wake $key2 $bits 1 0 || return $?
+
+    # wait f1, requeue f1 f2, wake f1, wake f2
+    futex_wait $key1 $bits
+
+    sleep 4
+
+    futex_requeue $key1 $key2 0 1 1 || return $?
+
+    futex_wake $key1 $bits 1 0 || return $?
+
+    futex_wake $key2 $bits 1 1 || return $?
+
+    futex_wake $key1 $bits 1 0 || return $?
+
+
+    # wait f1, requeue f1 f2, requeue f2 f1, wake f2, wake f1
+    futex_wait $key1 $bits
+
+    sleep 4
+
+    futex_requeue $key1 $key2 0 1 1 || return $?
+
+    futex_requeue $key2 $key1 0 1 1 || return $?
+
+    futex_wake $key2 $bits 1 0 || return $?
+
+    futex_wake $key1 $bits 1 1 || return $?
+
+    # wait f1, wait f1, requeue f1 f2, requeue f2 f1, wake f1, wake f2
+    futex_wait $key1 $bits
+    futex_wait $key1 $bits
+
+    sleep 4
+
+    futex_requeue $key1 $key2 1 1 2 || return $?
+
+    futex_requeue $key2 $key1 0 2 1 || return $?
+
+    futex_wake $key1 $bits 1 1 || return $?
+
+    futex_wake $key2 $bits 1 0 || return $?
+
+    # wait f1, wait f1, requeue f1 f2, requeue f2 f1, wake f1, wake f2
+    futex_wait $key1 $bits
+    futex_wait $key1 $bits
+
+    sleep 4
+
+    futex_requeue $key1 $key2 1 1 2 || return $?
+
+    futex_requeue $key2 $key1 0 2 1 || return $?
+
+    futex_wake $key2 $bits 1 0 || return $?
+
+    futex_wake $key1 $bits 1 1 || return $?
+
+
+    futex_delete $key1
+
+    futex_delete $key2
+
+
+    print_success $?
+
+    return $?
+}
+
+futex_setup $@ || exit $?
+
+futex_shm01 $@ || exit $?
