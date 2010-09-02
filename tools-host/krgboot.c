@@ -14,6 +14,7 @@
 #include <config.h>
 
 int ns_clone_flags = 0;
+char *pid_filename = NULL;
 
 void version(char * program_name)
 {
@@ -28,7 +29,7 @@ warranty; not even for MERCHANBILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
 void print_usage(const char *name)
 {
 	fprintf(stderr,
-		"Usage: %s [-hv] [-uimpnU] [--] <container_bootstrap_helper> [<init_arg1> ...]\n"
+		"Usage: %s [-hv] [-uimpnU] [-w <pid_file>] [--] <container_bootstrap_helper> [<init_arg1> ...]\n"
 		"Options:\n"
 		" -h  Display this information and exit\n"
 		" -v  Display version information and exit\n"
@@ -37,7 +38,8 @@ void print_usage(const char *name)
 		" -m  Isolate Mount namespace\n"
 		" -p  Isolate PID namespace\n"
 		" -n  Isolate Net namespace\n"
-		" -U  Isolate User namespace\n",
+		" -U  Isolate User namespace\n"
+		" -w <pid_file> Write the PID of new container init in <pid_file>\n",
 		name);
 }
 
@@ -45,7 +47,7 @@ int get_config(int argc, char *argv[])
 {
 	int opt;
 
-	while ((opt = getopt(argc, argv, "hvuimpnU")) != -1) {
+	while ((opt = getopt(argc, argv, "hvuimpnUw:")) != -1) {
 		switch (opt) {
 		case 'h':
 			print_usage(argv[0]);
@@ -70,6 +72,9 @@ int get_config(int argc, char *argv[])
 			break;
 		case 'U':
 			ns_clone_flags |= CLONE_NEWUSER;
+			break;
+		case 'w':
+			pid_filename = optarg;
 			break;
 		default:
 			print_usage(argv[0]);
@@ -97,7 +102,8 @@ void do_clone_helper(char *argv[])
 {
 	void *stack;
 	size_t stack_size;
-	int ret;
+	FILE *pid_file;
+	int ret, pid;
 
 	stack_size = sysconf(_SC_PAGESIZE);
 	stack = alloca(stack_size) + stack_size;
@@ -105,6 +111,31 @@ void do_clone_helper(char *argv[])
 	if (ret < 0) {
 		fprintf(stderr, "clone(...) failed! %s\n", strerror(errno));
 		exit(1);
+	}
+
+	if (pid_filename) {
+		pid = ret;
+
+		pid_file = fopen(pid_filename, "w");
+		if (!pid_file) {
+			fprintf(stderr, "Cannot open '%s'! %s\n",
+				pid_filename, strerror(errno));
+			exit(1);
+		}
+
+		ret = fprintf(pid_file, "%d\n", ret);
+		if (ret < 0) {
+			fprintf(stderr, "Cannot write %d to '%s'! %s\n",
+				pid, pid_filename, strerror(errno));
+			exit(1);
+		}
+
+		ret = fclose(pid_file);
+		if (ret) {
+			fprintf(stderr, "Cannot write %d to '%s'! %s\n",
+				pid, pid_filename, strerror(errno));
+			exit(1);
+		}
 	}
 }
 
