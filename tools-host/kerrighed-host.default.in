@@ -31,9 +31,17 @@ ISOLATE_USER=false
 #ISOLATE_USER=
 
 # Userspace application to use as local init process in the Kerrighed container
-# Something else may be used on the node starting the cluster.
+# Something else may be used on the node starting the cluster
+# (CLUSTER_BOOT_HELPER is used if BOOT_ID != -1).
 # krginit_helper has his configuration in /etc/kerrighed/krginit_helper.conf
 CLUSTER_INIT_HELPER=@sbindir@/krginit_helper
+
+# Userspace helper to create the Kerrighed container on each node
+# Something else may be used on the node starting the cluster (to this end don't
+# forget to set BOOT_ID to -1).
+# Supersedes CLUSTER_INIT_HELPER (but krgboot_helper use CLUSTER_INIT_HELPER
+# too)
+CLUSTER_BOOT_HELPER=@sbindir@/krgboot_helper
 
 # Net devices used by Kerrighed's internal RPC service
 # Format: ALL | dev1 [dev2 ...]
