@@ -15,7 +15,10 @@ AM_LDFLAGS=-Wl,--as-needed -static
 
 krgboot_SOURCES = krgboot.c
 
+krgboot_helper_scripts =
+
 EXTRA_DIST = \
+	$(krgboot_helper_scripts) \
 	krgboot_helper.in \
 	kerrighed-host.default.in \
 	kerrighed-host.init
@@ -35,11 +38,21 @@ endif
 
 all-local: kerrighed-host.default
 
+installdirs-local:
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kerrighed/krgboot_helper-pre.d
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kerrighed/krgboot_helper-post.d
+
 install-data-local: kerrighed-host.init kerrighed-host.default
+	for s in $(krgboot_helper_scripts); do \
+		$(install_sh_SCRIPT) $(preserve) $(srcdir)/$$s $(DESTDIR)$(sysconfdir)/kerrighed/$$s; \
+	done
 	$(install_sh_SCRIPT) $(srcdir)/kerrighed-host.init $(DESTDIR)$(sysconfdir)/init.d/kerrighed-host
 	$(install_sh_DATA) $(preserve) $(builddir)/kerrighed-host.default $(DESTDIR)$(sysconfdir)/default/kerrighed-host
 
 uninstall-local:
+	for s in $(krgboot_helper_scripts); do rm -f $(DESTDIR)$(sysconfdir)/kerrighed/$$s; done
+	-rmdir $(DESTDIR)$(sysconfdir)/kerrighed/krgboot_helper-pre.d
+	-rmdir $(DESTDIR)$(sysconfdir)/kerrighed/krgboot_helper-post.d
 	rm -f $(DESTDIR)$(sysconfdir)/init.d/kerrighed-host
 	rm -f $(DESTDIR)$(sysconfdir)/default/kerrighed-host
 

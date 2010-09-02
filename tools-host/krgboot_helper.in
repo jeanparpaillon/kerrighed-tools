@@ -2,7 +2,10 @@
 
 set -e
 
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
 SYS_DIR=/sys/kerrighed/hotplug
+RUN_DIR=/var/run/kerrighed
 KRGBOOT=@sbindir@/krgboot
 
 error() {
@@ -50,4 +53,24 @@ if [ "$ISOLATE_USER" -ne 0 ]; then
 	NS_ARGS="$NS_ARGS -U"
 fi
 
-exec $KRGBOOT $NS_ARGS -- $CLUSTER_INIT_HELPER
+rm -rf $RUN_DIR
+mkdir -p $RUN_DIR
+TEMPPID=$RUN_DIR/krginit-pid.$$
+mkfifo $TEMPPID || error "Cannot create temporary PID file"
+
+run-parts -- @sysconfdir@/kerrighed/krgboot_helper-pre.d
+
+# The kernel expects that the Kerrighed container will be cloned from this very
+# process, so KRGBOOT must be exec()'ed, which does not allow us to run post
+# scripts from this process.
+# Instead launch a trigger, which synchronizes with container creation through a
+# FIFO.
+(
+	read PID < $TEMPPID
+	rm "$TEMPPID"
+	[ -z "$PID" ] && exit 1
+
+	run-parts --arg=$PID -- @sysconfdir@/kerrighed/krgboot_helper-post.d
+) &
+
+exec $KRGBOOT $NS_ARGS -w "$TEMPPID" -- $CLUSTER_INIT_HELPER
