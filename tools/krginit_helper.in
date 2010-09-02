@@ -2,6 +2,9 @@
 
 set -e
 
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
+CONF=@sysconfdir@/kerrighed/krginit_helper.conf
 KRG_ROOT=/
 # Path inside $KRG_ROOT
 KRGINIT=@sbindir@/krginit
@@ -15,7 +18,7 @@ if [ ! -x "$KRG_ROOT$KRGINIT" ]; then
     error "Can not find krginit: $KRG_ROOT$KRGINIT"
 fi
 
-. @sysconfdir@/kerrighed/krginit_helper.conf
+. $CONF
 
 # Prefer caller args
 if [ $# -gt 0 ]; then
@@ -23,6 +26,8 @@ if [ $# -gt 0 ]; then
 fi
 
 mount -t proc krg-procfs $KRG_ROOT/proc
+
+run-parts --verbose --arg=$CONF -- @sysconfdir@/kerrighed/krginit_helper-pre.d
 
 cd  $KRG_ROOT
 if [ "$KRG_ROOT" != "/" ]; then

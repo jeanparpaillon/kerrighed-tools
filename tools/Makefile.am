@@ -24,8 +24,12 @@ krginit_SOURCES = krginit.c
 ipccheckpoint_SOURCES = ipccheckpoint.c
 ipcrestart_SOURCES = ipcrestart.c
 
+krginit_helper_scripts = \
+	krginit_helper-post.d/50kerrighed_start
+
 EXTRA_DIST = \
 	krginit_helper.conf \
+	$(krginit_helper_scripts) \
 	krginit_helper.in \
 	kerrighed.default \
 	kerrighed.init \
@@ -44,14 +48,24 @@ if ENABLE_PRESERVE_CONF
 preserve = -p
 endif
 
-install-data-local: krginit_helper.conf kerrighed.completion kerrighed.init kerrighed.default
+installdirs-local:
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper-pre.d
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper-post.d
+
+install-data-local: installdirs-local krginit_helper.conf $(krginit_helper_scripts) kerrighed.completion kerrighed.init kerrighed.default
 	$(install_sh_DATA) $(preserve) $(srcdir)/krginit_helper.conf $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf
+	for s in $(krginit_helper_scripts); do \
+		$(install_sh_SCRIPT) $(preserve) $(srcdir)/$$s $(DESTDIR)$(sysconfdir)/kerrighed/$$s; \
+	done
 	$(install_sh_DATA) $(srcdir)/kerrighed.completion $(DESTDIR)$(sysconfdir)/bash_completion.d/kerrighed
 	$(install_sh_SCRIPT) $(srcdir)/kerrighed.init $(DESTDIR)$(sysconfdir)/init.d/kerrighed
 	$(install_sh_DATA) $(preserve) $(srcdir)/kerrighed.default $(DESTDIR)$(sysconfdir)/default/kerrighed
 
 uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf
+	for s in $(krginit_helper_scripts); do rm -f $(DESTDIR)$(sysconfdir)/kerrighed/$$s; done
+	-rmdir $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper-pre.d
+	-rmdir $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper-post.d
 	rm -f $(DESTDIR)$(sysconfdir)/init.d/kerrighed
 	rm -f $(DESTDIR)$(sysconfdir)/default/kerrighed
 	rm -f $(DESTDIR)$(sysconfdir)/bash_completion.d/kerrighed
