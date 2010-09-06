@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -e
+
+IP=/bin/ip
+UDHCPC=/sbin/udhcpc
+
+session_id=$(cat /sys/kerrighed/session_id)
+node_id=$(cat /sys/kerrighed/node_id)
+
+read ifname mac vlanid tail < /var/run/kerrighed/net-conf
+
+$IP addr add 127.0.0.1 dev lo
+
+$UDHCPC -i $ifname -q
+#$IP addr add 10.4.40.${node_id}/24 dev $ifname
+#$IP link set $ifname up

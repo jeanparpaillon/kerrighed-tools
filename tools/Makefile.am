@@ -25,6 +25,7 @@ ipccheckpoint_SOURCES = ipccheckpoint.c
 ipcrestart_SOURCES = ipcrestart.c
 
 krginit_helper_scripts = \
+	krginit_helper-pre.d/10net \
 	krginit_helper-post.d/50kerrighed_start
 
 EXTRA_DIST = \

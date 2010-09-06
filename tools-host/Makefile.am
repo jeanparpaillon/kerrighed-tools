@@ -15,7 +15,9 @@ AM_LDFLAGS=-Wl,--as-needed -static
 
 krgboot_SOURCES = krgboot.c
 
-krgboot_helper_scripts =
+krgboot_helper_scripts = \
+	krgboot_helper-pre.d/50net \
+	krgboot_helper-post.d/50net
 
 EXTRA_DIST = \
 	$(krgboot_helper_scripts) \
