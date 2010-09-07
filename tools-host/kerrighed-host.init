@@ -88,12 +88,14 @@ d_start() {
 }
 
 d_set_isolate_ns() {
+    knob=/sys/kerrighed/hotplug/$2
+
     case "x$1" in
         xtrue)
-            echo 1 > /sys/kerrighed/hotplug/$2 || STATUS=1
+            check_set_value $knob 1 || STATUS=1
             ;;
         xfalse)
-            echo 0 > /sys/kerrighed/hotplug/$2 || STATUS=1
+            check_set_value $knob 0 || STATUS=1
             ;;
         x)
             ;;
@@ -104,6 +106,10 @@ d_set_isolate_ns() {
     esac
 
     return ${STATUS:-0}
+}
+
+check_set_value() {
+    [ "`cat $1`" = "$2" ] || echo "$2" > $1 
 }
 
 #
