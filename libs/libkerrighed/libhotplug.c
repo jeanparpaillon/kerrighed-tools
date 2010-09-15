@@ -366,7 +366,6 @@ int krg_check_hotplug(void)
 
 	r = call_kerrighed_services(KSYS_GET_NODE_ID, &node_id);
 	if (r != 0) {
-		errno = EAGAIN;
 		return -1;
 	}
 
