@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -e
+
+IP=/bin/ip
+UDHCPC=/sbin/udhcpc
+
+session_id=$(cat /sys/kerrighed/session_id)
+node_id=$(cat /sys/kerrighed/node_id)
+
+read ifname tail < /var/run/kerrighed/net-conf
+
+$IP addr add 127.0.0.1 dev lo
+
+#exec $UDHCPC -i $ifname -q
+
+# Use manual config
+
+. @sysconfdir@/kerrighed/net.conf
+
+# Substitude last byte of VIRTPREFIX while keeping mask length
+addr=${VIRTPREFIX%.*}.$node_id/${VIRTPREFIX#*/}
+
+$IP addr add $addr dev $ifname
+$IP link set $ifname up

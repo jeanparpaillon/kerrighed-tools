@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -e
+
+IPTABLES=/sbin/iptables
+IP=/bin/ip
+
+session_id=$(cat /sys/kerrighed/session_id)
+node_id=$(cat /sys/kerrighed/node_id)
+
+. @sysconfdir@/kerrighed/net.conf
+
+addr=${CLUSTERADDR%/*}
+NR_NODES=16
+
+$IPTABLES -I INPUT -i $VIRT -d $addr -j CLUSTERIP --new --total-nodes $NR_NODES --local-node $node_id --hashmode sourceip --clustermac $CLUSTERMAC
+$IP addr add $CLUSTERADDR dev $VIRT
