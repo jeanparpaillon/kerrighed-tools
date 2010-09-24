@@ -11,8 +11,10 @@ node_id=$(cat /sys/kerrighed/node_id)
 
 . @sysconfdir@/kerrighed/net.conf
 
+[ "$NETCONF_ENABLE" = true ] || exit 0
+
 mac=${VIRTMAC%:*}:$(printf %02x $node_id)
-# Reserve room for the 802.11q header
+# Reserve room for the 802.1q header
 mtu=$($IP link show $PHYS | $SED -n 's/^.* mtu \([0-9]*\) .*$/\1/p')
 mtu=$(( $mtu - 4 ))
 

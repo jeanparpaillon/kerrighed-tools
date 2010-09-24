@@ -10,6 +10,8 @@ node_id=$(cat /sys/kerrighed/node_id)
 
 . @sysconfdir@/kerrighed/net.conf
 
+[ "$CLUSTERADDR_ENABLE" = true ] || exit 0
+
 addr=${CLUSTERADDR%/*}
 NR_NODES=16
 
