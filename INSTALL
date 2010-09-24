@@ -239,7 +239,7 @@ we define the default one as:
 - the root container runs a complete distribution,
 
 - the Kerrighed container runs sshd on a non-standard port (2222) to
-  allow user login.
+  allow user login on the node starting the container (see BOOT_ID below).
 
   Note: for root container sshd on port 2222 and Kerrighed container
   sshd on (standard) port 22, edit respectively files `/etc/default/ssh'

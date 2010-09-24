@@ -10,5 +10,6 @@
 # With krginit, -- is followed by an optional "final" local init process in the
 # Kerrighed container.
 # The default arguments tell krginit to run the scripts in krginit_helper-post.d
-# before exec()'ing sshd on port 2222
-KRGINIT_ARGS='-- /bin/sh -c "/bin/run-parts -- /etc/kerrighed/krginit_helper-post.d; exec /usr/sbin/sshd -D -p 2222"'
+# before either exec()'ing sshd on port 2222 (boot node), or exec()'ing krginit
+# as final local init process (added nodes).
+KRGINIT_ARGS='-- /bin/sh -c "NODES=\`@sbindir@/krgadm nodes | /bin/grep -c online\`; /bin/run-parts -- @sysconfdir@/kerrighed/krginit_helper-post.d; [ \$NODES = 1 ] && exec /usr/sbin/sshd -D -p 2222; exec @sbindir@/krginit"'

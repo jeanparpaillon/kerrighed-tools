@@ -40,7 +40,7 @@ krginit_helper_scripts = \
 	$(krginit_helper_shipped_scripts)
 
 EXTRA_DIST = \
-	krginit_helper.conf \
+	krginit_helper.conf.in \
 	$(krginit_helper_template_scripts) \
 	$(krginit_helper_shipped_scripts) \
 	net.conf \
@@ -49,7 +49,7 @@ EXTRA_DIST = \
 	kerrighed.init \
 	kerrighed.completion
 
-CLEANFILES = krginit_helper $(krginit_helper_generated_scripts)
+CLEANFILES = krginit_helper krginit_helper.conf $(krginit_helper_generated_scripts)
 
 edit = sed \
         -e 's|@bindir[@]|$(bindir)|g' \
@@ -67,7 +67,7 @@ installdirs-local:
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper-post.d
 
 install-data-local: installdirs-local krginit_helper.conf $(krginit_helper_scripts) net.conf kerrighed.completion kerrighed.init kerrighed.default
-	$(install_sh_DATA) $(preserve) $(srcdir)/krginit_helper.conf $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf
+	$(install_sh_DATA) $(preserve) ./krginit_helper.conf $(DESTDIR)$(sysconfdir)/kerrighed/krginit_helper.conf
 	for s in $(krginit_helper_generated_scripts); do \
 		$(install_sh_SCRIPT) $(preserve) ./$$s $(DESTDIR)$(sysconfdir)/kerrighed/$$s; \
 	done
@@ -88,7 +88,7 @@ uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/default/kerrighed
 	rm -f $(DESTDIR)$(sysconfdir)/bash_completion.d/kerrighed
 
-krginit_helper $(krginit_helper_generated_scripts): Makefile
+krginit_helper krginit_helper.conf $(krginit_helper_generated_scripts): Makefile
 	rm -f $@ $@.tmp
 	$(MKDIR_P) $(dir $@)
 	srcdir=''; \
@@ -99,4 +99,5 @@ krginit_helper $(krginit_helper_generated_scripts): Makefile
 	mv $@.tmp $@
 
 krginit_helper: krginit_helper.in
+krginit_helper.conf: krginit_helper.conf.in
 $(krginit_helper_generated_scripts): %: %.in
