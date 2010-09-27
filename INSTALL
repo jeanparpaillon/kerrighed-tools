@@ -209,6 +209,10 @@ currently *broken* with Kerrighed:
   - Exectuble file formats / Emulations -> IA32 Emulation (CONFIG_IA32_EMULATION)
   - Security options -> Enable access key retention support (CONFIG_KEYS=n)
 
+Moreover, if you keep "Cluster support -> Kerrighed support for CLUSTERIP"
+(CONFIG_KRG_CLUSTERIP) enabled, be sure to read README.Net to get a working
+configuration of the Kerrighed container.
+
 4/ Starting Kerrighed
 =====================
 

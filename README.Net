@@ -1,0 +1,141 @@
+Kerrighed - Advanced network configuration
+==========================================
+
+This file explains some specific network configuration options of Kerrighed,
+namely:
+- how to configure the Kerrighed container to use an isolated network stack,
+- how to use Kerrighed support for Cluster IP.
+
+Since Kerrighed runs in Linux containers, it is possible to isolate the network
+stack of the Kerrighed container from the network stack of the host system. One
+can request the network stack to be isolated by setting
+ISOLATE_NET=true in /etc/default/kerrighed-host
+[ This assumes that the default kerrighed-host init script is used together with
+the default command krgboot_helper, set in the CLUSTER_BOOT_HELPER variable of
+/etc/default/kerrighed-host. ].
+
+Note: network isolation is required whenever the Kerrighed kernel is built with
+Kerrighed support for Cluster IP (option CONFIG_KRG_CLUSTERIP). When using such
+a kernel and krgboot_helper, make sure that ISOLATE_NET=true in
+/etc/default/kerrighed-host.
+
+A default set of scripts is provided in the Kerrighed tarball to enable a
+painless configuration of an isolated network stack in the Kerrighed container.
+Future releases of Kerrighed will allow as much as possible the use of more
+flexible and user-friendly tools like lxc [1]. The configuration of those scrips
+is explained thereafter.
+
+1/ Configuration of an isolated network stack
+=============================================
+
+The default set of network configuration scripts is the following in the
+Kerrighed tarball (after having run configure):
+
+- tools-host/krgboot_helper-pre.d/50net
+  installed in /etc/kerrighed/krgboot_helper-pre.d/50net (on Debian systems)
+
+- tools-host/krgboot_helper-post.d/50net 
+  installed in /etc/kerrighed/krgboot_helper-post.d/50net (on Debian systems)
+
+- tools/krginit_helper-pre.d/10net 
+  installed in /etc/kerrighed/krginit_helper-pre.d/10net (on Debian systems)
+
+These scripts take their parameters in a single file located in
+/etc/kerrighed/net.conf (on Debian systems).
+A sample net.conf file with extensive comments figures in tools/net.conf in the
+Kerrighed tarball.
+
+Since the network configuration implemented by the scripts uses 802.1q VLANs, it
+is assumed that a recent version of command ip (from package iproute2)
+supporting VLAN virtual interfaces is available on the cluster nodes.
+
+Note: It should also be possible to implement a network configuration based on
+bridged veth virtual interfaces, but this is left as en exercise.
+
+The principle of the network configuration based on net.conf is the following:
+
+- On each node, a virtual network interface (e.g. krg0) of type VLAN is created
+  and assigned to the Kerrighed container. This virtual network interface works
+  on top of a physical network interface (e.g. eth0). The MAC address of the
+  virtual interface is based on a given template (e.g. f0:00:00:00:07:00) and
+  the Kerrighed node id. For instance, virtual interface krg0 of node id 4
+  will have MAC address f0:00:00:00:07:04.
+
+- On each node, the Kerrighed container assigns to this virtual network
+  interface an IP address which is based on a given network prefix / netmask
+  (e.g. 10.4.135.0/18) and the node id. For instance, node id 4 will assign IP
+  address 10.4.135.4/18 to its virtual network interface krg0.
+
+Since virtual network interfaces are setup in a dedicated VLAN, all hosts
+(including routers) figuring on the same ethernet segment and that should be
+able to reach the Kerrighed container must also setup a (virtual) interface on
+the same VLAN. It is thus recommended that the network prefix given for the IP
+addresses of the Kerrighed container (10.4.135.0/18 in the examples above)
+figures in a different IP network than the addresses used for the host systems
+of the cluster (in the examples above, 10.4.128.0/18 is used in the Kerrighed
+containers, and 10.4.0.0/18 is used for the host systems).
+
+Example:
+Let's assume that the cluster is composed of 16 nodes and is served by an
+DHCP/PXE/TFTP/NFS server on address 10.4.7.254/18. The server has address
+10.4.7.254/18 assigned to eth0.
+
+At boot cluster nodes get addresses between 10.4.7.1 and 10.4.7.16, with netmask
+255.255.192.0 (18 bits).
+
+In the Kerrighed container, cluster nodes have addresses 10.4.135.1..16, with
+netmask 255.255.192.0, assigned to virtual interface krg0. The VLAN id of krg0
+is 7.
+
+In order to reach the Kerrighed container on the cluster, the server can
+configure a VLAN virtual interface on eth0, for instance with commands:
+
+# ip link add link eth0 address f0:00:00:00:07:fe krg0 type vlan id 7
+# ip link set krg0 mtu 1496
+# ip addr add 10.4.135.254/18 dev krg0
+# ip link set krg0 up
+
+2/ Configuration of a cluster IP
+================================
+
+When Kerrighed support for Cluster IP is enabled in the kernel, Kerrighed is
+able to configure a single IP address for all nodes of the Kerrighed container.
+This way, the address spaces of UDP and TCP ports of all nodes are merged along
+the following rules:
+- a socket bound to a port on INADDR_ANY or on a cluster IP (that is
+  setup with CLUSTERIP in the Kerrighed container) will reserve the
+  port on all nodes. No other socket can be bound to the same port,
+  whatever the node on which it is created.
+- as soon as a cluster IP is setup on all nodes, above mentioned
+  sockets will be able to receive network traffic.
+- a socket bound to a port on a local IP (that is not setup with
+  CLUSTERIP on this node) will keep the port available on other local
+  IPs and other nodes.
+
+Currently only UDP and TCP over IPv4 are supported.
+
+The setup of a cluster IP is done using the CLUSTERIP target of iptables. Beware
+that Kerrighed changes the behavior of this target in the Kerrighed container,
+in order to implement the merged address space described above.
+
+To configure a cluster IP in the Kerrighed container, a small script is provided
+in tools/krginit_helper-post.d/20clusterip (after having run configure), which
+is installed in /etc/kerrighed/krginit_helper-post.d/20clusterip on Debian
+systems. The configuration parameters of this script figure in the same net.conf
+file as used by the isolated network stack setup explained above.
+
+The configuration parameters simply consist in the name of the virtual network
+interface to which the cluster IP should be assigned (same as for the isolated
+network stack, e.g. krg0), the IP address to be assigned, and the MAC address
+(which must be a multicast MAC address) used for this IP address.
+
+Similarly to the IP address assigned to each node in the isolated network stack,
+it is recommended that the cluster IP address figures in another separate IP
+network (e.g. 10.4.192.0/18).
+
+Important note: CLUSTERIP adds requirements to the setup of the cluster:
+- Node ids must be in range 1..16;
+- There should always be node id 1 in the cluster.
+
+
+[1] http://lxc.sourceforge.net/
