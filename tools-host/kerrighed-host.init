@@ -77,6 +77,10 @@ d_start() {
 	fi
     done
 
+    if [ $(cat /sys/kerrighed/node_id) -lt 1 ] || [ $(cat /sys/kerrighed/node_id) -gt 16 ]; then
+	log_warning_msg "Kerrighed Cluster IP won't work: node id not in range 1..16!"
+    fi
+
     if test "$(cat /sys/kerrighed/node_id)" = "$BOOT_ID"; then
 	if ! d_start_container; then
 	    log_failure_msg "start of the container";
