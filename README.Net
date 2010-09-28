@@ -7,23 +7,42 @@ namely:
 - how to use Kerrighed support for Cluster IP.
 
 Since Kerrighed runs in Linux containers, it is possible to isolate the network
-stack of the Kerrighed container from the network stack of the host system. One
-can request the network stack to be isolated by setting
-ISOLATE_NET=true in /etc/default/kerrighed-host
+stack of the Kerrighed container from the network stack of the host system. Thus
+the Kerrighed container has its own network interfaces, IP addresses, routing
+tables, firewall rules, etc. One can request the network stack to be isolated by
+setting ISOLATE_NET=true in /etc/default/kerrighed-host.
 [ This assumes that the default kerrighed-host init script is used together with
-the default command krgboot_helper, set in the CLUSTER_BOOT_HELPER variable of
-/etc/default/kerrighed-host. ].
-
-Note: network isolation is required whenever the Kerrighed kernel is built with
-Kerrighed support for Cluster IP (option CONFIG_KRG_CLUSTERIP). When using such
-a kernel and krgboot_helper, make sure that ISOLATE_NET=true in
-/etc/default/kerrighed-host.
+  the default command krgboot_helper, set in the CLUSTER_BOOT_HELPER variable of
+  /etc/default/kerrighed-host. ]
 
 A default set of scripts is provided in the Kerrighed tarball to enable a
 painless configuration of an isolated network stack in the Kerrighed container.
-Future releases of Kerrighed will allow as much as possible the use of more
-flexible and user-friendly tools like lxc [1]. The configuration of those scrips
-is explained thereafter.
+It is not yet possible to use more flexible and user-friendly tools like
+lxc [1], but future releases of Kerrighed will allow as much as possible the use
+of such tools. The configuration of those scripts is explained in Section 1.
+
+When the Kerrighed container has an isolated network stack, Kerrighed also
+provides Single System Image support for Cluster IP.
+[ In fact network isolation is required whenever the Kerrighed kernel is built
+  with Kerrighed support for Cluster IP (option CONFIG_KRG_CLUSTERIP). When
+  using such a kernel and krgboot_helper, make sure that ISOLATE_NET=true in
+  /etc/default/kerrighed-host, or no Kerrighed container will be created. ]
+Kerrighed is then able to configure a single IP address for all nodes of the
+Kerrighed container. This way, the address spaces of UDP and TCP ports of all
+nodes are merged along the following rules:
+- a socket bound to a port on INADDR_ANY or on a cluster IP (that is
+  setup with CLUSTERIP in the Kerrighed container) will reserve the
+  port on all nodes. No other socket can be bound to the same port,
+  whatever the node on which it is created.
+- as soon as a cluster IP is setup on all nodes, above mentioned
+  sockets will be able to receive network traffic.
+- a socket bound to a port on a local IP (that is not setup with
+  CLUSTERIP on this node) will keep the port available on other local
+  IPs and other nodes. No socket can be bound to this port on INADDR_ANY or a
+  cluster IP.
+Currently only UDP and TCP over IPv4 are supported.
+The configuration of a cluster IP is explained in Section 2.
+
 
 1/ Configuration of an isolated network stack
 =============================================
@@ -50,7 +69,7 @@ is assumed that a recent version of command ip (from package iproute2)
 supporting VLAN virtual interfaces is available on the cluster nodes.
 
 Note: It should also be possible to implement a network configuration based on
-bridged veth virtual interfaces, but this is left as en exercise.
+bridged veth virtual interfaces, but this is left as an exercise.
 
 The principle of the network configuration based on net.conf is the following:
 
@@ -95,24 +114,9 @@ configure a VLAN virtual interface on eth0, for instance with commands:
 # ip addr add 10.4.135.254/18 dev krg0
 # ip link set krg0 up
 
+
 2/ Configuration of a cluster IP
 ================================
-
-When Kerrighed support for Cluster IP is enabled in the kernel, Kerrighed is
-able to configure a single IP address for all nodes of the Kerrighed container.
-This way, the address spaces of UDP and TCP ports of all nodes are merged along
-the following rules:
-- a socket bound to a port on INADDR_ANY or on a cluster IP (that is
-  setup with CLUSTERIP in the Kerrighed container) will reserve the
-  port on all nodes. No other socket can be bound to the same port,
-  whatever the node on which it is created.
-- as soon as a cluster IP is setup on all nodes, above mentioned
-  sockets will be able to receive network traffic.
-- a socket bound to a port on a local IP (that is not setup with
-  CLUSTERIP on this node) will keep the port available on other local
-  IPs and other nodes.
-
-Currently only UDP and TCP over IPv4 are supported.
 
 The setup of a cluster IP is done using the CLUSTERIP target of iptables. Beware
 that Kerrighed changes the behavior of this target in the Kerrighed container,
