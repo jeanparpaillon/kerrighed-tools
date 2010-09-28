@@ -1,3 +1,20 @@
+Kerrighed version 3.0.0-xos
+   Features:
+   * [kernel] Add support for Cluster IP
+   * [kernel] Support Checkpoint/Restart of shared anonymous mmap
+   * [kernel] Enhanced migration/fork/exit notifiers from Alexandre Lissy
+   * [tools] Add scripts to configure Kerrighed in an isolated network stack
+   * [tools] Add Checkpoint/Restart tests with blender
+
+   Fixes:
+   * [kernel] Support readdir() through FAF
+   * [kernel] Support sendfile() through FAF
+   * [kernel] Remove the limit on the number of FAF'ed files
+   * [kernel] Support remote getpriority()/setpriority()
+   * [kernel] Many random fixes
+   * [tools] krgltp-smp.sh fixes
+   * [tools] Checkpoint/Restart tests fixes
+
 Kerrighed version 3.0.0
    * [kernel] Port to linux 2.6.30
 
