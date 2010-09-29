@@ -1,0 +1,35 @@
+#!/bin/sh
+# Script to enable/disable pritting of error messages related
+# to Kerrighed.
+# Currently, it only handles errors about EPM operations: migration,
+#  remote fork, checkpoint/restart
+
+print_usage() {
+    echo $0 "+epm_errors|-epm_errors"
+}
+
+if [ "$1" != "+epm_errors" ] && [ "$1" != "-epm_errors" ]; then
+    print_usage
+    exit 1
+fi
+
+dbgdir=`mktemp -d`
+mount -t debugfs debugfs $dbgdir
+if [ $? -ne 0 ]; then
+    echo "Fail to mount debugfs"
+    exit 1
+fi
+
+control=$dbgdir/dynamic_debug/control
+if [ ! -e $control ]; then
+    echo "Kernel has been compiled without CONFIG_DYNAMIC_DEBUG"
+    exit 1
+fi
+
+if [ "$1" = "-epm_errors" ]; then
+    echo 'file epm.c -p' > $control
+else
+    echo 'file epm.c +p' > $control
+fi
+
+umount $dbgdir

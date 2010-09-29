@@ -6,7 +6,7 @@
 ### Author:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
-dist_sbin_SCRIPTS = krginit_helper krg_legacy_scheduler
+dist_sbin_SCRIPTS = krginit_helper krg_legacy_scheduler krglog
 bin_PROGRAMS = migrate checkpoint restart krgcapset krgcr-run ipccheckpoint ipcrestart
 sbin_PROGRAMS = krgadm krginit
 
