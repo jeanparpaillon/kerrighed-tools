@@ -5,7 +5,7 @@ Maintainer: Cyril Brulebois <cyril.brulebois@kerlabs.com>
 Build-Depends: debhelper (>= 7.0.50), autotools-dev, lsb-base, lsb-release, xmlto, pkg-config, chrpath, rsync, patchutils
 Standards-Version: 3.8.0
 Homepage: http://www.kerrighed.org/
-XS-Kernel-Name: 2.6.30
+XS-Kernel-Name: 2.6.30-krg
 XS-Kernel-Version: 3.0.0-1
 
 Package: kerrighed
