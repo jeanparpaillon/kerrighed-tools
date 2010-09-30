@@ -1,0 +1,34 @@
+# Kerrighed:
+usr/bin/migrate
+usr/bin/krgcapset
+usr/sbin/krgadm
+usr/sbin/krg_legacy_scheduler
+usr/sbin/krgboot
+usr/sbin/krgboot_helper
+usr/sbin/krginit
+usr/sbin/krginit_helper
+
+# Kerrighed configuration:
+etc/kerrighed
+
+# C/R:
+usr/bin/checkpoint
+usr/bin/restart
+usr/bin/ipccheckpoint
+usr/bin/ipcrestart
+
+# Others:
+etc/default/kerrighed
+etc/default/kerrighed-host
+etc/init.d/kerrighed
+etc/init.d/kerrighed-host
+usr/share/man
+
+# Schedulers node sets:
+#usr/bin/krg_schedsetnodes -> debian/rules
+
+# Bash helper:
+etc/bash_completion.d/kerrighed
+
+# Connector:
+#usr/bin/krgconnector -> debian/rules

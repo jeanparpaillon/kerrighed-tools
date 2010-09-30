@@ -1,0 +1,9 @@
+# Small package providing with both development and runtime files.
+non-dev-pkg-with-shlib-symlink usr/lib/libbi.so.0.0.0 usr/lib/libbi.so
+
+# Same reason as above.
+package-name-doesnt-match-sonames libbi0
+
+# Those commands aren't documented, but the only persons going to
+# actually run time are their respective authors, and their coworkers.
+# (list generated at build-time)

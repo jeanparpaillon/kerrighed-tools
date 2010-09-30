@@ -1,0 +1,13 @@
+usr/lib/libkerrighed.a
+usr/lib/libkerrighed.la
+usr/lib/libkerrighed.so
+usr/lib/libkrgcb.a
+usr/lib/libkrgcb.la
+usr/lib/libkrgcb.so
+usr/lib/libkrgcheckpoint.a
+usr/lib/libkrgcheckpoint.la
+usr/lib/libkrgcheckpoint.so
+usr/lib/pkgconfig/kerrighed.pc
+usr/lib/pkgconfig/krgcb.pc
+usr/lib/pkgconfig/krgcheckpoint.pc
+usr/include/kerrighed
