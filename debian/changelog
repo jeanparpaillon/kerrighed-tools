@@ -1,3 +1,9 @@
+kerrighed (3.0.0+xos-1) stable; urgency=low
+
+  * Include XtreemOS features.
+
+ -- Cyril Brulebois <cyril.brulebois@kerlabs.com>  Thu, 30 Sep 2010 11:32:33 +0200
+
 kerrighed (3.0.0-1) stable; urgency=low
 
   * Release Kerrighed 3.0.0
