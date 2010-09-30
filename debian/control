@@ -58,7 +58,7 @@ Description: The Kerrighed library - development files
 
 Package: kerrighed-tools
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, iproute (>= 20100519)
 Description: Tools for the Kerrighed OS
  The Kerrighed OS is a Linux-based SSI system which allows you to use
  a cluster as a single SMP machine.

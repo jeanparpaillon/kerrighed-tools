@@ -1,6 +1,7 @@
 kerrighed (3.0.0+xos-1) stable; urgency=low
 
   * Include XtreemOS features.
+  * Add versioned dependency on iproute.
 
  -- Cyril Brulebois <cyril.brulebois@kerlabs.com>  Thu, 30 Sep 2010 11:32:33 +0200
 
