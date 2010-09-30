@@ -1,0 +1,76 @@
+Source: kerrighed
+Section: admin
+Priority: optional
+Maintainer: Cyril Brulebois <cyril.brulebois@kerlabs.com>
+Build-Depends: debhelper (>= 7.0.50), autotools-dev, lsb-base, lsb-release, xmlto, pkg-config, chrpath, rsync, patchutils
+Standards-Version: 3.8.0
+Homepage: http://www.kerrighed.org/
+XS-Kernel-Name: 2.6.30
+XS-Kernel-Version: 3.0.0-1
+
+Package: kerrighed
+Architecture: all
+Depends: ${misc:Depends},
+ kerrighed-image-${kernel:Name} (>= ${kernel:Version}),
+ kerrighed-tools (>= ${source:Version})
+Description: The Kerrighed OS
+ The Kerrighed OS is a Linux-based SSI system which allows you to use
+ a cluster as a single SMP machine.
+ .
+ This package is a metapackage which depends on everything you need to run
+ a Kerrighed cluster.
+
+Package: kerrighed-dev
+Architecture: all
+Depends: ${misc:Depends},
+ kerrighed-image-${kernel:Name} (>= ${kernel:Version}),
+ kerrighed-tools (>= ${source:Version}),
+ kerrighed-headers-${kernel:Name} (>= ${kernel:Version}),
+ libkerrighed-dev (>= ${source:Version})
+Description: The Kerrighed OS - development version
+ The Kerrighed OS is a Linux-based SSI system which allows you to use
+ a cluster as a single SMP machine.
+ .
+ This package is a metapackage which depends on everything you need to run
+ a Kerrighed cluster, including development packages.
+
+Package: libkerrighed1
+Architecture: any
+Depends: ${shlibs:Depends}
+Suggests: libkerrighed-dev (= ${binary:Version})
+Description: The Kerrighed library
+ The Kerrighed OS is a Linux-based SSI system which allows you to use
+ a cluster as a single SMP machine.
+ .
+ This package contains the library required to use advanced features
+ of the Kerrighed OS.
+
+Package: libkerrighed-dev
+Section: libdevel
+Architecture: any
+Depends: libkerrighed1 (= ${binary:Version}), ${shlibs:Depends}
+Description: The Kerrighed library - development files
+ The Kerrighed OS is a Linux-based SSI system which allows you to use
+ a cluster as a single SMP machine.
+ .
+ This package contains the library required to use advanced features
+ of the Kerrighed OS.
+
+Package: kerrighed-tools
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Tools for the Kerrighed OS
+ The Kerrighed OS is a Linux-based SSI system which allows you to use
+ a cluster as a single SMP machine.
+ .
+ This package contains the tools to manage a Kerrighed cluster.
+
+Package: kerrighed-tests
+Architecture: any
+Depends: ${shlibs:Depends}, python
+Suggests: ltp-kernel-test (>= 20080531)
+Description: Tests for the Kerrighed OS
+ The Kerrighed OS is a Linux-based SSI system which allows you to use
+ a cluster as a single SMP machine.
+ .
+ This package contains basic tests for Kerrighed.

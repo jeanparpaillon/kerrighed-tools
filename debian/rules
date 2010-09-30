@@ -1,0 +1,106 @@
+#!/usr/bin/make -f
+
+# (Linux) Kernel and Kerrighed versions, target architecture.
+KERNEL_NAME       = $(shell grep -i -- ^xs-kernel-name    debian/control|awk '{print $$2}')
+KERNEL_VERSION    = $(shell grep -i -- ^xs-kernel-version debian/control|awk '{print $$2}')
+ALL_PACKAGES      = $(shell grep ^Package: debian/control|awk '{print $$2}')
+
+# Extra binaries for kerrighed-tools, depending on the tree:
+EXTRA_BINARIES = \
+	usr/bin/krgconnector \
+	usr/bin/krginteractor \
+	usr/bin/krg_schedsetnodes
+
+# Stamps:
+#UPSTREAM_TWEAKS_STAMP = upstream-tweaks-stamp
+AUTORECONF_STAMP      = autoreconf-stamp
+CONFIGURE_STAMP       = configure-stamp
+
+#$(UPSTREAM_TWEAKS_STAMP):
+#	sed -i '/\/update-rc/d' scripts/Makefile.am
+#	touch $@
+
+$(AUTORECONF_STAMP):
+	cp /usr/share/misc/config.guess .
+	cp /usr/share/misc/config.sub   .
+	autoreconf -vi
+	touch $@
+
+#override_dh_auto_configure: $(UPSTREAM_TWEAKS_STAMP) $(AUTORECONF_STAMP)
+override_dh_auto_configure: $(AUTORECONF_STAMP)
+	dh_testdir
+	./configure \
+	  --prefix=/usr \
+	  --mandir=\$${prefix}/share/man \
+	  --infodir=\$${prefix}/share/info \
+	  --sysconfdir=/etc \
+	  --disable-kernel \
+	  --enable-libkerrighed \
+	  --enable-tools \
+	  --enable-service \
+	  --enable-tests \
+	  --enable-tests-ktp \
+	  --enable-tests-apps \
+	  --enable-tests-proc \
+	  --enable-tests-benchmark \
+	  CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f $(UPSTREAM_TWEAKS_STAMP) $(AUTORECONF_STAMP)
+	# Make sure a build env summary is available already:
+	@if [ ! -f debian/build-env ] ; then \
+		echo 'E: Build env summary (debian/build-env) is missing.' ; \
+		exit 1 ; \
+	fi
+
+override_dh_auto_install:
+	dh_auto_install
+	# Tweak the boot helper:
+	#sed -i 's,/usr/local,/usr,' debian/kerrighed-tools/usr/bin/krgboot_helper
+	sed -i 's,/usr/local,/usr,' debian/tmp/usr/sbin/krgboot_helper
+	# Conditionally install additional binaries:
+	for i in $(EXTRA_BINARIES); do \
+		if [ -f debian/tmp/$$i ]; then \
+			dh_install -pkerrighed-tools --sourcedir=debian/tmp $$i ; \
+		fi ; \
+	done
+
+	# Prefix all tests binaries with krg_ to avoid name collision.
+	# cd debian/kerrighed-tests/usr/bin && rename 's/^/krg_/' *
+
+override_dh_lintian: install-overrides
+	dh_lintian
+
+override_dh_install: EXCLUDE_BINARIES=$(addprefix -X, $(EXTRA_BINARIES))
+override_dh_install:
+	rm -f debian/tmp/usr/lib/*/site-packages/kerrighed.*
+	# Using --fail-missing means debian/tmp has to be empty in the end,
+	# even though we're only moving the extra binaries into place later
+	# on. So let's exclude them:
+	dh_install --fail-missing $(EXCLUDE_BINARIES)
+
+override_dh_gencontrol:
+	dh_gencontrol -- -Vkernel:Name="$(KERNEL_NAME)" -Vkernel:Version="$(KERNEL_VERSION)"
+
+install-overrides: LINTIAN_DIR=/usr/share/lintian/overrides
+install-overrides: TESTS_PACKAGE=kerrighed-tests
+install-overrides:
+	# Delete and add overrides for all files to make sure.
+	for i in $(ALL_PACKAGES) ; do \
+	  rm -f debian/$$i/$(LINTIAN_DIR)/$$i ; \
+	  mkdir -p debian/$$i/$(LINTIAN_DIR) ; \
+	  cp debian/overrides/default debian/$$i/$(LINTIAN_DIR)/$$i ; \
+	  if [ -f debian/overrides/$$i ] ; then \
+	    cat debian/overrides/$$i >> debian/$$i/$(LINTIAN_DIR)/$$i ; \
+	  fi ; \
+	done
+
+	# Additional build-time generated overrides.
+	for i in debian/$(TESTS_PACKAGE)/usr/bin/* ; do \
+	  echo 'binary-without-manpage' `echo $$i | sed -e 's,^.*/usr/bin/,usr/bin/,'` \
+	  >> debian/$(TESTS_PACKAGE)/$(LINTIAN_DIR)/$(TESTS_PACKAGE) ; \
+	done
+
+%:
+	dh $@

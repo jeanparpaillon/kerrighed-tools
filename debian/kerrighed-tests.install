@@ -1,0 +1,38 @@
+# Actual (LTP) tests:
+usr/share/ltp/testcases
+
+# Includes:
+usr/include/krg-tools.h
+usr/include/libbi.h
+usr/include/smp-tools.h
+usr/include/test-tools.h
+
+# Library:
+/usr/lib/libbi.*
+
+# Tiny test programs:
+usr/bin/bi
+usr/bin/bi-clone-files
+usr/bin/bi-clone-fs
+usr/bin/bi-clone-semundo
+usr/bin/bi-cr
+usr/bin/bi-cr-disable
+usr/bin/bi-cr-static
+usr/bin/bi-double
+usr/bin/bi-exclude-mm
+usr/bin/bi-file
+usr/bin/bi-pipe
+usr/bin/bi-server-socket
+usr/bin/bi-signal
+usr/bin/bi-thread
+usr/bin/extractrmax.py
+usr/bin/fork_test
+usr/bin/ipcmsg-tool
+usr/bin/ipcsem-tool
+usr/bin/ipcshm-tool
+usr/bin/krgcr-run
+usr/bin/krgltp-smp.sh
+usr/bin/posixshm-tool
+usr/bin/slab-check
+usr/bin/up-gs
+usr/bin/up-gs_migr

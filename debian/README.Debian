@@ -1,0 +1,18 @@
+README for kerrighed(-dev):
+---------------------------
+
+  * The canonical place for Kerrighed-related documentation is
+    http://kerrighed.org/ and the "Installation Notes" in particular.
+
+  * A very typical setup is NFSROOT. In short words, a "server" will provide
+    with TFTP, DHCP, and NFS services, while the kerrighed(-dev) package is
+    installed in the "served" filesystem. In addition, the kerrighed-image
+    kernel should be able to boot from NFS. To do so, it's possible to choose
+    "BOOT=nfs" instead of the default "BOOT=local" in the initramfs-tools
+    configuration (/etc/initramfs-tools/initramfs.conf). It's then sufficient
+    to use "update-initramfs" to (re)generate the initramfs. Usual options are
+    "-k all" (process all kernel versions), "-c" (create), "-u" (update). It's
+    also important to serve the kernel and its initramfs through PXE, probably
+    by copying them in /var/lib/tftpboot, and pointing the PXE tools on them.
+
+ -- Cyril Brulebois <cyril.brulebois@kerlabs.com>, Fri, 20 Jun 2008 14:37:52 +0200
