@@ -1,7 +1,7 @@
 /*
  *  Copyright (C) 2001-2006, INRIA, Universite de Rennes 1, EDF.
+ *  Copyright (C) 2010, Kerlabs
  */
-
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -13,18 +13,7 @@
 #include <errno.h>
 
 #include <types.h>
-
 #include <kerrighed.h>
-
-
-
-/*****************************************************************************/
-/*                                                                           */
-/*                              INTERNAL FUNCTIONS                           */
-/*                                                                           */
-/*****************************************************************************/
-
-
 
 /** Call a Kerrighed kernel service through «/proc/kerrighed/services».
  *  @author Renaud Lottiaux
@@ -35,55 +24,47 @@
  */
 int call_kerrighed_services(int service_id, void * data)
 {
-  int fd;
-  int res;
+	int fd;
+	int res;
 
-  fd = open("/proc/kerrighed/services", O_RDONLY);
-  if (fd == -1)
-    {
-      close (fd);
-      return -1;
-    }
-  
-  res = ioctl(fd, service_id, data);
+	fd = open("/proc/kerrighed/services", O_RDONLY);
+	if (fd == -1) {
+		close (fd);
+		return -1;
+	}
 
-  close(fd);
+	res = ioctl(fd, service_id, data);
 
-  return res;
-} 
+	close(fd);
 
-
+	return res;
+}
 
 /** open kerrighed services
  * @author David Margery
  * @return the file descriptor of the openned kerrighed service, -1 if failure
  */
-int open_kerrighed_services() 
+int open_kerrighed_services(void)
 {
-
-  return open("/proc/kerrighed/services", O_RDONLY);
+	return open("/proc/kerrighed/services", O_RDONLY);
 }
-
-
 
 /** close kerrighed services
  * @author David Margery
  * @param fd : the file descriptor returned when the kerrighed services where opened
  */
-void close_kerrighed_services(int fd) 
+void close_kerrighed_services(int fd)
 {
-  close ( fd ) ;
+	close(fd) ;
 }
-
-
 
 /** call a kerrighed service that was allready opened
  * @author David Margery
  * @param fd : the file descriptor returned when the kerrighed services where opened
  * @param service_id : the service called
  * @param data : the data needed by the service
- */ 
-int call_opened_kerrighed_services(int fd, int service_id, void * data) 
+ */
+int call_opened_kerrighed_services(int fd, int service_id, void *data)
 {
-  return ioctl(fd, service_id, data);
+	return ioctl(fd, service_id, data);
 }
