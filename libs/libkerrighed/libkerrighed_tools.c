@@ -3,6 +3,7 @@
  *  Copyright (C) 2010, Kerlabs
  */
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -14,6 +15,31 @@
 
 #include <types.h>
 #include <kerrighed.h>
+#include <version.h>
+
+int check_abi_version(void)
+{
+	int ret, fd;
+	char version[256];
+
+	fd = open("/sys/kerrighed/abi", O_RDONLY);
+	if (fd == -1)
+		return -1;
+
+	ret = read(fd, version, 256);
+	if (ret < 2) {
+		ret = -1;
+		goto err_close;
+	}
+
+	ret = strncmp(version, KERRIGHED_ABI, ret-1);
+	if (ret)
+		ret = -1;
+
+err_close:
+	close(fd);
+	return ret;
+}
 
 /** open kerrighed services
  * @author David Margery
