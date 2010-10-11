@@ -41,6 +41,16 @@ err_close:
 	return ret;
 }
 
+void __attribute__ ((constructor)) init_krg_lib(void)
+{
+	int ret = check_abi_version();
+	if (ret) {
+		fprintf(stderr,
+			"kerrighed: tools and kernel version mismatch\n");
+		exit(EXIT_FAILURE);
+	}
+}
+
 /** open kerrighed services
  * @author David Margery
  * @return the file descriptor of the openned kerrighed service, -1 if failure

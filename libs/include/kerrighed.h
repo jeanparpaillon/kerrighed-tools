@@ -16,6 +16,8 @@ extern "C" {
 #include "hotplug.h"
 #include "ipc.h"
 
+void __attribute__ ((constructor)) init_krg_lib(void);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
