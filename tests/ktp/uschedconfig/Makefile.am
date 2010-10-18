@@ -4,7 +4,8 @@
 ###                     Alexandre Lissy <alexandre.lissy@etu.univ-tours.fr>
 ###
 testsuser_SCRIPTS = \
-	cpuspeed_probe.sh
+	cpuspeed_probe.sh \
+	load_probe.sh
 
 testsuserdir = @ltpbase@/testcases/bin
 
