@@ -149,14 +149,49 @@ int update_capability(char *description, int oldcapability)
 	return res;
 }
 
+int get_caps_for_pid(pid_t pid, krg_cap_t *initial_caps)
+{
+	int res = 0;
+
+	if(pid == -1) {
+		res = krg_father_capget(initial_caps);
+		if (res)
+			printf("Unable to get my father's capabilities res: %d, errno: %d\n", res, errno);
+	} else {
+		res = krg_pid_capget(pid, initial_caps);
+		if (res)
+			printf("Unable to get capabilities of process %d (res: %d, errno: %d))\n", pid, res, errno);
+	}
+
+	return res;
+}
+
+int set_caps_for_pid(pid_t pid, krg_cap_t *initial_caps)
+{
+	int res = 0;
+
+	if (pid == -1) {
+		res = krg_father_capset(initial_caps);
+		if (res)
+			printf("Unable to set my father's capabilities\n");
+	} else {
+		res = krg_pid_capset(pid, initial_caps);
+		if (res)
+			printf("Unable to set the capabilities of process %d (res is %d, errno %d)\n", pid, res, errno);
+	}
+
+	return res;
+}
+
 int usage(char *argv[])
 {
 	int res;
 
 	printf("\
-Usage: %s [-h|--help] [-v|--version]\n\
-  or:  %s [-k|--pid <pid>] -s|--show\n\
-  or:  %s [-f|--force] [-k|--pid <pid>] {SET {[+|-]CAPABILITY LIST | OCTAL VALUE}...}\n\
+Usage: %s {-h|--help}\n\
+  or:  %s {-v|--version}\n\
+  or:  %s [-k|--pid <pid>] [-s|--show]\n\
+  or:  %s [-f|--force] [-k|--pid <pid>] {SET {[+|-]CAPABILITY LIST | OCTAL VALUE}}... \n\
   -h, --help                   display this help and exit\n\
   -v, --version                display version informations and exit\n\
   -k, --pid <pid>              act on the task having pid <pid>\n\
@@ -170,7 +205,7 @@ Change capabilities of the designated task.\n\
   -d, --inheritable-effective  set up inheritable effective capabilities\n\
   -i, --inheritable-permitted  set up inheritable permitted capabilities\n\
 \n\
-", argv[0], argv[0], argv[0]);
+", argv[0], argv[0], argv[0], argv[0]);
 
 	res = krg_cap_get_supported(&supported_caps);
 	if (res)
@@ -182,28 +217,24 @@ Change capabilities of the designated task.\n\
 		       "of capabilities amongst:\n");
 		print_capability(supported_caps);
 	}
+
 	return 0;
 }
 
-int force = 0;
-int changed_father_cap = 0;
 int main(int argc, char *argv[])
 {
 	pid_t pid = -1;
 	int c;
 	int res;
+	int changed_cap = 0;
+	int show = 0;
+	int set = 0;
+	int force = 0;
 	long int cap_value;
 	char *ignored = NULL;
 	krg_cap_t initial_caps;
 
-	if (argc == 1) {
-		usage(argv);
-		exit(EXIT_SUCCESS);
-	}
-
-	/*
-	 * First pass on args for -h or -v
-	 */
+	/* First pass, check if arguments are valid */
 	while (1) {
 		c = getopt_long(argc, argv, "hvsfk:p:e:i:d:", long_options, NULL);
 
@@ -218,7 +249,47 @@ int main(int argc, char *argv[])
 		case 'h':
 			usage(argv);
 			exit(EXIT_SUCCESS);
+		case 's':
+			if (show)
+				fprintf(stderr, "Notice: -s (or --show) were specified twice\n");
+			show = 1;
+			break;
+		case 'k':
+			if (pid != -1) {
+				fprintf(stderr, "-k (or --pid) were specified twice\n");
+				usage(argv);
+				exit(EXIT_FAILURE);
+			}
+			pid = atoi (optarg);
+			break;
+		case 'e':
+		case 'd':
+		case 'p':
+		case 'i':
+			set = 1;
+			break;
+		case 'f':
+			if (force)
+				fprintf(stderr, "Notice: -f (or --force) were specified twice\n");
+			force = 1;
+			break;
+		case '?':
+		default:
+			usage(argv);
+			exit(EXIT_FAILURE);
 		}
+	}
+
+	if(optind < argc) {
+		fprintf(stderr, "Unknown argument %s\n", argv[optind]);
+		usage(argv);
+		exit(EXIT_FAILURE);
+	}
+
+	if(show && set) {
+		fprintf(stderr, "You can't use -s (or --show) and a modifier at the same time !\n");
+		usage(argv);
+		exit(EXIT_FAILURE);
 	}
 
 	res = krg_cap_get_supported(&supported_caps);
@@ -234,104 +305,93 @@ int main(int argc, char *argv[])
 			"Some capability names won't be recognized.\n",
 			argv[0]);
 
-	res = krg_father_capget(&initial_caps);
-	if (res) {
-		printf("Unable to get my father's capabilities res: %d, errno: %d\n",
-		       res, errno);
-		exit(res);
-	}
 
-	optind = 1;
-	while (1) {
-		c = getopt_long(argc, argv, "hvsfk:p:e:i:d:", long_options, NULL);
+	if(set) {
+		res = get_caps_for_pid(pid, &initial_caps);
+		if(res)
+			exit(res);
 
-		if (c == -1)
-			break;
+		/* Second pass, let's do the job ! */
+		optind = 1;
+		while (1) {
+			c = getopt_long(argc, argv, "hvsfk:p:e:i:d:",
+					long_options, NULL);
 
-		cap_value = 0;
-		switch (c) {
-		case 'f':
-			force = 1;
-			break;
-		case 's':
-			print_capabilities(&initial_caps);
-			break;
-		case 'e':
-			cap_value = strtol(optarg, &ignored, 0);
-			if (*ignored != '\0')
-				cap_value = update_capability(optarg, initial_caps.krg_cap_effective);
-			initial_caps.krg_cap_effective = cap_value;
-			changed_father_cap = 1;
-			break;
-		case 'p':
-			cap_value = strtol(optarg, &ignored, 0);
-			if (*ignored != '\0')
-				cap_value = update_capability(optarg, initial_caps.krg_cap_permitted);
-			initial_caps.krg_cap_permitted = cap_value;
-			changed_father_cap = 1;
-			break;
-		case 'i':
-			cap_value = strtol(optarg, &ignored, 0);
-			if (*ignored != '\0')
-				cap_value = update_capability(optarg, initial_caps.krg_cap_inheritable_permitted);
-			initial_caps.krg_cap_inheritable_permitted = cap_value;
-			changed_father_cap = 1;
-			break;
-		case 'd':
-			cap_value = strtol(optarg, &ignored, 0);
-			if (*ignored != '\0')
-				cap_value = update_capability(optarg, initial_caps.krg_cap_inheritable_effective);
-			initial_caps.krg_cap_inheritable_effective = cap_value;
-			changed_father_cap = 1;
-			break;
-		case 'k':
-			pid = atoi(optarg);
-			if (changed_father_cap) {
-				printf("Conflict in implementation: -k must be the first option used\n");
+			if (c == -1)
+				break;
+
+			cap_value = 0;
+			switch (c) {
+
+			case 'f':
+			case 's':
+			case 'k':
+				break;
+			case 'e':
+				cap_value = strtol(optarg, &ignored, 0);
+				if (*ignored != '\0')
+					cap_value = update_capability(optarg, initial_caps.krg_cap_effective);
+				initial_caps.krg_cap_effective = cap_value;
+				changed_cap = 1;
+				break;
+			case 'p':
+				cap_value = strtol(optarg, &ignored, 0);
+				if (*ignored != '\0')
+					cap_value = update_capability(optarg, initial_caps.krg_cap_permitted);
+				initial_caps.krg_cap_permitted = cap_value;
+				changed_cap = 1;
+				break;
+			case 'i':
+				cap_value = strtol(optarg, &ignored, 0);
+				if (*ignored != '\0')
+					cap_value = update_capability(optarg, initial_caps.krg_cap_inheritable_permitted);
+				initial_caps.krg_cap_inheritable_permitted = cap_value;
+				changed_cap = 1;
+				break;
+			case 'd':
+				cap_value = strtol(optarg, &ignored, 0);
+				if (*ignored != '\0')
+					cap_value = update_capability(optarg, initial_caps.krg_cap_inheritable_effective);
+				initial_caps.krg_cap_inheritable_effective = cap_value;
+				changed_cap = 1;
+				break;
+			default:
+				usage(argv);
 				exit(EXIT_FAILURE);
+				break;
 			}
-			res = krg_pid_capget(pid, &initial_caps);
-			if (res) {
-				printf("Unable to get capabilities of process %d (res: %d, errno: %d))\n",
-				       pid, res, errno);
-				exit(res);
-			}
-			break;
-		default:
-			usage(argv);
-			exit(EXIT_FAILURE);
-			break;
 		}
+
+		if (changed_cap)
+		{
+
+			if (!force && (!cap_raised(initial_caps.krg_cap_permitted, CAP_CHANGE_KERRIGHED_CAP)
+				       || !cap_raised(initial_caps.krg_cap_effective, CAP_CHANGE_KERRIGHED_CAP)) ) {
+				int answer;
+				int use_default = 1;
+				printf("Are you sure you want to loose the capability to change your capabilities (y/N)\n");
+				answer = getchar();
+				while (answer != 'y' && answer != 'Y' && answer != 'n' && answer != 'N' && answer != EOF && answer != '\n') {
+					use_default = 0;
+					answer = getchar();
+				}
+				if (answer != 'y' && answer != 'Y' && (answer = '\n' || use_default) )
+					exit(EXIT_SUCCESS);
+
+				res = set_caps_for_pid(pid, &initial_caps);
+				if (res)
+					exit(EXIT_FAILURE);
+			}
+		}
+
+	} else {
+		/* Show capabilities lists */
+		res = get_caps_for_pid(pid, &initial_caps);
+		if (res)
+			exit(res);
+
+		print_capabilities(&initial_caps);
 	}
 
-	if (changed_father_cap && (!force
-				   && (!cap_raised(initial_caps.krg_cap_permitted, CAP_CHANGE_KERRIGHED_CAP)
-		 		       || !cap_raised(initial_caps.krg_cap_effective, CAP_CHANGE_KERRIGHED_CAP)))) {
-		int answer;
-		int use_default = 1;
-
-		printf("Are you sure you want to loose the capability to change your capabilities (y/N)\n");
-		answer = getchar();
-		while (answer != 'y' && answer != 'Y' && answer != 'n' && answer != 'N'
-		       && answer != EOF && answer != '\n') {
-			use_default = 0;
-			answer = getchar();
-		}
-		if (answer != 'y' && answer != 'Y' && (answer = '\n' || use_default))
-			exit(EXIT_SUCCESS);
-	}
-	if (changed_father_cap) {
-		if (pid == -1) {
-			res = krg_father_capset(&initial_caps);
-			if (res)
-				printf("Unable to set my father's capabilities\n");
-		} else {
-			res = krg_pid_capset(pid, &initial_caps);
-			if (res)
-				printf("Unable to set the capabilities of process %d"
-				       " (res is %d, errno %d)\n",
-				       pid, res, errno);
-		}
-	}
 	exit(EXIT_SUCCESS);
 }

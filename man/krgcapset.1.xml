@@ -14,7 +14,7 @@
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>krgcapset</command>
-      <group choice="opt" >
+      <group choice="req" >
 	<arg choice="plain" >-h</arg>
 	<arg choice="plain" >--help</arg>
       </group>
@@ -35,7 +35,7 @@
 	</group>
 	<replaceable>pid</replaceable>
       </arg>
-      <group choice="req" >
+      <group choice="opt" >
 	<arg choice="plain" >-s</arg>
 	<arg choice="plain" >--show</arg>
       </group>
