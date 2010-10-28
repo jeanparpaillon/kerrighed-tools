@@ -85,7 +85,7 @@ int print_capability(int current_cap_vector)
 	return 0;
 }
 
-void print_capabilities(const krg_cap_t * caps)
+void print_capabilities(const krg_cap_t *caps)
 {
 	printf("Permitted Capabilities: 0%o\n",
 	       krg_cap_getpermitted(caps));
@@ -153,7 +153,7 @@ int get_caps_for_pid(pid_t pid, krg_cap_t *initial_caps)
 {
 	int res = 0;
 
-	if(pid == -1) {
+	if (pid == -1) {
 		res = krg_father_capget(initial_caps);
 		if (res)
 			printf("Unable to get my father's capabilities res: %d, errno: %d\n", res, errno);
@@ -208,8 +208,7 @@ Change capabilities of the designated task.\n\
 ", argv[0], argv[0], argv[0], argv[0]);
 
 	res = krg_cap_get_supported(&supported_caps);
-	if (res)
-	{
+	if (res) {
 		printf("WARNING: Capability list not available."
 		       "You may not be running a Kerrighed kernel.\n");
 	} else {
@@ -280,13 +279,13 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if(optind < argc) {
+	if (optind < argc) {
 		fprintf(stderr, "Unknown argument %s\n", argv[optind]);
 		usage(argv);
 		exit(EXIT_FAILURE);
 	}
 
-	if(show && set) {
+	if (show && set) {
 		fprintf(stderr, "You can't use -s (or --show) and a modifier at the same time !\n");
 		usage(argv);
 		exit(EXIT_FAILURE);
@@ -306,9 +305,9 @@ int main(int argc, char *argv[])
 			argv[0]);
 
 
-	if(set) {
+	if (set) {
 		res = get_caps_for_pid(pid, &initial_caps);
-		if(res)
+		if (res)
 			exit(res);
 
 		/* Second pass, let's do the job ! */
@@ -362,11 +361,10 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		if (changed_cap)
-		{
+		if (changed_cap) {
 
 			if (!force && (!cap_raised(initial_caps.krg_cap_permitted, CAP_CHANGE_KERRIGHED_CAP)
-				       || !cap_raised(initial_caps.krg_cap_effective, CAP_CHANGE_KERRIGHED_CAP)) ) {
+				       || !cap_raised(initial_caps.krg_cap_effective, CAP_CHANGE_KERRIGHED_CAP))) {
 				int answer;
 				int use_default = 1;
 				printf("Are you sure you want to loose the capability to change your capabilities (y/N)\n");
@@ -375,7 +373,7 @@ int main(int argc, char *argv[])
 					use_default = 0;
 					answer = getchar();
 				}
-				if (answer != 'y' && answer != 'Y' && (answer = '\n' || use_default) )
+				if (answer != 'y' && answer != 'Y' && (answer = '\n' || use_default))
 					exit(EXIT_SUCCESS);
 
 				res = set_caps_for_pid(pid, &initial_caps);
