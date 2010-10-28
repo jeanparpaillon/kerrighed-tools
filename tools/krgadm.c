@@ -525,6 +525,23 @@ exit:
 	return i;
 }
 
+int check_in_krg_container(void)
+{
+	int ret;
+
+	ret = krg_check_container();
+	if (ret) {
+		fprintf(stderr, "There is no Kerrighed container running.\n");
+		return ret;
+	}
+
+	ret = krg_check_hotplug();
+	if (ret)
+		fprintf(stderr, "Must be run from Kerrighed container only.\n");
+
+	return ret;
+}
+
 /*
  * Return EXIT_SUCCESS on success, EXIT_FAILURE on failure.
  */
@@ -534,11 +551,9 @@ int cluster(int argc, char* argv[], char* program_name)
 	int ret = EXIT_SUCCESS;
 	int r;
 
-	r = krg_check_hotplug();
-	if (r) {
-		perror("Kerrighed is not running");
+	r = check_in_krg_container();
+	if (r)
 		return EXIT_FAILURE;
-	}
 
 	krg_hotplug_init();
 
@@ -615,11 +630,9 @@ int nodes(int argc, char* argv[], char* program_name)
 	int action = NONE;
 	int ret;
 
-	ret = krg_check_hotplug();
-	if (ret) {
-		perror("Kerrighed is not running");
+	ret = check_in_krg_container();
+	if (ret)
 		return EXIT_FAILURE;
-	}
 
 	krg_hotplug_init();
 
