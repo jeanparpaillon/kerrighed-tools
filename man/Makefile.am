@@ -22,13 +22,12 @@ man_MANS = \
 	ipcrestart.1
 
 html_MANS = $(patsubst %,%.html,$(man_MANS))
+nodist_man_MANS = $(html_MANS)
 man_sources = $(patsubst %,%.xml,$(man_MANS))
 
-EXTRA_DIST = $(man_MANS) $(man_sources) manual-man.xsl manual-xhtml.xsl
-CLEANFILES = $(html_MANS)
-MAINTAINERCLEANFILES = $(man_MANS)
-
-html: $(html_MANS)
+EXTRA_DIST = $(man_MANS) $(html_MANS) $(man_sources) manual-man.xsl manual-xhtml.xsl
+CLEANFILES =
+MAINTAINERCLEANFILES = $(man_MANS) $(html_MANS)
 
 $(man_MANS): %: %.xml manual-man.xsl
 	xsltproc --nonet --param man.endnotes.are.numbered 0 $(srcdir)/manual-man.xsl $<
