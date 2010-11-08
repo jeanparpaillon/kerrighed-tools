@@ -18,7 +18,7 @@ mac=${VIRTMAC%:*}:$(printf %02x $node_id)
 mtu=$($IP link show $PHYS | $SED -n 's/^.* mtu \([0-9]*\) .*$/\1/p')
 mtu=$(( $mtu - 4 ))
 
-$IP link add link $PHYS address $mac $VIRT type vlan id $VLANID
+$IP link add link $PHYS address $mac $VIRT type macvlan
 $IP link set $VIRT mtu $mtu
 $IP link set $VIRT netns $PID
 
