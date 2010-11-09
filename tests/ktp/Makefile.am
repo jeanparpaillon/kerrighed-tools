@@ -5,7 +5,7 @@
 ### Authors:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
-SUBDIRS = cr uschedconfig
+SUBDIRS = cr faf uschedconfig
 bin_SCRIPTS = krgltp-smp.sh slab-check
 
 EXTRA_DIST = krgltp-smp.sh.in slab-check
