@@ -11,11 +11,11 @@ error() {
     exit 1
 }
 
+. @sysconfdir@/kerrighed/krginit_helper.conf
+
 if [ ! -x "$KRG_ROOT$KRGINIT" ]; then
     error "Can not find krginit: $KRG_ROOT$KRGINIT"
 fi
-
-. @sysconfdir@/kerrighed/krginit_helper.conf
 
 # Prefer caller args
 if [ $# -gt 0 ]; then
