@@ -9,7 +9,7 @@
 bin_PROGRAMS = bi bi-cr bi-cr-static bi-file bi-signal bi-double \
 	bi-clone-files bi-clone-fs bi-clone-semundo bi-thread bi-server-socket \
 	bi-pipe bi-exclude-mm bi-cr-disable \
-	fchmod fork-loop \
+	fchmod fchown fork-loop \
 	ipcshm-tool ipcmsg-tool ipcsem-tool \
 	posixshm-tool
 
@@ -77,6 +77,8 @@ bi_cr_disable_LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la -lbi @top
 bi_cr_disable_DEPENDENCIES = libbi.la
 
 fchmod_SOURCES = fchmod.c
+
+fchown_SOURCES = fchown.c
 
 fork_loop_SOURCES = fork-loop.c
 

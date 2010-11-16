@@ -6,7 +6,8 @@
 tests_SCRIPTS = \
 	lib_faf.sh \
 	check_leak \
-	faf_chmod
+	faf_chmod \
+	faf_chown
 
 testsdir = @ltpbase@/testcases/bin
 
