@@ -24,4 +24,5 @@ $IP addr add 127.0.0.1 dev lo
 addr=${VIRTPREFIX%.*}.$node_id/${VIRTPREFIX#*/}
 
 $IP addr add $addr dev $ifname
+$IP rout add default dev $ifname via ${GATEWAY}
 $IP link set $ifname up
