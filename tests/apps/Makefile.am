@@ -9,7 +9,7 @@
 bin_PROGRAMS = bi bi-cr bi-cr-static bi-file bi-signal bi-double \
 	bi-clone-files bi-clone-fs bi-clone-semundo bi-thread bi-server-socket \
 	bi-pipe bi-exclude-mm bi-cr-disable \
-	fork-loop \
+	fchmod fork-loop \
 	ipcshm-tool ipcmsg-tool ipcsem-tool \
 	posixshm-tool
 
@@ -75,6 +75,8 @@ bi_cr_disable = bi-cr-disable.c
 bi_cr_disable_CFLAGS = -I@top_srcdir@/libs/include
 bi_cr_disable_LDADD = @top_builddir@/libs/libkerrighed/libkerrighed.la -lbi @top_builddir@/libs/libkrgcb/libkrgcb.la @top_builddir@/libs/libkrgcheckpoint/libkrgcheckpoint.la
 bi_cr_disable_DEPENDENCIES = libbi.la
+
+fchmod_SOURCES = fchmod.c
 
 fork_loop_SOURCES = fork-loop.c
 

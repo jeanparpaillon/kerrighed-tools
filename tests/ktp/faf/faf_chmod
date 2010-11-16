@@ -1,0 +1,57 @@
+#!/bin/bash
+###############################################################################
+##
+## Copyright (c) Kerlabs, 2010
+##
+## This program is free software;  you can redistribute it and#or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+## or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+## for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program;  if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+##
+###############################################################################
+#
+# File :        faf_chmod
+#
+# Description:  Open a local file (tmpfs), remote fork, use fchmod syscall.
+#
+# Author:       Matthieu Fertré, matthieu.fertre@kerlabs.com
+#
+
+source `dirname $0`/lib_faf.sh
+
+run_test() {
+    krgcapset -d +DISTANT_FORK
+
+    fchmod $FILE 200
+    r=$?
+
+    if [ $r -eq 0 ]; then
+	true
+    else
+	false
+    fi
+}
+
+setup $@ || exit $?
+
+setup_tmp_dir || exit $?
+
+LTP_print_step_info "Running fchmod..."
+
+(run_test)
+
+r=$?
+print_success $r
+
+cleanup_tmp_dir
+
+exit $r
