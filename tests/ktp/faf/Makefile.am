@@ -8,7 +8,8 @@ tests_SCRIPTS = \
 	check_leak \
 	faf_chmod \
 	faf_chown \
-	faf_truncate
+	faf_truncate \
+	faf_utimes
 
 testsdir = @ltpbase@/testcases/bin
 

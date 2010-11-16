@@ -9,7 +9,7 @@
 bin_PROGRAMS = bi bi-cr bi-cr-static bi-file bi-signal bi-double \
 	bi-clone-files bi-clone-fs bi-clone-semundo bi-thread bi-server-socket \
 	bi-pipe bi-exclude-mm bi-cr-disable \
-	fchmod fchown fork-loop ftruncate \
+	fchmod fchown fork-loop ftruncate futimes \
 	ipcshm-tool ipcmsg-tool ipcsem-tool \
 	posixshm-tool
 
@@ -83,6 +83,8 @@ fchown_SOURCES = fchown.c
 fork_loop_SOURCES = fork-loop.c
 
 ftruncate_SOURCES = ftruncate.c
+
+futimes_SOURCES = futimes.c
 
 ipcshm_tool_SOURCES = ipcshm-tool.c
 ipcshm_tool_LDADD = -lbi
