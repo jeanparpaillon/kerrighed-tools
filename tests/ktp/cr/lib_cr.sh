@@ -722,7 +722,7 @@ to do that, give --" 1>&2
     local captoset=`echo $krg_cap | sed "s/CHECKPOINTABLE//" | tr -s "," | sed "s/^+,/+/" | sed "s/,$//" | sed "s/^+$//" | sed "s/^--$//"`
 
     if [ "$captoset" != "" ]; then
-	krgcapset -d $captoset;
+	krgcapset -d "$captoset";
 	r=$?
 	if [ $r -ne 0 ]; then
 	    tst_brkm TFAIL NULL "Fail to set relevant capabilities ($captoset)"
@@ -743,7 +743,7 @@ to do that, give --" 1>&2
     fi
 
     # give old capabilities
-    krgcapset -d $oldcap
+    krgcapset -d "$oldcap"
 
     # give time to setsid to create the new session...
     local pid=`cat $sessionfile 2> /dev/null`

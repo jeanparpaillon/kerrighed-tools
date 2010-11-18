@@ -50,13 +50,13 @@ cr_pipe02()
 	return 0
     fi
 
-    local oldcap=`krgcapset -s - | grep "Inheritable Effective" | cut -d: -f2`
+    local oldcap=`krgcapset -s | grep "Inheritable Effective" | cut -d: -f2`
 
     krgcapset -d -DISTANT_FORK
 
     runcommand +CHECKPOINTABLE,CAN_MIGRATE 2 || return $?
 
-    krgcapset -d $oldcap
+    krgcapset -d "$oldcap"
 
     migrate_process $PID $TESTCMD || return $?
 
