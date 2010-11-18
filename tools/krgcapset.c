@@ -376,10 +376,11 @@ int main(int argc, char *argv[])
 				if (answer != 'y' && answer != 'Y' && (answer = '\n' || use_default))
 					exit(EXIT_SUCCESS);
 
-				res = set_caps_for_pid(pid, &initial_caps);
-				if (res)
-					exit(EXIT_FAILURE);
 			}
+
+			res = set_caps_for_pid(pid, &initial_caps);
+			if (res)
+				exit(EXIT_FAILURE);
 		}
 
 	} else {
