@@ -373,7 +373,7 @@ int main(int argc, char *argv[])
 					use_default = 0;
 					answer = getchar();
 				}
-				if (answer != 'y' && answer != 'Y' && (answer = '\n' || use_default))
+				if (answer != 'y' && answer != 'Y' && (answer != '\n' || use_default))
 					exit(EXIT_SUCCESS);
 
 			}
