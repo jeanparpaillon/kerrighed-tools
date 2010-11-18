@@ -40,8 +40,8 @@ cr_posix_shm01()
     #
     # WARNING: this test must be run without DISTANT_FORK
     #
-    local oldincap=`krgcapset -s - | grep "Inheritable Effective" | cut -d: -f2`
-    local oldefcap=`krgcapset -s - | grep "^Effective" | cut -d: -f2`
+    local oldincap=`krgcapset -s | grep "Inheritable Effective" | cut -d: -f2`
+    local oldefcap=`krgcapset -s | grep "^Effective" | cut -d: -f2`
     krgcapset -d -DISTANT_FORK
     krgcapset -e -DISTANT_FORK
 
@@ -90,8 +90,8 @@ cr_posix_shm01()
     #
     # WARNING: this test was run without DISTANT_FORK
     #
-    krgcapset -d $oldincap
-    krgcapset -e $oldefcap
+    krgcapset -d "$oldincap"
+    krgcapset -e "$oldefcap"
 
     print_success $ret
     return $ret

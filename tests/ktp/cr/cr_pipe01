@@ -38,13 +38,13 @@ cr_pipe01()
     TCID="$FUNCNAME"               # Identifier of this testcase.
     TST_COUNT=$[$TST_COUNT+1]      # Test case number.
 
-    local oldcap=`krgcapset -s - | grep "Inheritable Effective" | cut -d: -f2`
+    local oldcap=`krgcapset -s | grep "Inheritable Effective" | cut -d: -f2`
 
     krgcapset -d -DISTANT_FORK
 
     runcommand +CHECKPOINTABLE 2 || return $?
 
-    krgcapset -d $oldcap
+    krgcapset -d "$oldcap"
 
     checkpoint_process $PID $TESTCMD || return $?
 
