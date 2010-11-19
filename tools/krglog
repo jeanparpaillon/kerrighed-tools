@@ -1,17 +1,10 @@
 #!/bin/sh
 # Script to enable/disable pritting of error messages related
 # to Kerrighed.
-# Currently, it only handles errors about EPM operations: migration,
-#  remote fork, checkpoint/restart
 
 print_usage() {
-    echo $0 "+epm_errors|-epm_errors"
+    echo $0 "+epm|-epm|+faf|-faf"
 }
-
-if [ "$1" != "+epm_errors" ] && [ "$1" != "-epm_errors" ]; then
-    print_usage
-    exit 1
-fi
 
 dbgdir=`mktemp -d`
 mount -t debugfs debugfs $dbgdir
@@ -26,10 +19,18 @@ if [ ! -e $control ]; then
     exit 1
 fi
 
-if [ "$1" = "-epm_errors" ]; then
-    echo 'file epm.c -p' > $control
-else
-    echo 'file epm.c +p' > $control
-fi
+case "$1" in
+    "+epm")
+	echo 'file epm.c +p' > $control;;
+    "-epm")
+	echo 'file epm.c -p' > $control;;
+    "+faf")
+	echo 'file faf.c +p' > $control;;
+    "-faf")
+	echo 'file faf.c -p' > $control;;
+    *)
+	print_usage
+	exit 1;;
+esac
 
 umount $dbgdir
