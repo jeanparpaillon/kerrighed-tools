@@ -1749,6 +1749,15 @@ rsingle processsize_probe.sh
 rsingle local_user_presence.sh
 rsingle user_probe.sh
 
+############################ FAF
+r faf_chmod
+r faf_chown
+r faf_truncate
+r faf_utimes
+rfail faf_mmap		# mmap not supported on FAFfed file
+rcrash check_leak	# OOM after several runs
+
+
 ## Now, finish with the long running LTP tests.
 
 
