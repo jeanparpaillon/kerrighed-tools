@@ -1,0 +1,66 @@
+#!/bin/sh
+# Script to enable/disable pritting of error messages related
+# to Kerrighed.
+
+print_usage() {
+    echo $0 "+epm|-epm|+faf|-faf"
+}
+
+mount_debugfs() {
+    dbgdir=`mktemp -d`
+    mount -t debugfs debugfs $dbgdir
+    if [ $? -ne 0 ]; then
+	echo "Fail to mount debugfs"
+	exit 1
+    fi
+}
+
+umount_debugfs() {
+    umount $dbgdir
+    rmdir $dbgdir
+}
+
+exit_umount() {
+    umount_debugfs
+    exit 1
+}
+
+check_dynamic_debug_available() {
+    control=$dbgdir/dynamic_debug/control
+    if [ ! -e $control ]; then
+	echo "Error: Kernel has been compiled without CONFIG_DYNAMIC_DEBUG"
+	exit_umount
+    fi
+}
+
+enable_debug_option() {
+    case "$1" in
+	"+epm")
+	    echo 'file epm.c +p' > $control
+	    echo 'file file_stat.c +p' > $control;;
+	"-epm")
+	    echo 'file epm.c -p' > $control
+	    echo 'file file_stat.c -p' > $control;;
+	"+faf")
+	    echo 'file faf.c +p' > $control;;
+	"-faf")
+	    echo 'file faf.c -p' > $control;;
+	*)
+	    print_usage
+	    exit_umount;;
+    esac
+
+    return 0
+}
+
+mount_debugfs
+
+check_dynamic_debug_available
+
+while [ "$1" != "" ]; do
+    enable_debug_option "$1"
+
+    shift
+done
+
+umount_debugfs

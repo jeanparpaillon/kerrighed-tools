@@ -41,6 +41,12 @@ d_check_kerrighed() {
     test -d /sys/kerrighed
 }
 
+d_start_log() {
+    if [ "$KRGLOG_OPTS" != "" ]; then
+	krglog $KRGLOG_OPTS
+    fi
+}
+
 #
 # Start the Kerrighed container
 #
@@ -52,6 +58,8 @@ d_start_container() {
 # Function that starts the daemon/service.
 #
 d_start() {
+    d_start_log
+
     d_set_isolate_ns "$ISOLATE_UTS" isolate_uts || return 1
 
     d_set_isolate_ns "$ISOLATE_MNT" isolate_mnt || return 1
