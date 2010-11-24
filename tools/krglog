@@ -15,15 +15,17 @@ fi
 
 control=$dbgdir/dynamic_debug/control
 if [ ! -e $control ]; then
-    echo "Kernel has been compiled without CONFIG_DYNAMIC_DEBUG"
+    echo "Error: Kernel has been compiled without CONFIG_DYNAMIC_DEBUG"
     exit 1
 fi
 
 case "$1" in
     "+epm")
-	echo 'file epm.c +p' > $control;;
+	echo 'file epm.c +p' > $control
+	echo 'file file_stat.c +p' > $control;;
     "-epm")
-	echo 'file epm.c -p' > $control;;
+	echo 'file epm.c -p' > $control
+	echo 'file file_stat.c -p' > $control;;
     "+faf")
 	echo 'file faf.c +p' > $control;;
     "-faf")
