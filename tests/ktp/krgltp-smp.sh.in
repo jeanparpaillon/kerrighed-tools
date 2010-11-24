@@ -1737,6 +1737,7 @@ r cr_ipc_shm01
 r cr_ipc_shm02
 r cr_posix_shm01
 r cr_posix_shm02
+rsingle cr_blender
 ########
 
 rsingle cr-post # fake test to clean results of C/R tests
