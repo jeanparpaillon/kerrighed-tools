@@ -9,7 +9,7 @@
 bin_PROGRAMS = bi bi-cr bi-cr-static bi-file bi-signal bi-double \
 	bi-clone-files bi-clone-fs bi-clone-semundo bi-thread bi-server-socket \
 	bi-pipe bi-exclude-mm bi-cr-disable \
-	fchmod fchown fmmap fork-loop ftruncate futimes \
+	fchmod fchown fepoll fmmap fork-loop ftruncate futimes \
 	ipcshm-tool ipcmsg-tool ipcsem-tool \
 	posixshm-tool
 
@@ -79,6 +79,8 @@ bi_cr_disable_DEPENDENCIES = libbi.la
 fchmod_SOURCES = fchmod.c
 
 fchown_SOURCES = fchown.c
+
+fepoll_SOURCES = fepoll.c
 
 fmmap_SOURCES = fmmap.c
 

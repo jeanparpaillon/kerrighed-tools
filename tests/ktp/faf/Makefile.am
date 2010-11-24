@@ -8,6 +8,7 @@ tests_SCRIPTS = \
 	check_leak \
 	faf_chmod \
 	faf_chown \
+	faf_epoll \
 	faf_mmap \
 	faf_truncate \
 	faf_utimes
