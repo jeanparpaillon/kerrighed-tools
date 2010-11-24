@@ -41,3 +41,12 @@ CLUSTER_INIT_HELPER=@sbindir@/krginit_helper
 NET_DEVICES=ALL
 #NET_DEVICES=eth1
 #NET_DEVICES=eth0 eth2
+
+# Enable some kerrighed information messages to be printed in
+# kernel messages log.
+# Kerrighed must have been compiled with CONFIG_DYNAMIC_DEBUG
+# for this option to be available.
+# It may be useful to understand why a process can not migrate
+# for instance.
+KRGLOG_OPTS="+epm +faf"
+#KRGLOG_OPTS=""

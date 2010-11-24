@@ -6,7 +6,7 @@
 ### Author:
 ###   Jean Parpaillon <jean.parpaillon@kerlabs.com>
 ###
-dist_sbin_SCRIPTS = krgboot_helper
+dist_sbin_SCRIPTS = krgboot_helper krglog
 sbin_PROGRAMS = krgboot
 
 INCLUDES = -I@top_srcdir@/libs/include
